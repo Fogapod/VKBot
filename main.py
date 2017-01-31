@@ -1,3 +1,4 @@
+#-*- coding: utf-8 -*-
 from program import ChatBot
 from bot_core import Bot
 from bot_core import LongPollSession
@@ -12,9 +13,6 @@ def main():
     try:
         ChatBot().run()
 
-        session = LongPollSession(bot=Bot())
-        while not session.authorization(token_path=PATH + DATA_PATH + 'token.txt'):
-            continue
         session.process_updates()
 
     except Exception:
