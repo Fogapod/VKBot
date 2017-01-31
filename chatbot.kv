@@ -1,0 +1,81 @@
+<NiceLB@Label>:
+    font_size: '14sp'
+    color: 0, .2, .4, 1
+    size_hint: None, None
+    size: self.texture_size[0]+5, self.texture_size[1]+5
+
+<HeadLB@Label>:
+    font_size: '17sp'
+    color: 0, .2, .4, 1
+    size_hint: None, None
+    size: self.texture_size[0]+10,self.texture_size[1]+10
+    
+<BigTI@TextInput>:
+    size_hint_y: None
+    font_size: '16sp'
+    height: self.minimum_height+10
+    multiline: False
+    
+<Apply@Button>:
+    text: 'Принять'
+    font_size: '15sp'
+    background_normal: ''
+    background_color: 0, .2, .4, 1
+    size_hint: None, None
+    size: self.texture_size[0]*2.3, self.texture_size[1]*2.3
+    
+<Screen@Screen>:
+    canvas.before:
+        #Color: 
+            #rgba: .85, .66, .01, 1
+        Rectangle:
+            source: 'background.jpg'
+            pos: self.pos
+            size: self.size
+
+<LoginScreen>:
+    name: 'login_screen'
+
+    HeadLB:
+        text: 'Авторизация ВК'
+        pos_hint: {'center_x':.5}
+        pos: self.pos[0], login.pos[1]+login.height*1.4
+
+    BigTI:
+        hint_text: 'Логин'.decode('utf-8') #KIVY BUG
+        id: login
+        size_hint_x: .65
+        pos_hint: {'center_x':.5,'center_y':.7}
+
+    BigTI:
+        hint_text: 'Пароль'.decode('utf-8') #KIVY BUG
+        id: pass_input
+        size_hint_x: .65
+        pos: login.pos[0], login.pos[1]-login.height*1.1
+        password: show_pass.active == False
+
+    CheckBox:
+        id: show_pass
+        size_hint: None, None
+        size: login.width*.15, login.height*.8
+        pos: login.pos[0]-self.width*.35, pass_input.pos[1]-login.height*1.1
+
+    NiceLB:
+        text: 'Показать пароль'
+        color: 0, .2, .4, 1
+        size: self.texture_size[0], show_pass.height
+        pos: show_pass.pos[0]+show_pass.width, show_pass.pos[1]
+
+    Apply:
+        text: 'Войти'
+        id: enter
+        pos_hint: {'center_x':.5}
+        pos: self.pos[0], show_pass.pos[1]-login.height*1.4
+        on_release: root.login()
+
+    Apply:
+        text: 'Пропустить'
+        pos_hint: {'center_x':.5}
+        background_color: 0, .2, .4, .5
+        pos: self.pos[0], root.height*.05
+        #on_release: root.parent.current = 'MP'
