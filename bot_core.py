@@ -34,14 +34,6 @@ __help__ = '''
     ver = __version__, author = __author__, source = __source__
 )
 
-# qpy
-import logging
-logging.captureWarnings(True)
-import sys
-reload(sys)
-sys.setdefaultencoding('utf-8')
-# qpy
-
 class LongPollSession(object):
     def __init__(self, bot):
         self.bot = bot
@@ -52,13 +44,16 @@ class LongPollSession(object):
         self.message_long_poll_response = []
         exit()
 
-    def authorization(self, token_path):
+    def authorization(self, token_path, login= '', password= ''):
         authorized = False
+        token = None
         try:
             with open(token_path, 'r') as token_file:
-                token = token_file.readlines()[0][:-1]
+                if token_file.read(): # file is not empty
+                    token = token_file.readlines()
+                    print token
         except IOError:
-            token = None
+            pass
 
         if token:
             if vkr.log_in(token=token):
@@ -68,7 +63,6 @@ class LongPollSession(object):
                 open(token_path, 'w').close()
 
         else:
-            login, password = raw_input('Login: '), raw_input('Password: ')
             new_token = vkr.log_in(login=login, password=password)
             if new_token:
                 with open(token_path, 'w') as token_file:
@@ -172,7 +166,7 @@ class LongPollSession(object):
             for update in response['updates']:
                 if  update[0] == 4 and\
                     update[8] != self.last_rnd_id and\
-                    update[6] != '':
+                    update[6]:
                 # response == message
                 # message != last_message
                 # message != ''
@@ -181,19 +175,19 @@ class LongPollSession(object):
                 else:
                     continue
 
-                if  text.lower() == 'ершов' or\
-                    text.lower() == 'женя' or\
-                    text.lower() == 'жень' or\
-                    text.lower() == 'женька' or\
-                    text.lower() == 'жека' or\
-                    text.lower() == 'евгений' or\
-                    text.lower() == 'ерш' or\
-                    text.lower() == 'евгеха' or\
-                    text.lower() == 'жэка':
+                if  text.lower() == u'ершов' or\
+                    text.lower() == u'женя' or\
+                    text.lower() == u'жень' or\
+                    text.lower() == u'женька' or\
+                    text.lower() == u'жека' or\
+                    text.lower() == u'евгений' or\
+                    text.lower() == u'ерш' or\
+                    text.lower() == u'евгеха' or\
+                    text.lower() == u'жэка':
                     text = 'А'
 
-                elif text.lower() == 'how to praise the sun?' or\
-                     text.lower() == '🌞':
+                elif text.lower() == u'how to praise the sun?' or\
+                     text.lower() == u'🌞':
                     text = '\\[T]/\n..🌞\n...||\n'
 
                 elif re.sub('^( )*', '', text).startswith('/'): 
@@ -233,7 +227,7 @@ class LongPollSession(object):
                 if not text:
                     continue
                 
-                if update[5] != ' ... ':
+                if update[5] != u' ... ':
                     message_to_resend = update[1]
                 else:
                     message_to_resend = None
