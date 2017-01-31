@@ -120,7 +120,7 @@ class Session(object):
         Default behavior on CAPTCHA is to raise exception
         Reload this in child
         """
-        return None
+        return raw_input('{}\nKey: '.format(captcha_image_url))
     
     def auth_code_is_needed(self, content, session):
         """
