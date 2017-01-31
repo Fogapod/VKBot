@@ -1,12 +1,26 @@
 from bot_core import Bot
 from bot_core import LongPollSession
 
-def main():
-    session = LongPollSession(bot=Bot())
-    while not session.authorization(token_path='data/token.txt'):
-        continue
+import sys
+import traceback
 
-    session.process_updates()
+PATH = '' # '/storage/emulated/0/Git/ChatBot_UI/'
+DATA_PATH = 'data/'
+
+def main():
+    try:
+        from program import ChatBot
+        ChatBot().run()
+
+        session = LongPollSession(bot=Bot())
+        while not session.authorization(token_path=PATH + DATA_PATH + 'token.txt'):
+            continue
+        session.process_updates()
+
+    except Exception:
+        error_text = traceback.format_exc()
+        open(PATH + 'error.log', 'w').write(error_text)
+        print(error_text)
 
 def bot_debug():
     bot = Bot()
