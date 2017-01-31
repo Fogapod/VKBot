@@ -10,3 +10,4 @@ build/
 data/
 
 .last_tmp.py
+*.log
