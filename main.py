@@ -1,7 +1,5 @@
 #-*- coding: utf-8 -*-
 from program import ChatBot
-from bot_core import Bot
-from bot_core import LongPollSession
 
 import sys
 import traceback
@@ -12,9 +10,6 @@ DATA_PATH = 'data/'
 def main():
     try:
         ChatBot().run()
-
-        session.process_updates()
-
     except Exception:
         error_text = traceback.format_exc()
         open(PATH + 'error.log', 'w').write(error_text)

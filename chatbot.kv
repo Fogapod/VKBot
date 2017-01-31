@@ -33,6 +33,10 @@
             pos: self.pos
             size: self.size
 
+<MainScreen>
+    Label:
+        text: '123'
+
 <LoginScreen>:
     name: 'login_screen'
 
@@ -71,7 +75,7 @@
         id: enter
         pos_hint: {'center_x':.5}
         pos: self.pos[0], show_pass.pos[1]-login.height*1.4
-        on_release: root.login()
+        on_release: root.log_in()
 
     Apply:
         text: 'Пропустить'
