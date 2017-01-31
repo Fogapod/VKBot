@@ -1,0 +1,12 @@
+__pycache__/
+*.so
+*.pyc
+.Python
+env/
+build/
+*.manifest
+*.spec
+
+data/
+
+.last_tmp.py
