@@ -1,3 +1,4 @@
+from program import ChatBot
 from bot_core import Bot
 from bot_core import LongPollSession
 
@@ -9,7 +10,6 @@ DATA_PATH = 'data/'
 
 def main():
     try:
-        from program import ChatBot
         ChatBot().run()
 
         session = LongPollSession(bot=Bot())

@@ -1,5 +1,4 @@
 from kivy.app import App
-from program import ChatBot
 
 class ChatBot(App):
     def build(self):
