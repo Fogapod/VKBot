@@ -6,6 +6,7 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 
 from bot_core import LongPollSession
 
+session = LongPollSession()
 
 Builder.load_string('''
 #:import FadeTransition kivy.uix.screenmanager.FadeTransition
