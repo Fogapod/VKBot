@@ -87,10 +87,11 @@ def log_in(**kwargs):
     global api
     try:
         api = vk.API(session, v='5.60')
-        track_visitor()
-    except Exception: # session was not created
-        raise Exception('Failed receiving session!')
-    else:
+        if not track_visitor():
+            raise
+    except: # session was not created
+        return False
+    finally:
         return session.access_token
 
 
