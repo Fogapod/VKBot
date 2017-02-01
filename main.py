@@ -1,11 +1,11 @@
 #-*- coding: utf-8 -*-
+#qpy:kivy
 from program import ChatBot
 
 import sys
 import traceback
 
-PATH = '' # '/storage/emulated/0/Git/ChatBot_UI/'
-DATA_PATH = 'data/'
+PATH = '/storage/emulated/0/Git/ChatBot_UI'
 
 def main():
     try:
