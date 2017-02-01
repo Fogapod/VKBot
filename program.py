@@ -22,14 +22,19 @@ class ChatBot(App):
         self.root = Root()
 
     def build(self):
-        self.root.add_widget(LoginScreen())
         self.root.add_widget(HomeScreen())
+        self.root.add_widget(LoginScreen())
+
         if not session.authorization():
             self.show_auth_form()
+
         return self.root
 
     def show_auth_form(self):
         self.root.current = 'login_screen'
+
+    def show_home_form(self):
+        self.root.current = 'home_screen'
 
     def on_pause(self):
         return True
