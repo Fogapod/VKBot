@@ -10,5 +10,6 @@ build/
 
 data/
 
+.kivy/
 .last_tmp.py
 *.log
