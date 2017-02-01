@@ -1,6 +1,7 @@
 __pycache__/
 *.so
 *.pyc
+*.pyo
 .Python
 env/
 build/
