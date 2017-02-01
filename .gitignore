@@ -12,4 +12,5 @@ data/
 
 .kivy/
 .last_tmp.py
+.launch
 *.log
