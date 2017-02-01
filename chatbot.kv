@@ -1,21 +1,19 @@
-<NiceLB@Label>:
+<LB@Label>:
     font_size: '14sp'
     color: 0, .2, .4, 1
     size_hint: None, None
     size: self.texture_size[0]+5, self.texture_size[1]+5
 
-<HeadLB@Label>:
+<Head@LB>:
     font_size: '17sp'
-    color: 0, .2, .4, 1
-    size_hint: None, None
     size: self.texture_size[0]+10,self.texture_size[1]+10
     
-<BigTI@TextInput>:
+<TextInput@TextInput>:
     size_hint_y: None
     font_size: '16sp'
     height: self.minimum_height+10
     multiline: False
-    
+
 <Apply@Button>:
     text: 'Принять'
     font_size: '15sp'
@@ -23,7 +21,8 @@
     background_color: 0, .2, .4, 1
     size_hint: None, None
     size: self.texture_size[0]*2.3, self.texture_size[1]*2.3
-    
+
+
 <Screen@Screen>:
     canvas.before:
         #Color: 
@@ -33,25 +32,22 @@
             pos: self.pos
             size: self.size
 
-<MainScreen>
-    Label:
-        text: '123'
 
 <LoginScreen>:
     name: 'login_screen'
 
-    HeadLB:
+    Head:
         text: 'Авторизация ВК'
         pos_hint: {'center_x':.5}
         pos: self.pos[0], login.pos[1]+login.height*1.4
 
-    BigTI:
+    TextInput:
         hint_text: 'Логин'.decode('utf-8') #KIVY BUG
         id: login
         size_hint_x: .65
         pos_hint: {'center_x':.5,'center_y':.7}
 
-    BigTI:
+    TextInput:
         hint_text: 'Пароль'.decode('utf-8') #KIVY BUG
         id: pass_input
         size_hint_x: .65
@@ -64,9 +60,8 @@
         size: login.width*.15, login.height*.8
         pos: login.pos[0]-self.width*.35, pass_input.pos[1]-login.height*1.1
 
-    NiceLB:
+    LB:
         text: 'Показать пароль'
-        color: 0, .2, .4, 1
         size: self.texture_size[0], show_pass.height
         pos: show_pass.pos[0]+show_pass.width, show_pass.pos[1]
 
@@ -82,4 +77,39 @@
         pos_hint: {'center_x':.5}
         background_color: 0, .2, .4, .5
         pos: self.pos[0], root.height*.05
-        #on_release: root.parent.current = 'MP'
+        on_release: root.parent.current = 'home_screen'
+
+<HomeScreen>:
+    name: 'home_screen'
+    BoxLayout:
+        orientation: 'vertical'
+        ActionBar:
+            id: actionbar
+            ActionView:
+                ActionPrevious:
+                ActionOverflow:
+                    mode: 'spinner'
+                    ActionButton:
+                        text: 'Настройки'
+                        on_release: app.open_settings()                        
+                    ActionButton:
+                        text: 'Авторизация'
+                        minimum_width: '110sp'
+                        on_release:  
+                            root.parent.current = 'login_screen'
+                    ActionButton:
+                        text: 'Logout'
+                        on_release: root.logout()
+
+        Carousel:
+            loop: True
+
+            FloatLayout:
+                Apply:
+                    id: button
+                    text: 'Запустить бота'
+                    size_hint_x: .5
+                    pos_hint: {'center_x':.5}
+                    pos_hint_y: None
+                    pos: self.pos[0], actionbar.pos[1]-actionbar.height*1.5
+                    on_press: root.on_press()
