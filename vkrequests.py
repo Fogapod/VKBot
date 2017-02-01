@@ -36,9 +36,6 @@ def vk_request_errors(request):
                 print('Capthca!!!!!')
                 #TODO обработать капчу
 
-            elif 'Failed receiving session' in error:
-                print('Error receiving session!')
-
             elif 'Auth check code is needed' in error:
                 print('Auth code is needed!')
 
@@ -91,7 +88,7 @@ def log_in(**kwargs):
             raise
     except: # session was not created
         return False
-    finally:
+    else:
         return session.access_token
 
 
@@ -251,3 +248,4 @@ def get_self_id():
 @vk_request_errors
 def track_visitor():
     api.stats.trackVisitor()
+    return True
