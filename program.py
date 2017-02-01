@@ -5,9 +5,7 @@ from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
 
 from bot_core import LongPollSession
-from bot_core import Bot
 
-session = LongPollSession(bot=Bot())
 
 Builder.load_string('''
 #:import FadeTransition kivy.uix.screenmanager.FadeTransition
@@ -15,6 +13,7 @@ Builder.load_string('''
     id: rootscr
     transition: FadeTransition()
 ''')
+
 
 class ChatBot(App):
     def __init__(self, **kwargs):
@@ -56,19 +55,16 @@ class LoginScreen(Screen):
 
 
 class HomeScreen(Screen):
-    def on_press(self):
-        if self.ids.button.text == 'Запустить бота':
-            self.run_bot()
-            self.ids.button.text = 'Остановить бота'
+    def on_main_btn_press(self):
+        run_bot_text = 'Запустить бота'
+        stop_bot_text = 'Остановить бота'
+
+        if self.ids.button.text == run_bot_text:
+            session.start_bot()
+            self.ids.button.text = stop_bot_text
         else:
-            self.stop_bot()
-            self.ids.button.text = 'Запустить бота'
-
-    def run_bot(self):
-        pass #session.process_updates()
-
-    def stop_bot(self):
-        pass
+            session.stop_bot()
+            self.ids.button.text = run_bot_text
 
 
 class Root(ScreenManager):
