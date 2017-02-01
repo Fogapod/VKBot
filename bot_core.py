@@ -44,25 +44,27 @@ class LongPollSession(object):
         self.message_long_poll_response = []
         exit()
 
-    def authorization(self, token_path, login= '', password= ''):
+    def authorization(self, login= '', password= ''):
+        token_path= '/storage/emulated/0/Git/ChatBot_UI/data/token.txt'
         authorized = False
         token = None
-        try:
-            with open(token_path, 'r') as token_file:
-                lines = token_file.readlines()
-                if lines:
-                    token = lines[0]
-        except IOError:
-            pass
+        if not (login and password):
+            try:
+                with open(token_path, 'r') as token_file:
+                    lines = token_file.readlines()
+                    if lines:
+                        token = lines[0]
+            except IOError:
+                pass
 
-        if token:
-            if vkr.log_in(token=token):
-                self.SELF_ID = vkr.get_user_id()
-                print vkr.log_in(token=token)
-                print self.SELF_ID
-                authorized = True
-            else:
-                open(token_path, 'w').close()
+            if token:
+                if vkr.log_in(token=token):
+                    self.SELF_ID = vkr.get_user_id()
+                    print vkr.log_in(token=token)
+                    print self.SELF_ID
+                    authorized = True
+                else:
+                    open(token_path, 'w').close()
         else:
             new_token = vkr.log_in(login=login, password=password)
             if new_token:

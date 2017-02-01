@@ -1,26 +1,35 @@
 #-*- coding: utf-8 -*-
+#qpy:kivy
 from kivy.app import App
+from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
 
 from bot_core import LongPollSession
 from bot_core import Bot
 
+session = LongPollSession(bot=Bot())
+
+Builder.load_string('''
+#:import FadeTransition kivy.uix.screenmanager.FadeTransition
+<Root>:
+    id: rootscr
+    transition: FadeTransition()
+''')
 
 class ChatBot(App):
     def __init__(self, **kwargs):
         super(ChatBot, self).__init__(**kwargs)
-        self.session = LongPollSession(bot=Bot())
-        self.screen = MainScreen()
-        self.PATH = '' # '/storage/emulated/0/Git/ChatBot_UI/'
-        self.DATA_PATH = 'data/'
+        self.root = Root()
 
     def build(self):
-        if not self.session.authorization(token_path=self.PATH + self.DATA_PATH + 'token.txt'):
+        self.root.add_widget(LoginScreen())
+        self.root.add_widget(HomeScreen())
+        if not session.authorization():
             self.show_auth_form()
-        return self.screen
+        return self.root
 
     def show_auth_form(self):
-        self.screen.ids.load_screen.add_widget(self.password_form)
+        self.root.current = 'login_screen'
 
     def on_pause(self):
         return True
@@ -34,12 +43,32 @@ class LoginScreen(Screen):
         login = self.ids.login.text
         password = self.ids.pass_input.text
 
-        if login != '' and password != '':
-            if not session.authorization(token_path=PATH + DATA_PATH + 'token.txt', login=login, password=password):
-                self.ids.login.text = self.ids.pass_input.text = ''
+        if login and password:
+            if session.authorization(login=login, password=password):
+                self.parent.current = 'home_screen'
 
         self.ids.login.text = self.ids.pass_input.text = ''
 
 
-class MainScreen(ScreenManager):
+class HomeScreen(Screen):
+    def on_press(self):
+        button_text = self.ids.button.text
+        if self.text == 'Запустить бота':
+            self.run_bot()
+            button_text = 'Остановить бота'
+        else:
+            self.stop_bot()
+            button_text = 'Запустить бота'
+
+    def run_bot(self):
+        pass#session.process_updates()
+
+    def stop_bot(self):
+        pass
+
+
+class Root(ScreenManager):
     pass
+
+if __name__ == '__main__':
+    ChatBot().run()
