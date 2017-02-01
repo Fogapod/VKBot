@@ -52,16 +52,15 @@ class LoginScreen(Screen):
 
 class HomeScreen(Screen):
     def on_press(self):
-        button_text = self.ids.button.text
-        if self.text == 'Запустить бота':
+        if self.ids.button.text == 'Запустить бота':
             self.run_bot()
-            button_text = 'Остановить бота'
+            self.ids.button.text = 'Остановить бота'
         else:
             self.stop_bot()
-            button_text = 'Запустить бота'
+            self.ids.button.text = 'Запустить бота'
 
     def run_bot(self):
-        pass#session.process_updates()
+        pass #session.process_updates()
 
     def stop_bot(self):
         pass
