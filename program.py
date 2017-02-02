@@ -17,9 +17,13 @@ Builder.load_string('''
 
 
 class ChatBot(App):
-    def __init__(self, **kwargs):
-        super(ChatBot, self).__init__(**kwargs)
+    def __init__(self, *args, **kwargs):
+        super(ChatBot, self).__init__(*args, **kwargs)
         self.root = Root()
+    
+    def on_stop(self):
+        while not session.stop_bot(): continue
+        return True
 
     def build(self):
         self.root.add_widget(HomeScreen())
@@ -61,12 +65,18 @@ class HomeScreen(Screen):
         stop_bot_text = 'Остановить бота'
 
         if self.ids.button.text == run_bot_text:
-            session.start_bot()
+            while not session.start_bot(): continue
             self.ids.button.text = stop_bot_text
         else:
-            session.stop_bot()
+            while not session.stop_bot(): continue
             self.ids.button.text = run_bot_text
 
+    def crack_pentagon(self):
+        return '(В разработке)'
+
+    def logout(self):
+        session.authorization(logout=True)
+        self.parent.current = 'login_screen'
 
 class Root(ScreenManager):
     pass

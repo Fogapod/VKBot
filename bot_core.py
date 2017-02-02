@@ -135,16 +135,21 @@ class LongPollSession(Bot):
     def __init__(self):
         self.run_bot = True
         self.update_processing = None
+        self.running = False
 
     def __exit__(self):
         self.run_message_long_poll_process = False
         self.message_long_poll_response = []
         exit()
 
-    def authorization(self, login= '', password= ''):
+    def authorization(self, login= '', password= '', logout=False):
         token_path = '/storage/emulated/0/Git/ChatBot_UI/data/token.txt'
         authorized = False
         token = None
+        if logout:
+            open(token_path, 'w').close()
+            return
+
         if not (login and password):
             try:
                 with open(token_path, 'r') as token_file:
@@ -226,6 +231,7 @@ class LongPollSession(Bot):
         self.message_long_poll_response = None
         self.run_message_long_poll_process = True
         self.message_long_poll_process.start()
+        self.running = True
 
         self.last_rnd_id = 0
         self.reply_count = 0
@@ -329,17 +335,24 @@ class LongPollSession(Bot):
                     )
                 self.reply_count += 1
 
+                if not self.run_bot:
+                    self.__exit__()
+                    self.running = False
             if not self.run_bot:
                 self.__exit__()
+                self.running = False
 
     def start_bot(self):
         self.update_processing = Thread(target=self._process_updates)
         self.update_processing.start()
-        return
+        while not self.running: continue
+        return True
 
     def stop_bot(self):
         self.run_bot = False
         self.update_processing = None
+        while self.running: continue
+        return True
 
     def stop_bot_from_message(self, response):
         is_refused = True
