@@ -2,21 +2,12 @@
 import re
 import time
 
-from threading import Thread
-
-
 class Profiler():
     def __enter__(self):
         self._startTime = time.time()
 
     def __exit__(self, type, value, traceback):
         print('Время выполнения: {:.3f} с.'.format(time.time() - self._startTime))
-
-
-class thread(Thread):
-    def __init__(self, f):
-        Thread.__init__(self)
-        self.run = f
 
 
 def parse_input(string, replace_vkurl=True, replace_url=True):
