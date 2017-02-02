@@ -132,17 +132,13 @@ class Bot(object):
 
 class LongPollSession(Bot):
     def __init__(self):
-        self.run_bot = True
         self.update_processing = None
+        self.run_bot = False
         self.running = False
-
-    def __exit__(self):
-        self.run_message_long_poll_process = False
-        self.message_long_poll_response = []
-        exit()
+        self.reply_count = 0
 
     def authorization(self, login= '', password= '', logout=False):
-        token_path = '/storage/emulated/0/Git/ChatBot_UI/data/token.txt'
+        token_path = PATH + DATA_PATH + 'token.txt'
         authorized = False
         token = None
         if logout:
@@ -197,151 +193,125 @@ class LongPollSession(Bot):
                 key = self.mlpd['key'],
                 ts = self.mlpd['ts'],
                 act = 'a_check',
-                w = 100,
+                w = 50,
                 m = 130,
                 v = 1
             )
             return url
-
-    def _listen_message_long_poll(self):
-        """
-        Позволяет получать новые события (нужно запускать отдельным потоком)
-        При получении события меняет значение переменной message_long_poll_response с None на ответ сервера
-        """
-        print('{decor}{txt}{decor}'.format(decor='-'*6, txt='Listening long poll'))
-
-        while self.run_message_long_poll_process:
-            if not self.message_long_poll_response:
-                self.message_long_poll_response = vkr.do_message_long_poll_request(url=self.message_long_poll_url)
-            else:
-                # прошлый ответ ещё не обработан
-                time.sleep(0.01)
     
     def _process_updates(self):
-        print (__help__)
-        self.mlpd = None # message_long_poll_data
+        mlpd = None # message_long_poll_data
         #{
         #   server: str,
         #   key: int,
         #   ts: int
         #}
-        self.message_long_poll_url = self._make_message_long_poll_url()
-        self.message_long_poll_process = Thread(target=self._listen_message_long_poll)
-        self.message_long_poll_response = None
-        self.run_message_long_poll_process = True
-        self.message_long_poll_process.start()
+        message_long_poll_url = self._make_message_long_poll_url()
+        last_rnd_id = 0
+
         self.running = True
-
-        self.last_rnd_id = 0
-        self.reply_count = 0
-
-        while self.update_processing:
-            if not self.message_long_poll_response:
-                time.sleep(1)
-                continue
-
-            response = json.loads(self.message_long_poll_response.content)
+        print('launched')
+        while self.run_bot:
             try:
-                self.message_long_poll_url = self._make_message_long_poll_url(keep_ts=response['ts'])
-            except KeyError:
-                if 'failed' in response:
-                    self.mlpd = None
-                    self.message_long_poll_url = self._make_message_long_poll_url()
-                    self.message_long_poll_response = None
-                    continue
+                raw_response = vkr.do_message_long_poll_request(url=message_long_poll_url)
+                response = json.loads(raw_response.content)
+                try:
+                    message_long_poll_url = self._make_message_long_poll_url(keep_ts=response['ts'])
+                except KeyError:
+                    if 'failed' in response:
+                        mlpd = None
+                        message_long_poll_url = self._make_message_long_poll_url()
+                        continue
 
-            self.message_long_poll_response = None
+                print(response)
 
-            print(response)
-
-            for update in response['updates']:
-                if  update[0] == 4 and\
-                    update[8] != self.last_rnd_id and\
-                    update[6]:
-                # response == message
-                # message != last_message
-                # message != ''
-                    text = update[6]
-                    mark_msg = True
-                else:
-                    continue
-
-                if  text.lower() == u'ершов' or\
-                    text.lower() == u'женя' or\
-                    text.lower() == u'жень' or\
-                    text.lower() == u'женька' or\
-                    text.lower() == u'жека' or\
-                    text.lower() == u'евгений' or\
-                    text.lower() == u'ерш' or\
-                    text.lower() == u'евгеха' or\
-                    text.lower() == u'жэка':
-                    text = 'А'
-
-                elif text.lower() == u'how to praise the sun?' or\
-                     text.lower() == u'🌞':
-                    text = '\\[T]/\n..🌞\n...||\n'
-
-                elif re.sub('^( )*', '', text).startswith('/'): 
-                    text = text[1:]
-                    if text.startswith('/'):
-                        mark_msg = False
-                        text = text[1:]
-
-                    text = parse_input(text, replace_vkurl=False)
-                    words = text.split()
-
-                    if not words: 
-                        words = ' '
-
-                    if  re.match(u'(^help)|(^помощь)|(^info)|(^инфо)|(^информация)|^\?$',\
-                        words[0].lower()):
-                        text = self.help()
-
-                    elif re.match(u'(^скажи)|(^say)$', words[0].lower()):
-                        text = self.say(words)
-                        
-                    elif re.match(u'(^посчитай)|(^calculate)|$', words[0].lower()) or\
-                         words[0].startswith('='):
-                        text = self.calculate(words)
-                                        
-                    elif re.match(u'(^простое)|(^prime)|%$', words[0].lower()):
-                        text = self.prime(words)
-
-                    elif re.match(u'(^stop)|(^выйти)|(^exit)|(^стоп)|(^terminate)|(^завершить)|(^close)|^!$',\
-                    	   words[0].lower()):
-                        text = self.stop_bot_from_message(update)
-
+                for update in response['updates']:
+                    if  update[0] == 4 and\
+                        update[8] != last_rnd_id and\
+                        update[6]:
+                    # response == message
+                    # message != last_message
+                    # message != ''
+                        text = update[6]
+                        mark_msg = True
                     else:
-                        text = 'Неизвестная команда. Вы можете использовать /help для получения списка команд.'
-                else:
-                    continue
-                
-                if not text:
-                    continue
-                
-                if update[5] != u' ... ':
-                    message_to_resend = update[1]
-                else:
-                    message_to_resend = None
+                        continue
 
-                self.last_rnd_id = update[8] + 9
+                    if  text.lower() == u'ершов' or\
+                        text.lower() == u'женя' or\
+                        text.lower() == u'жень' or\
+                        text.lower() == u'женька' or\
+                        text.lower() == u'жека' or\
+                        text.lower() == u'евгений' or\
+                        text.lower() == u'ерш' or\
+                        text.lower() == u'евгеха' or\
+                        text.lower() == u'жэка':
+                        text = 'А'
 
-                vkr.send_message(
-                    uid = update[3],
-                    text = text + "'" if mark_msg else text,
-                    forward = message_to_resend,
-                    rnd_id = self.last_rnd_id
+                    elif text.lower() == u'how to praise the sun?' or\
+                         text.lower() == u'🌞':
+                        text = '\\[T]/\n..🌞\n...||\n'
+
+                    elif re.sub('^( )*', '', text).startswith('/'): 
+                        text = text[1:]
+                        if text.startswith('/'):
+                            mark_msg = False
+                            text = text[1:]
+
+                        text = parse_input(text)
+                        words = text.split()
+
+                        if not words: 
+                            words = ' '
+
+                        if  re.match(u'(^help)|(^помощь)|(^info)|(^инфо)|(^информация)|^\?$',\
+                            words[0].lower()):
+                            text = self.help()
+
+                        elif re.match(u'(^скажи)|(^say)$', words[0].lower()):
+                            text = self.say(words)
+
+                        elif re.match(u'(^посчитай)|(^calculate)|$', words[0].lower()) or\
+                             words[0].startswith('='):
+                            text = self.calculate(words)    
+
+                        elif re.match(u'(^простое)|(^prime)|%$', words[0].lower()):
+                            text = self.prime(words)
+
+                        elif re.match(u'(^stop)|(^выйти)|(^exit)|(^стоп)|(^terminate)|(^завершить)|(^close)|^!$',\
+                    	     words[0].lower()):
+                            text = self._stop_bot_from_message(update)
+                        else:
+                            text = 'Неизвестная команда. Вы можете использовать /help для получения списка команд.'
+                    else:
+                        continue
+                
+                    if not text:
+                        continue
+                
+                    if update[5] != u' ... ':
+                        message_to_resend = update[1]
+                    else:
+                        message_to_resend = None
+
+                    last_rnd_id = update[8] + 9
+
+                    vkr.send_message(
+                        uid = update[3],
+                        text = text + "'" if mark_msg else text,
+                        forward = message_to_resend,
+                        rnd_id = last_rnd_id
                     )
-                self.reply_count += 1
-
-                if not self.run_bot:
-                    self.__exit__()
-                    self.running = False
-            if not self.run_bot:
-                self.__exit__()
-                self.running = False
+                    self.reply_count += 1
+            except Exception as e:
+                print str(e)
+                self.run_bot = False
+        self.running = False
+        self.reply_count = 0
+        print('stopped')
 
     def start_bot(self):
+        self.run_bot = True
         self.update_processing = Thread(target=self._process_updates)
         self.update_processing.start()
         while not self.running: continue
@@ -349,11 +319,12 @@ class LongPollSession(Bot):
 
     def stop_bot(self):
         self.run_bot = False
-        self.update_processing = None
+        self.reply_count = 0
         while self.running: continue
+        self.update_processing = None
         return True
 
-    def stop_bot_from_message(self, response):
+    def _stop_bot_from_message(self, response):
         is_refused = True
         denied_text = 'Отказано в доступе'
         allowed_text = 'Завершаю программу'
