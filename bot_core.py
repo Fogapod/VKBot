@@ -9,10 +9,11 @@ import math
 from utils import parse_input
 import vkrequests as vkr
 
+from __init__ import PATH
+from __init__ import DATA_PATH
 
-__version__ = '0.1.0-demo'
-__author__ = 'Eugene Ershov - https://vk.com/fogapod'
-__source__ = 'https://github.com/Fogapod/ChatBot/tree/qpy2.7'
+from __init__ import __version__
+from __init__ import __author__
     
 __help__ = '''
 Версия: {ver}
@@ -30,9 +31,8 @@ __help__ = '''
 В конце моих сообщений ставится знак верхней кавычки'
 
 Автор: {author}
-Мой исходный код: {source}
 '''.format(\
-    ver = __version__, author = __author__, source = __source__
+    ver = __version__, author = __author__
 )
 
 
