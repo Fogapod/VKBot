@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
-import vkrequests as vkr
-from utils import parse_input
-
 from threading import Thread
 import requests
 import time
 import json
 import re
 import math
+
+from utils import parse_input
+import vkrequests as vkr
+
 
 __version__ = '0.1.0-demo'
 __author__ = 'Eugene Ershov - https://vk.com/fogapod'
@@ -133,6 +134,7 @@ class Bot(object):
 class LongPollSession(Bot):
     def __init__(self):
         self.run_bot = True
+        self.update_processing = None
 
     def __exit__(self):
         self.run_message_long_poll_process = False
@@ -210,21 +212,8 @@ class LongPollSession(Bot):
             else:
                 # прошлый ответ ещё не обработан
                 time.sleep(0.01)
-
-    def flood(self, chat_id):
-        while True:
-            ans = raw_input('Начать флуд в {}? (Y/N) '.format(chat_id)) 
-            if ans.upper() == 'Y':
-                print('Начинаю флудить...')
-                for i in range(1000):
-                    vkr.send_message(text=str(i+1),uid=chat_id,rnd_id=i)
-                    time.sleep(2)
-            elif ans.upper() == 'N':
-                break
-            else:
-                print('Ответ не распознан, повторите')
-
-    def start_bot(self):
+    
+    def _process_updates(self):
         print (__help__)
         self.mlpd = None # message_long_poll_data
         #{
@@ -241,7 +230,7 @@ class LongPollSession(Bot):
         self.last_rnd_id = 0
         self.reply_count = 0
 
-        while True:
+        while self.update_processing:
             if not self.message_long_poll_response:
                 time.sleep(1)
                 continue
@@ -293,7 +282,7 @@ class LongPollSession(Bot):
                         mark_msg = False
                         text = text[1:]
 
-                    text = parse_input(text, replace_vkurl=False, replace_nl=False)
+                    text = parse_input(text, replace_vkurl=False)
                     words = text.split()
 
                     if not words: 
@@ -313,7 +302,8 @@ class LongPollSession(Bot):
                     elif re.match(u'(^простое)|(^prime)|%$', words[0].lower()):
                         text = self.prime(words)
 
-                    elif re.match(u'(^stop)|(^выйти)|(^exit)|(^стоп)|(^terminate)|(^завершить)|(^close)|^!$', words[0].lower()):
+                    elif re.match(u'(^stop)|(^выйти)|(^exit)|(^стоп)|(^terminate)|(^завершить)|(^close)|^!$',\
+                    	   words[0].lower()):
                         text = self.stop_bot_from_message(update)
 
                     else:
@@ -339,11 +329,17 @@ class LongPollSession(Bot):
                     )
                 self.reply_count += 1
 
-                if not self.run_bot:
-                    self.__exit__()
+            if not self.run_bot:
+                self.__exit__()
+
+    def start_bot(self):
+        self.update_processing = Thread(target=self._process_updates)
+        self.update_processing.start()
+        return
 
     def stop_bot(self):
         self.run_bot = False
+        self.update_processing = None
 
     def stop_bot_from_message(self, response):
         is_refused = True
