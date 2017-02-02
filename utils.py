@@ -2,6 +2,9 @@
 import re
 import time
 
+from threading import Thread
+
+
 class Profiler():
     def __enter__(self):
         self._startTime = time.time()
@@ -9,7 +12,14 @@ class Profiler():
     def __exit__(self, type, value, traceback):
         print('Время выполнения: {:.3f} с.'.format(time.time() - self._startTime))
 
-def parse_input(string, replace_vkurl=True, replace_url=True, replace_nl=True):
+
+class thread(Thread):
+    def __init__(self, f):
+        Thread.__init__(self)
+        self.run = f
+
+
+def parse_input(string, replace_vkurl=True, replace_url=True):
 	new_string = string
 
 	if replace_vkurl:
@@ -24,8 +34,5 @@ def parse_input(string, replace_vkurl=True, replace_url=True, replace_nl=True):
 		, '__url__', # поиск всех остальных ссылок
 		new_string
 	)
-
-	if replace_nl:
-		new_string = re.sub('\n', ' __nl__ ', new_string) # поиск переносов на новую строку
 
 	return new_string
