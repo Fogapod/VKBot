@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from threading import Thread
-import requests
 import time
 import json
 import re

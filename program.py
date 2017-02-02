@@ -23,7 +23,6 @@ class ChatBot(App):
     
     def on_stop(self):
         while not session.stop_bot(): continue
-        return True
 
     def build(self):
         self.root.add_widget(HomeScreen())
