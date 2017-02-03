@@ -180,7 +180,7 @@ class LongPollSession(Bot):
         last_rnd_id = 0
 
         self.running = True
-        print('launched')
+        print('__LAUNCHED__')
         while self.run_bot:
             try:
                 response = vkr.get_message_updates(ts=mlpd['ts'],pts=mlpd['pts'])
@@ -271,7 +271,7 @@ class LongPollSession(Bot):
 
         self.running = False
         self.reply_count = 0
-        print('stopped')
+        print('__STOPPED__')
 
     def start_bot(self):
         self.run_bot = True
