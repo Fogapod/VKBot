@@ -48,7 +48,8 @@ class Bot(object):
             return argument_required
 
         del words[0]
-        return ' '.join(words)
+        text = ' '.join(words)
+        return text
         
     def calculate(self, words):
         argument_required = self._argument_missing(words)
@@ -173,66 +174,28 @@ class LongPollSession(Bot):
                 authorized = True
 
         return authorized
-
-    def _make_message_long_poll_url(self, keep_ts=False):
-        """
-        :keep_ts:
-            использовать значение ts, полученное в результате события {ts: 12345, updates: []} 
-            (предполагается, что все поля mlpd заполнены)
-        Возвращает: готовый url для осуществления long poll запроса
-        """
-        if keep_ts:
-            self.mlpd['ts'] = keep_ts
-        else: 
-            self.mlpd = vkr.get_message_long_poll_data()
-
-        if self.mlpd:
-            url_pattern = 'https://{server}?act={act}&key={key}&ts={ts}&wait={w}&mode={m}&version={v}'
-            url = url_pattern.format(
-                server = self.mlpd['server'],
-                key = self.mlpd['key'],
-                ts = self.mlpd['ts'],
-                act = 'a_check',
-                w = 50,
-                m = 130,
-                v = 1
-            )
-            return url
     
     def _process_updates(self):
-        mlpd = None # message_long_poll_data
-        #{
-        #   server: str,
-        #   key: int,
-        #   ts: int
-        #}
-        message_long_poll_url = self._make_message_long_poll_url()
+        mlpd = vkr.get_message_long_poll_data()
         last_rnd_id = 0
 
         self.running = True
         print('launched')
         while self.run_bot:
             try:
-                raw_response = vkr.do_message_long_poll_request(url=message_long_poll_url)
-                response = json.loads(raw_response.content)
-                try:
-                    message_long_poll_url = self._make_message_long_poll_url(keep_ts=response['ts'])
-                except KeyError:
-                    if 'failed' in response:
-                        mlpd = None
-                        message_long_poll_url = self._make_message_long_poll_url()
-                        continue
+                response = vkr.get_message_updates(ts=mlpd['ts'],pts=mlpd['pts'])
+                if response[0]:
+                    updates = response[0]
+                    mlpd['pts'] = response[1]
+                    messages = response[2]
+                else:
+                    time.sleep(2)
+                    continue
+                print(updates)
 
-                print(response)
-
-                for update in response['updates']:
-                    if  update[0] == 4 and\
-                        update[8] != last_rnd_id and\
-                        update[6]:
-                    # response == message
-                    # message != last_message
-                    # message != ''
-                        text = update[6]
+                for message in messages['items']:
+                    if message['body'] and message['random_id'] != last_rnd_id:
+                        text = message['body']
                         mark_msg = True
                     else:
                         continue
@@ -289,23 +252,26 @@ class LongPollSession(Bot):
                     if not text:
                         continue
                 
-                    if update[5] != u' ... ':
-                        message_to_resend = update[1]
+                    if message['title'] != u' ... ':
+                        message_to_resend = message['id']
                     else:
                         message_to_resend = None
 
-                    last_rnd_id = update[8] + 9
+                    last_rnd_id = message['random_id'] + 9
 
                     vkr.send_message(
-                        uid = update[3],
+                        uid = message['user_id'] if not 'chat_id' in message.keys() else None,
+                        gid = None if not 'chat_id' in message.keys() else message['chat_id'],
                         text = text + "'" if mark_msg else text,
                         forward = message_to_resend,
                         rnd_id = last_rnd_id
                     )
                     self.reply_count += 1
+
             except Exception as e:
-                print str(e)
+                print 'Bot error: ' + str(e)
                 self.run_bot = False
+
         self.running = False
         self.reply_count = 0
         print('stopped')

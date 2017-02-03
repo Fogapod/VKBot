@@ -94,24 +94,21 @@ def log_in(**kwargs):
 
 @vk_request_errors
 def get_message_long_poll_data():
-    response = api.messages.getLongPollServer()
+    response = api.messages.getLongPollServer(
+    	    need_pts=1
+    	)
     return response
-
-@vk_request_errors
-def get_new_messages(**kwargs):
-    ts = kwargs.get('ts')
-    pts = kwargs.get('pts')
-    if not ts or not pts:
-        new_ts, new_pts = get_long_poll_data()
-    return api.messages.getLongPollHistory(
-        ts=ts if ts else new_ts,
-        pts=pts if pts else new_pts
-    )
 
 
 @vk_request_errors
 def send_message(**kwargs):
     """
+    :gid:
+    :uid:
+    :forward:
+    :rnd_id:
+    
+    Возвращает:
     """
     gid = None
     uid = kwargs.get('uid')
@@ -132,15 +129,34 @@ def send_message(**kwargs):
 
 @vk_request_errors
 def get_user_name(**kwargs):
-    uid = str(kwargs['uid'])
+    uid = kwargs['uid']
 
-    if int(uid) < 0: # группа
+    if uid < 0: # группа
         response = api.groups.getById(group_id=uid[1:])
         name = response[0]['name']
     else:
         response = api.users.get(user_ids=uid)
         name = response[0]['first_name'] + ' ' + response[0]['last_name']
     return name
+
+
+@vk_request_errors
+def get_message_updates(**kwargs):
+    """
+    :ts: server
+    :pts: number of uodates to ignore
+    
+    Возвращает: массив с обновлениямии и ноаое значение pts или []
+    """
+    ts = kwargs['ts']
+    pts = kwargs['pts']
+
+    response = api.messages.getLongPollHistory(
+    	    ts=ts, pts=pts
+    	)
+    	
+    if response:
+        return response['history'], response['new_pts'], response['messages']
 
 
 @vk_request_errors
