@@ -194,7 +194,7 @@ class LongPollSession(Bot):
                 print(updates)
 
                 for message in messages['items']:
-                    if message['body'] and message['random_id'] != last_rnd_id:
+                    if message['body'] and message.get('random_id', 10) != last_rnd_id:
                         text = message['body']
                         mark_msg = True
                     else:
@@ -249,15 +249,12 @@ class LongPollSession(Bot):
                     else:
                         continue
                 
-                    if not text:
-                        continue
-                
                     if message['title'] != u' ... ':
                         message_to_resend = message['id']
                     else:
                         message_to_resend = None
 
-                    last_rnd_id = message['random_id'] + 9
+                    last_rnd_id = message.get('random_id', 10) + 9
 
                     vkr.send_message(
                         uid = message['user_id'] if not 'chat_id' in message.keys() else None,
