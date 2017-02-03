@@ -191,7 +191,7 @@ class LongPollSession(Bot):
                 else:
                     time.sleep(2)
                     continue
-                print(updates)
+                response = None
 
                 for message in messages['items']:
                     if message['body'] and message.get('random_id', 10) != last_rnd_id:
