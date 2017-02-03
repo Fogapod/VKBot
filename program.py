@@ -74,12 +74,17 @@ class HomeScreen(Screen):
             while not session.stop_bot(): continue
             self.ids.button.text = run_bot_text
 
-    def crack_pentagon(self):
-        return '(В разработке)'
+        self.update_answers_count()
+
+    def update_answers_count(self):
+        self.ids.answers_count_lb.text = 'Ответов: {}'.format(session.reply_count)
 
     def logout(self):
         session.authorization(logout=True)
         self.parent.current = 'login_screen'
+
+    def crack_pentagon(self):
+        return '(В разработке)'
 
 class Root(ScreenManager):
     pass
