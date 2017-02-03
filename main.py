@@ -1,12 +1,16 @@
 #-*- coding: utf-8 -*-
 #qpy:kivy
 import traceback
+import os
 
 from program import ChatBot
 from __init__ import PATH
+from __init__ import DATA_PATH
 
 def main():
     try:
+        if not os.path.exists(PATH + DATA_PATH):
+            os.makedirs(PATH + DATA_PATH)
         ChatBot().run()
     except Exception:
         error_text = traceback.format_exc()
