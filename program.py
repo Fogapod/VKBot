@@ -3,7 +3,7 @@
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
-from utils import platform
+from kivy.utils import platform
 
 from bot_core import LongPollSession
 
