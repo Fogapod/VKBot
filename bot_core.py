@@ -177,24 +177,26 @@ class LongPollSession(Bot):
     
     def _process_updates(self):
         mlpd = vkr.get_message_long_poll_data()
-        last_rnd_id = 0
+        last_rnd_id = -1
 
         self.running = True
         print('__LAUNCHED__')
         while self.run_bot:
             try:
+                time.sleep(1)
                 response = vkr.get_message_updates(ts=mlpd['ts'],pts=mlpd['pts'])
+                print(response)
                 if response[0]:
                     updates = response[0]
                     mlpd['pts'] = response[1]
                     messages = response[2]
                 else:
-                    time.sleep(2)
+                    time.sleep(1)
                     continue
                 response = None
 
                 for message in messages['items']:
-                    if message['body'] and message.get('random_id', 10) != last_rnd_id:
+                    if message['body'] and message.get('random_id', 0) != last_rnd_id:
                         text = message['body']
                         mark_msg = True
                     else:
@@ -215,7 +217,7 @@ class LongPollSession(Bot):
                          text.lower() == u'🌞':
                         text = '\\[T]/\n..🌞\n...||\n'
 
-                    elif re.sub('^( )*', '', text).startswith('/'): 
+                    elif re.sub('^( )*', '', text).startswith('/'):
                         text = text[1:]
                         if text.startswith('/'):
                             mark_msg = False
@@ -254,8 +256,7 @@ class LongPollSession(Bot):
                     else:
                         message_to_resend = None
 
-                    last_rnd_id = message.get('random_id', 10) + 9
-
+                    last_rnd_id = message.get('random_id', 0) + 1
                     vkr.send_message(
                         uid = message['user_id'] if not 'chat_id' in message.keys() else None,
                         gid = None if not 'chat_id' in message.keys() else message['chat_id'],
