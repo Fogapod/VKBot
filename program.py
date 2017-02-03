@@ -3,6 +3,7 @@
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.utils import platform
 
 from bot_core import LongPollSession
 
@@ -25,6 +26,12 @@ class ChatBot(App):
         while not session.stop_bot(): continue
 
     def build(self):
+        if platform == 'android':
+            from android import AndroidService
+            service = AndroidService('my pong service', 'running')
+            service.start('service started')
+            self.service = service
+
         self.root.add_widget(HomeScreen())
         self.root.add_widget(LoginScreen())
 
@@ -41,9 +48,6 @@ class ChatBot(App):
 
     def on_pause(self):
         return True
-
-    def on_resume(self):
-        pass
 
 
 class LoginScreen(Screen):
