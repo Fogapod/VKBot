@@ -59,7 +59,7 @@ class LoginScreen(Screen):
             if session.authorization(login=login, password=password):
                 self.parent.current = 'home_screen'
 
-        self.ids.login.text = self.ids.pass_input.text = ''
+        self.ids.login.text = ''
 
 
 class HomeScreen(Screen):
