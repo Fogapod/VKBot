@@ -177,8 +177,8 @@ class LongPollSession(Bot):
     
     def _process_updates(self):
         mlpd = vkr.get_message_long_poll_data()
-        last_rnd_id = -1
 
+        last_msg_text = ''
         self.running = True
         print('__LAUNCHED__')
         while self.run_bot:
@@ -196,8 +196,8 @@ class LongPollSession(Bot):
                 response = None
 
                 for message in messages['items']:
-                    if message['body'] and message.get('random_id', 0) != last_rnd_id:
-                        text = message['body']
+                    text = message['body']
+                    if text and text != last_msg_text:
                         mark_msg = True
                     else:
                         continue
@@ -256,14 +256,14 @@ class LongPollSession(Bot):
                     else:
                         message_to_resend = None
 
-                    last_rnd_id = message.get('random_id', 0) + 1
+                    message_text = text + "'" if mark_msg else text
                     vkr.send_message(
                         uid = message['user_id'] if not 'chat_id' in message.keys() else None,
                         gid = None if not 'chat_id' in message.keys() else message['chat_id'],
-                        text = text + "'" if mark_msg else text,
-                        forward = message_to_resend,
-                        rnd_id = last_rnd_id
+                        text = message_text,
+                        forward = message_to_resend
                     )
+                    last_msg_text = message_text
                     self.reply_count += 1
 
             except Exception as e:

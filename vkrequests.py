@@ -116,7 +116,7 @@ def send_message(**kwargs):
         gid = kwargs['gid']
     text = kwargs['text']
     forward = kwargs.get('forward')
-    rnd_id = kwargs['rnd_id']
+    rnd_id = kwargs.get('rnd_id', None)
 
     response = api.messages.send(
         peer_id=uid, message=text,
