@@ -69,7 +69,7 @@ class HomeScreen(Screen):
             while not session.stop_bot(): continue
             self.ids.button.text = run_bot_text
 
-        self.update_answers_count()
+        #self.update_answers_count()
 
     def update_answers_count(self):
         self.ids.answers_count_lb.text = 'Ответов: {}'.format(session.reply_count)
