@@ -26,12 +26,6 @@ class ChatBot(App):
         while not session.stop_bot(): continue
 
     def build(self):
-        if platform == 'android':
-            from android import AndroidService
-            service = AndroidService('my pong service', 'running')
-            service.start('service started')
-            self.service = service
-
         self.root.add_widget(HomeScreen())
         self.root.add_widget(LoginScreen())
 
