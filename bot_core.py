@@ -245,7 +245,7 @@ class LongPollSession(Bot):
 
                         elif re.match(u'(^stop)|(^выйти)|(^exit)|(^стоп)|(^terminate)|(^завершить)|(^close)|^!$',\
                     	     words[0].lower()):
-                            text = self._stop_bot_from_message(update)
+                            text = self._stop_bot_from_message(message)
                         else:
                             text = 'Неизвестная команда. Вы можете использовать /help для получения списка команд.'
                     else:
@@ -288,34 +288,9 @@ class LongPollSession(Bot):
         self.update_processing = None
         return True
 
-    def _stop_bot_from_message(self, response):
-        is_refused = True
-        denied_text = 'Отказано в доступе'
-        allowed_text = 'Завершаю программу'
-        message = denied_text
-
-        if 'from' in response[7]:
-            if int(response[7]['from']) == self.SELF_ID:
-                message = allowed_text
-                is_refused = False
+    def _stop_bot_from_message(self, message):
+        if message['out']:
+            self.run_bot = False
+            return 'Завершаю работу'
         else:
-            out = False
-            sum_flags = response[2]
-            for flag in [512,256,128,64,32,16,8,4]:
-                if sum_flags == 3 or sum_flags == 2:
-                    out = True
-                    break
-                if sum_flags - flag <= 0:
-                    continue
-                else:
-                    if sum_flags - flag == 3 or sum_flags - flag == 2:
-                        out = True
-                        break
-                    else:
-                        sum_flags -= flag
-            if out:
-                message = allowed_text
-                is_refused = False
-
-        self.run_bot = is_refused
-        return message
+            return 'Отказано в доступе'
