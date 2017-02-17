@@ -26,12 +26,6 @@ class ChatBot(App):
         while not session.stop_bot(): continue
 
     def build(self):
-        if platform == 'android':
-            from android import AndroidService
-            service = AndroidService('my pong service', 'running')
-            service.start('service started')
-            self.service = service
-
         self.root.add_widget(HomeScreen())
         self.root.add_widget(LoginScreen())
 
@@ -75,7 +69,7 @@ class HomeScreen(Screen):
             while not session.stop_bot(): continue
             self.ids.button.text = run_bot_text
 
-        self.update_answers_count()
+        #self.update_answers_count()
 
     def update_answers_count(self):
         self.ids.answers_count_lb.text = 'Ответов: {}'.format(session.reply_count)
