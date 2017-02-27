@@ -4,6 +4,7 @@ from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.utils import platform
+from kivy.clock import Clock
 
 from bot_core import LongPollSession
 
@@ -58,6 +59,10 @@ class LoginScreen(Screen):
 
 
 class HomeScreen(Screen):
+    def __init__(self, *args, **kwargs):
+        super(HomeScreen, self).__init__(*args, **kwargs)
+        self.bot_check_event = Clock.schedule_interval(self.check_if_bot_active, 1)
+
     def on_main_btn_press(self):
         run_bot_text = 'Запустить бота'
         stop_bot_text = 'Остановить бота'
@@ -65,7 +70,9 @@ class HomeScreen(Screen):
         if self.ids.button.text == run_bot_text:
             while not session.start_bot(): continue
             self.ids.button.text = stop_bot_text
+            self.bot_check_event()
         else:
+            self.bot_check_event.cancel()
             while not session.stop_bot(): continue
             self.ids.button.text = run_bot_text
 
@@ -80,6 +87,11 @@ class HomeScreen(Screen):
 
     def crack_pentagon(self):
         return '(В разработке)'
+    
+    def check_if_bot_active(self, _):
+        if not session.running:
+            self.ids.button.text = 'Запустить бота'
+            self.bot_check_event.cancel()
 
 class Root(ScreenManager):
     pass
