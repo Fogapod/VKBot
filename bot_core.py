@@ -139,8 +139,8 @@ class Bot(object):
 
 
 class LongPollSession(Bot):
-    def __init__(self):
-        self.activated = False
+    def __init__(self, activated=False):
+        self.activated = activated
         self.update_processing = None
         self.run_bot = False
         self.running = False
@@ -223,7 +223,7 @@ class LongPollSession(Bot):
 
                     elif message_text.lower() == u'how to praise the sun?' or\
                          message_text.lower() == u'🌞':
-                        response_text = '\\[T]/\n..🌞\n...||\n'
+                        response_text = u'\\[T]/\n..🌞\n...||\n'
 
                     elif re.sub('^( )*', '', message_text).startswith('/'):
                         message_text = message_text[1:]
@@ -236,12 +236,8 @@ class LongPollSession(Bot):
 
                         if not words: 
                             words = ' '
-                        
-                        if not self.activated:
-                            if words[0].lower() == 'activate':
-                                response_text, self.activated = self.activate_bot(message)
 
-                        elif re.match(u'(^help)|(^помощь)|(^info)|(^инфо)|(^информация)|^\?$',\
+                        if re.match(u'(^help)|(^помощь)|(^info)|(^инфо)|(^информация)|^\?$',\
                             words[0].lower()):
                             response_text = self.help()
 
@@ -258,21 +254,32 @@ class LongPollSession(Bot):
                         elif re.match(u'(^stop)|(^выйти)|(^exit)|(^стоп)|(^terminate)|(^завершить)|(^close)|^!$',\
                     	     words[0].lower()):
                             response_text = self._stop_bot_from_message(message)
+
+                        elif words[0].lower() == 'activate':
+                            response_text, self.activated = self.activate_bot(message)
+
                         else:
                             response_text = u'Неизвестная команда. Вы можете использовать /help для получения списка команд.'
                     else:
                         continue
-                
-                    if message['title'] != u' ... ':
+
+                    if not self.activated:
+                        message_text += u'\nБот не активирован. По вопросам активации просьба обратиться к %s' % __author__
+
+                    if message['title'] != u' ... ': # messege from chat
                         message_to_resend = message['id']
+                        chat_id = message['chat_id']
+                        user_id = None
                     else:
                         message_to_resend = None
+                        group_id = None
+                        user_id = message['user_id']
 
-                    message_text = response_text + "'" if mark_msg else response_text
+                    response_text += "'" if mark_msg else response_text
                     vkr.send_message(
-                        uid = message['user_id'] if not 'chat_id' in message.keys() else None,
-                        gid = None if not 'chat_id' in message.keys() else message['chat_id'],
                         text = message_text,
+                        uid = user_id,
+                        gid = chat_id,
                         forward = message_to_resend
                     )
                     last_msg_text = message_text
