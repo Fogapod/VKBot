@@ -205,7 +205,7 @@ class LongPollSession(Bot):
 
                 for message in messages['items']:
                     message_text = message['body']
-                    if message_text and message_text != last_msg_text:
+                    if message_text and message_text != last_response_text:
                         mark_msg = True
                     else:
                         continue
@@ -277,12 +277,12 @@ class LongPollSession(Bot):
 
                     response_text += "'" if mark_msg else response_text
                     vkr.send_message(
-                        text = message_text,
+                        text = response_text,
                         uid = user_id,
                         gid = chat_id,
                         forward = message_to_resend
                     )
-                    last_msg_text = message_text
+                    last_response_text = response_text
                     self.reply_count += 1
 
             except Exception as e:
@@ -302,7 +302,6 @@ class LongPollSession(Bot):
 
     def stop_bot(self):
         self.run_bot = False
-        self.reply_count = 0
         while self.running: continue
         self.update_processing = None
         return True
@@ -310,6 +309,6 @@ class LongPollSession(Bot):
     def _stop_bot_from_message(self, message):
         if message['out']:
             self.run_bot = False
-            return 'Завершаю работу'
+            return u'Завершаю работу'
         else:
-            return 'Отказано в доступе'
+            return u'Отказано в доступе'
