@@ -15,7 +15,7 @@ from __init__ import __version__
 from __init__ import __author_vk_id__
 from __init__ import __author__
     
-__help__ = '''
+__help__ = u'''
 Версия: {ver}
 
 Я умею:
@@ -31,7 +31,7 @@ __help__ = '''
 
 Автор: {author}
 
-В конце моих сообщений ставится знак верхней кавычки'
+В конце моих сообщений ставится знак верхней кавычки
 '''.format(\
     ver = __version__, author = __author__
 )
@@ -83,17 +83,17 @@ class Bot(object):
             try:
                 result = str(eval(words))
             except SyntaxError:
-                result = 'Ошибка [0]'
+                result = u'Ошибка [0]'
             except NameError:
-                result = 'Ошибка [1]'
+                result = u'Ошибка [1]'
             except AttributeError:
-                result = 'Ошибка [2]'        
+                result = u'Ошибка [2]'        
             except ZeroDivisionError:
-                result = 'Деление на 0'
+                result = u'Деление на 0'
             except OverflowError:
-                result = 'Слишком большой результат'
+                result = u'Слишком большой результат'
         else:
-            result = 'Не математическая операция'
+            result = u'Не математическая операция'
         return result
             
     def prime(self, words):
@@ -120,20 +120,20 @@ class Bot(object):
                 is_prime = True if (luc_number - 1) % input_number == 0 else False
                 result = 'Является простым числом' if is_prime else 'Не является простым числом'
             else:
-                result = '0 не является простым числом'
+                result = u'0 не является простым числом'
         else:
-            result = 'Дано неверное или слишком большое значение'
+            result = u'Дано неверное или слишком большое значение'
         return result
     
     def activate_bot(self, message):
         if message['user_id'] == __author_vk_id__:
-            return 'Активация прошла успешно', True
+            return u'Активация прошла успешно', True
         else:
-            return 'Бот не активирован. По вопросу активации обратитесь к %s' % __author__, False
+            return u'Бот не активирован. По вопросу активации обратитесь к %s' % __author__, False
 
     def _argument_missing(self, words):
         if len(words) == 1:
-            return 'Команду необходимо использовать с аргументом'
+            return u'Команду необходимо использовать с аргументом'
         else:
             return False
 
@@ -204,62 +204,62 @@ class LongPollSession(Bot):
                 response = None
 
                 for message in messages['items']:
-                    text = message['body']
-                    if text and text != last_msg_text:
+                    message_text = message['body']
+                    if message_text and message_text != last_msg_text:
                         mark_msg = True
                     else:
                         continue
 
-                    if  text.lower() == u'ершов' or\
-                        text.lower() == u'женя' or\
-                        text.lower() == u'жень' or\
-                        text.lower() == u'женька' or\
-                        text.lower() == u'жека' or\
-                        text.lower() == u'евгений' or\
-                        text.lower() == u'ерш' or\
-                        text.lower() == u'евгеха' or\
-                        text.lower() == u'жэка':
-                        text = 'А'
+                    if  message_text.lower() == u'ершов' or\
+                        message_text.lower() == u'женя' or\
+                        message_text.lower() == u'жень' or\
+                        message_text.lower() == u'женька' or\
+                        message_text.lower() == u'жека' or\
+                        message_text.lower() == u'евгений' or\
+                        message_text.lower() == u'ерш' or\
+                        message_text.lower() == u'евгеха' or\
+                        message_text.lower() == u'жэка':
+                        message_text = 'А'
 
-                    elif text.lower() == u'how to praise the sun?' or\
-                         text.lower() == u'🌞':
-                        text = '\\[T]/\n..🌞\n...||\n'
+                    elif message_text.lower() == u'how to praise the sun?' or\
+                         message_text.lower() == u'🌞':
+                        response_text = '\\[T]/\n..🌞\n...||\n'
 
-                    elif re.sub('^( )*', '', text).startswith('/'):
-                        text = text[1:]
-                        if text.startswith('/'):
+                    elif re.sub('^( )*', '', message_text).startswith('/'):
+                        message_text = message_text[1:]
+                        if message_text.startswith('/'):
                             mark_msg = False
-                            text = text[1:]
+                            message_text = message_text[1:]
 
-                        text = parse_input(text)
-                        words = text.split()
+                        message_text = parse_input(message_text)
+                        words = message_text.split()
 
                         if not words: 
                             words = ' '
                         
                         if not self.activated:
                             if words[0].lower() == 'activate':
-                                text, self.activated = self.activate_bot(message)
+                                response_text, self.activated = self.activate_bot(message)
 
                         elif re.match(u'(^help)|(^помощь)|(^info)|(^инфо)|(^информация)|^\?$',\
                             words[0].lower()):
-                            text = self.help()
+                            response_text = self.help()
 
                         elif re.match(u'(^скажи)|(^say)$', words[0].lower()):
-                            text = self.say(words)
+                            response_text = self.say(words)
 
                         elif re.match(u'(^посчитай)|(^calculate)|$', words[0].lower()) or\
                              words[0].startswith('='):
-                            text = self.calculate(words)    
+                            response_text = self.calculate(words)    
 
                         elif re.match(u'(^простое)|(^prime)|%$', words[0].lower()):
-                            text = self.prime(words)
+                            response_text = self.prime(words)
 
                         elif re.match(u'(^stop)|(^выйти)|(^exit)|(^стоп)|(^terminate)|(^завершить)|(^close)|^!$',\
                     	     words[0].lower()):
-                            text = self._stop_bot_from_message(message)
+                            response_text = self._stop_bot_from_message(message)
                         else:
-                            text = 'Неизвестная команда. Вы можете использовать /help для получения списка команд.'
+                            response_text = u'Неизвестная команда. Вы можете использовать /help для получения списка команд.'
                     else:
                         continue
                 
@@ -268,7 +268,7 @@ class LongPollSession(Bot):
                     else:
                         message_to_resend = None
 
-                    message_text = text + "'" if mark_msg else text
+                    message_text = response_text + "'" if mark_msg else response_text
                     vkr.send_message(
                         uid = message['user_id'] if not 'chat_id' in message.keys() else None,
                         gid = None if not 'chat_id' in message.keys() else message['chat_id'],
