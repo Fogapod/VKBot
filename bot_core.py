@@ -12,6 +12,7 @@ from __init__ import PATH
 from __init__ import DATA_PATH
 
 from __init__ import __version__
+from __init__ import __author_vk_id__
 from __init__ import __author__
     
 __help__ = '''
@@ -27,9 +28,10 @@ __help__ = '''
 *Вызывать помощь
 (/help |/помощь ) ?
 
-В конце моих сообщений ставится знак верхней кавычки'
 
 Автор: {author}
+
+В конце моих сообщений ставится знак верхней кавычки'
 '''.format(\
     ver = __version__, author = __author__
 )
@@ -122,7 +124,12 @@ class Bot(object):
         else:
             result = 'Дано неверное или слишком большое значение'
         return result
-        
+    
+    def activate_bot(self, message):
+        if message['user_id'] == __author_vk_id__:
+            return 'Активация прошла успешно', True
+        else:
+            return 'Бот не активирован. По вопросу активации обратитесь к %s' % __author__, False
 
     def _argument_missing(self, words):
         if len(words) == 1:
@@ -133,6 +140,7 @@ class Bot(object):
 
 class LongPollSession(Bot):
     def __init__(self):
+        self.activated = False
         self.update_processing = None
         self.run_bot = False
         self.running = False
@@ -228,8 +236,12 @@ class LongPollSession(Bot):
 
                         if not words: 
                             words = ' '
+                        
+                        if not self.activated:
+                            if words[0].lower() == 'activate':
+                                text, self.activated = self.activate_bot(message)
 
-                        if  re.match(u'(^help)|(^помощь)|(^info)|(^инфо)|(^информация)|^\?$',\
+                        elif re.match(u'(^help)|(^помощь)|(^info)|(^инфо)|(^информация)|^\?$',\
                             words[0].lower()):
                             text = self.help()
 
