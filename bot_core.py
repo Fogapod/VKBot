@@ -139,12 +139,19 @@ class Bot(object):
 
 
 class LongPollSession(Bot):
-    def __init__(self, activated=False):
+    def __init__(self, activated=False, custom_data=''):
         self.activated = activated
+        self.custom_data = custom_data
         self.update_processing = None
         self.run_bot = False
         self.running = False
         self.reply_count = 0
+        
+        if self.custom_data:
+            self.custom_data = self.prepare_custom_data()
+            
+    def prepare_custom_data(self):
+        pass
 
     def authorization(self, login= '', password= '', logout=False):
         token_path = PATH + DATA_PATH + 'token.txt'
