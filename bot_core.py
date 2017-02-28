@@ -141,6 +141,7 @@ class Bot(object):
 class LongPollSession(Bot):
     def __init__(self, activated=False, custom_data=''):
         self.activated = activated
+        print activated
         self.custom_data = custom_data
         self.update_processing = None
         self.run_bot = False
@@ -300,8 +301,10 @@ class LongPollSession(Bot):
         self.reply_count = 0
         print('__STOPPED__')
 
-    def start_bot(self):
+    def start_bot(self, activated=False):
         self.run_bot = True
+        self.activated = activated
+        print activated
         self.update_processing = Thread(target=self._process_updates)
         self.update_processing.start()
         while not self.running: continue
