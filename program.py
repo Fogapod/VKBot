@@ -8,7 +8,6 @@ from kivy.clock import Clock
 
 from bot_core import LongPollSession
 
-session = LongPollSession()
 
 Builder.load_string('''
 #:import FadeTransition kivy.uix.screenmanager.FadeTransition
@@ -27,8 +26,12 @@ class ChatBot(App):
         while not session.stop_bot(): continue
 
     def build(self):
-        self.root.add_widget(HomeScreen())
+        self.root.add_widget(HomeScreen(config=self.config))
         self.root.add_widget(LoginScreen())
+        
+        activation_status = self.config.getdefault('General', 'bot_activated', 0)
+        global session
+        session = LongPollSession(activated=activation_status)
 
         if not session.authorization():
             self.show_auth_form()
@@ -43,7 +46,28 @@ class ChatBot(App):
 
     def on_pause(self):
         return True
+        
+    def build_config(self, config):
+        config.setdefaults('General', {'show_bot_activity': 0, "bot_activated": 0})
 
+    def build_settings(self, settings):
+        settings.add_json_panel("Настройки бота", self.config, data=
+            '''[
+                {"type": "bool",
+                "title": "Отображать состояние бота в статусе (WIP)",
+                "section": "General",
+                "key": "show_bot_activity",
+                "values": [1, 0]
+                },
+                {"type": "bool",
+                "title": "Бот активирован",
+                "section": "General",
+                "key": "bot_activated",
+                "values": [1, 0],
+                "disabled": 0
+                }
+            ]'''
+        )
 
 class LoginScreen(Screen):
     def log_in(self):
@@ -62,13 +86,16 @@ class HomeScreen(Screen):
     def __init__(self, *args, **kwargs):
         super(HomeScreen, self).__init__(*args, **kwargs)
         self.bot_check_event = Clock.schedule_interval(self.check_if_bot_active, 1)
-
+        self.config = kwargs['config']
+        
     def on_main_btn_press(self):
         run_bot_text = 'Запустить бота'
         stop_bot_text = 'Остановить бота'
 
         if self.ids.button.text == run_bot_text:
-            while not session.start_bot(): continue
+            config = ChatBot.get_running_app().config
+            activation_status = config.getdefault('General', 'bot_activated', 0)
+            while not session.start_bot(activated=activation_status): continue
             self.ids.button.text = stop_bot_text
             self.bot_check_event()
         else:
