@@ -186,7 +186,7 @@ class LongPollSession(Bot):
     def _process_updates(self):
         mlpd = vkr.get_message_long_poll_data()
 
-        last_msg_text = ''
+        last_response_text = ''
         self.running = True
         print('__LAUNCHED__')
         while self.run_bot:
@@ -264,7 +264,7 @@ class LongPollSession(Bot):
                         continue
 
                     if not self.activated:
-                        message_text += u'\nБот не активирован. По вопросам активации просьба обратиться к %s' % __author__
+                        response_text += u'\n\nБот не активирован. По вопросам активации просьба обратиться к %s' % __author__
 
                     if message['title'] != u' ... ': # messege from chat
                         message_to_resend = message['id']
