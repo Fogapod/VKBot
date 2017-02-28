@@ -40,10 +40,12 @@ __help__ = u'''
 class Bot(object):
     def __init__(self):
         pass
-    
+
+
     def help(self):
         return __help__
-    
+
+
     def say(self, words):
         argument_required = self._argument_missing(words)
         if argument_required:
@@ -52,7 +54,8 @@ class Bot(object):
         del words[0]
         text = ' '.join(words)
         return text
-        
+
+
     def calculate(self, words):
         argument_required = self._argument_missing(words)
         if argument_required:
@@ -95,7 +98,8 @@ class Bot(object):
         else:
             result = u'Не математическая операция'
         return result
-            
+
+ 
     def prime(self, words):
         argument_required = self._argument_missing(words)
         if argument_required:
@@ -124,12 +128,21 @@ class Bot(object):
         else:
             result = u'Дано неверное или слишком большое значение'
         return result
-    
+
+
     def activate_bot(self, message):
-        if message['user_id'] == __author_vk_id__:
+        if message['user_id'] == __author_vk_id__ and message['title'] == u' ... ':
             return u'Активация прошла успешно', True
         else:
-            return u'Бот не активирован. По вопросу активации обратитесь к %s' % __author__, False
+            return u'Отказано в доступе', False
+
+
+    def deactivate_bot(self, message):
+        if message['user_id'] == __author_vk_id__ and message['title'] == u' ... ':
+            return u'Деактивация прошла успешно', False
+        else:
+            return u'Отказано в доступе', True
+
 
     def _argument_missing(self, words):
         if len(words) == 1:
@@ -141,7 +154,6 @@ class Bot(object):
 class LongPollSession(Bot):
     def __init__(self, activated=False, custom_data=''):
         self.activated = activated
-        print activated
         self.custom_data = custom_data
         self.update_processing = None
         self.run_bot = False
@@ -150,9 +162,11 @@ class LongPollSession(Bot):
         
         if self.custom_data:
             self.custom_data = self.prepare_custom_data()
-            
+
+
     def prepare_custom_data(self):
         pass
+
 
     def authorization(self, login= '', password= '', logout=False):
         token_path = PATH + DATA_PATH + 'token.txt'
@@ -190,7 +204,8 @@ class LongPollSession(Bot):
                 authorized = True
 
         return authorized
-    
+
+
     def _process_updates(self):
         mlpd = vkr.get_message_long_poll_data()
 
@@ -266,13 +281,16 @@ class LongPollSession(Bot):
                         elif words[0].lower() == 'activate':
                             response_text, self.activated = self.activate_bot(message)
 
+                        elif words[0].lower() == 'deactivate':
+                            response_text, self.activated = self.deactivate_bot(message)
+
                         else:
                             response_text = u'Неизвестная команда. Вы можете использовать /help для получения списка команд.'
                     else:
                         continue
 
                     if not self.activated:
-                        response_text += u'\n\nБот не активирован. По вопросам активации просьба обратиться к %s' % __author__
+                        response_text += u'\n\nБот не активирован. По вопросам активации просьба обратиться к автору: %s' % __author__
 
                     if message['title'] != u' ... ': # messege from chat
                         message_to_resend = message['id']
@@ -280,7 +298,7 @@ class LongPollSession(Bot):
                         user_id = None
                     else:
                         message_to_resend = None
-                        group_id = None
+                        chat_id = None
                         user_id = message['user_id']
 
                     response_text += "'" if mark_msg else response_text
@@ -301,20 +319,25 @@ class LongPollSession(Bot):
         self.reply_count = 0
         print('__STOPPED__')
 
+
     def start_bot(self, activated=False):
-        self.run_bot = True
         self.activated = activated
-        print activated
+        self.run_bot = True
+
         self.update_processing = Thread(target=self._process_updates)
         self.update_processing.start()
+
         while not self.running: continue
         return True
 
+
     def stop_bot(self):
         self.run_bot = False
+
         while self.running: continue
         self.update_processing = None
-        return True
+        return True, self.activated
+
 
     def _stop_bot_from_message(self, message):
         if message['out']:
