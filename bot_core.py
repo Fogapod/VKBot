@@ -131,6 +131,7 @@ class Bot(object):
 class LongPollSession(Bot):
     def __init__(self, activated=False, custom_data=''):
         self.activated = activated
+        self.authorized = False
         self.custom_data = custom_data
         self.update_processing = None
         self.run_bot = False
@@ -178,6 +179,7 @@ class LongPollSession(Bot):
                     )
                 authorized = True
 
+        self.authorized = authorized
         return authorized
 
 
