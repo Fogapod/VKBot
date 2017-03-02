@@ -91,7 +91,7 @@
                     mode: 'spinner'
                     ActionButton:
                         text: 'Настройки'
-                        on_release: app.open_settings()                        
+                        on_press: app.open_settings()                        
                     ActionButton:
                         text: 'Авторизация'
                         minimum_width: '110sp'
@@ -99,7 +99,7 @@
                             root.parent.current = 'login_screen'
                     ActionButton:
                         text: 'Выйти'
-                        on_release: root.logout()
+                        on_press: root.logout()
 
         Carousel:
             loop: True
