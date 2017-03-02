@@ -169,7 +169,7 @@ class LongPollSession(Bot):
 
 
     def authorization(self, login= '', password= '', logout=False):
-        token_path = PATH + DATA_PATH + 'token.txt'
+        token_path = DATA_PATH + 'token.txt'
         authorized = False
         token = None
         if logout:
