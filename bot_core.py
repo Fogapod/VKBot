@@ -10,30 +10,8 @@ import vkrequests as vkr
 from __init__ import PATH
 from __init__ import DATA_PATH
 
-from __init__ import __version__
+from __init__ import __help__
 from __init__ import __author_vk_id__
-from __init__ import __author__
-    
-__help__ = u'''
-Версия: {ver}
-
-Я умею:
-*Говорить то, что вы попросите
-(/say ... |/скажи ... )
-*Производить математические операции
-(/calculate ... |/посчитай ... ) =
-*Проверять, простое ли число
-(/prime ... |/простое ... ) %
-*Вызывать помощь
-(/help |/помощь ) ?
-
-
-Автор: {author}
-
-В конце моих сообщений ставится знак верхней кавычки
-'''.format(\
-    ver = __version__, author = __author__
-)
 
 
 class Bot(object):
