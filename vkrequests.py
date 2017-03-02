@@ -164,18 +164,12 @@ def get_status():
     response = api.status.get()
     return response
 
+
 @vk_request_errors
 def set_status(**kwargs):
     text = kwargs['text']
     api.status.set(text=text)
     return True
-
-
-@vk_request_errors
-def get_user_id(**kwargs):
-    user_link = kwargs.get('link')
-    response = api.users.get(user_ids=user_link)
-    return response[0]['id']
 
 
 @vk_request_errors

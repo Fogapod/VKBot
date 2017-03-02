@@ -187,7 +187,6 @@ class LongPollSession(Bot):
 
             if token:
                 if vkr.log_in(token=token):
-                    self.SELF_ID = vkr.get_user_id()
                     authorized = True
                 else:
                     open(token_path, 'w').close()
@@ -199,7 +198,6 @@ class LongPollSession(Bot):
                         new_token, 'НИКОМУ НЕ ПОКАЗЫВАЙТЕ СОДЕРЖИМОЕ ЭТОГО ФАЙЛА'
                         )
                     )
-                self.SELF_ID = vkr.get_user_id()
                 authorized = True
 
         return authorized
