@@ -8,7 +8,7 @@ build/
 *.manifest
 *.spec
 
-data/
+data/*
 
 .kivy/
 .last_tmp.py
