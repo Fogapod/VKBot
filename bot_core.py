@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from threading import Thread
 import time
-import json
 import re
 import math
 
