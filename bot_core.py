@@ -131,14 +131,14 @@ class Bot(object):
 
 
     def activate_bot(self, message):
-        if message['user_id'] == __author_vk_id__ and message['title'] == u' ... ':
+        if message['user_id'] == __author_vk_id__ and message['title'] != u' ... ':
             return u'Активация прошла успешно', True
         else:
             return u'Отказано в доступе', False
 
 
     def deactivate_bot(self, message):
-        if message['user_id'] == __author_vk_id__ and message['title'] == u' ... ':
+        if message['user_id'] == __author_vk_id__ and message['title'] != u' ... ':
             return u'Деактивация прошла успешно', False
         else:
             return u'Отказано в доступе', True
@@ -301,7 +301,7 @@ class LongPollSession(Bot):
                         chat_id = None
                         user_id = message['user_id']
 
-                    response_text += "'" if mark_msg else response_text
+                    response_text += "'" if mark_msg else ''
                     vkr.send_message(
                         text = response_text,
                         uid = user_id,
