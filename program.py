@@ -18,6 +18,7 @@ Builder.load_string('''
 
 
 class ChatBot(App):
+	use_kivy_settings = False
 	def __init__(self, *args, **kwargs):
 		super(ChatBot, self).__init__(*args, **kwargs)
 		self.root = Root()
