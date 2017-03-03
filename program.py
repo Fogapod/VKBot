@@ -80,7 +80,7 @@ class LoginScreen(Screen):
 
 		if login and password:
 			if session.authorization(login=login, password=password):
-				self.parent.parent.show_home_form()
+				self.parent.show_home_form()
 				self.ids.pass_input.text = ''
 
 		self.ids.login.text = ''

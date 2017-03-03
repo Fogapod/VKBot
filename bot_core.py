@@ -11,6 +11,7 @@ from __init__ import PATH
 from __init__ import DATA_PATH
 
 from __init__ import __help__
+from __init__ import __author__
 from __init__ import __author_vk_id__
 
 
