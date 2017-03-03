@@ -34,15 +34,9 @@ class ChatBot(App):
 		session = LongPollSession(activated=activation_status == 'True')
 
 		if not session.authorization():
-			self.show_auth_form()
+			self.root.show_auth_form()
 
 		return self.root
-
-	def show_auth_form(self):
-		self.root.current = 'login_screen'
-
-	def show_home_form(self):
-		self.root.current = 'home_screen'
 
 	def on_pause(self):
 		return True
@@ -78,7 +72,7 @@ class LoginScreen(Screen):
 
 		if login and password:
 			if session.authorization(login=login, password=password):
-				self.parent.current = 'home_screen'
+				self.parent.parent.show_home_form()
 				self.ids.pass_input.text = ''
 
 		self.ids.login.text = ''
@@ -95,7 +89,7 @@ class HomeScreen(Screen):
 
 		config = ChatBot.get_running_app().config
 
-		if self.ids.button.text == run_bot_text:
+		if self.parent.current_screen.ids.button.text == run_bot_text:
 			self.activation_status = config.getdefault('General', 'bot_activated', 'False')
 
 			while not session.start_bot(activated=self.activation_status == 'True'): continue
@@ -119,10 +113,7 @@ class HomeScreen(Screen):
 
 	def logout(self):
 		session.authorization(logout=True)
-		self.parent.current = 'login_screen'
-
-	def crack_pentagon(self):
-		return '(В разработке)'
+		self.parent.show_auth_form()
 	
 	def check_if_bot_active(self, _):
 		if not session.running:
@@ -130,7 +121,13 @@ class HomeScreen(Screen):
 			self.bot_check_event.cancel()
 
 class Root(ScreenManager):
-	pass
+	def show_auth_form(self):
+		self.current = 'login_screen'
+		self.current_screen.ids.pass_auth.disabled = not session.authorized
+		
+	def show_home_form(self):
+		self.current = 'home_screen'
+
 
 if __name__ == '__main__':
 	ChatBot().run()

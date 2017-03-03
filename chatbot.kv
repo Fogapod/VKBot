@@ -74,6 +74,8 @@
 
     Apply:
         text: 'Пропустить'
+        id: pass_auth
+        disabled: False
         pos_hint: {'center_x':.5}
         background_color: 0, .2, .4, .5
         pos: self.pos[0], root.height*.05
@@ -96,7 +98,7 @@
                         text: 'Авторизация'
                         minimum_width: '110sp'
                         on_release:  
-                            root.parent.current = 'login_screen'
+                            root.parent.show_auth_form()
                     ActionButton:
                         text: 'Выйти'
                         on_press: root.logout()
@@ -125,4 +127,4 @@
                     text: 'Взломать Пентагон'
                     size_hint_x: .5
                     pos_hint: {'center_x':.5, 'center_y': .5}
-                    on_press: self.text = root.crack_pentagon()
+                    on_press: self.text = 'В разработке'
