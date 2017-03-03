@@ -247,8 +247,8 @@ class LongPollSession(Bot):
                             response_text = 'Неизвестная команда. Вы можете использовать /help для получения списка команд.'
                     else:
                         if self.custom_commands and\
-                          words[0].lower() in self.custom_commands.keys():
-                            response_text = self.custom_commands[words[0].lower()]
+                          message_text.lower() in self.custom_commands.keys():
+                            response_text = self.custom_commands[message_text.lower()]
                             mark_msg = False
                         else:
                             continue
