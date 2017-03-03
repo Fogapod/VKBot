@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 import re
 import time
+import os
+import json
+
+from __init__ import PATH
 
 class Profiler():
     def __enter__(self):
@@ -27,3 +31,10 @@ def parse_input(string, replace_vkurl=True, replace_url=True):
 	)
 
 	return new_string
+
+def load_custom_commands():
+    if not os.path.exists(PATH +  'presets.txt'):
+        return False
+    else:    
+        with open(PATH + 'presets.txt', 'r') as f:
+            return json.load(f)

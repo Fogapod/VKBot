@@ -4,7 +4,7 @@ import time
 import re
 import math
 
-from utils import parse_input
+from utils import parse_input, load_custom_commands
 import vkrequests as vkr
 
 from __init__ import PATH
@@ -129,21 +129,16 @@ class Bot(object):
 
 
 class LongPollSession(Bot):
-    def __init__(self, activated=False, custom_data=''):
+    def __init__(self, activated=False, enable_custom_commands=False):
         self.activated = activated
         self.authorized = False
-        self.custom_data = custom_data
         self.update_processing = None
         self.run_bot = False
         self.running = False
         self.reply_count = 0
         
-        if self.custom_data:
-            self.custom_data = self.prepare_custom_data()
-
-
-    def prepare_custom_data(self):
-        pass
+        if enable_custom_commands:
+            self.custom_commands = load_custom_commands()
 
 
     def authorization(self, login= '', password= '', logout=False):
