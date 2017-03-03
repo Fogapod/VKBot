@@ -152,6 +152,7 @@ class LongPollSession(Bot):
         token = None
         if logout:
             open(token_path, 'w').close()
+            self.authorized = False
             return
 
         if not (login and password):
