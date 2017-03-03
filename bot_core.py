@@ -129,16 +129,13 @@ class Bot(object):
 
 
 class LongPollSession(Bot):
-    def __init__(self, activated=False, enable_custom_commands=False):
+    def __init__(self, activated=False):
         self.activated = activated
         self.authorized = False
         self.update_processing = None
         self.run_bot = False
         self.running = False
         self.reply_count = 0
-        
-        if enable_custom_commands:
-            self.custom_commands = load_custom_commands()
 
 
     def authorization(self, login= '', password= '', logout=False):
@@ -181,6 +178,10 @@ class LongPollSession(Bot):
 
     def _process_updates(self):
         mlpd = vkr.get_message_long_poll_data()
+        if self.use_custom_commands:
+            self.custom_commands = load_custom_commands()
+        else:
+            self.custom_commands = None
 
         last_response_text = ''
         self.running = True
@@ -206,32 +207,16 @@ class LongPollSession(Bot):
                     else:
                         continue
 
-                    if  message_text.lower() == u'ершов' or\
-                        message_text.lower() == u'женя' or\
-                        message_text.lower() == u'жень' or\
-                        message_text.lower() == u'женька' or\
-                        message_text.lower() == u'жека' or\
-                        message_text.lower() == u'евгений' or\
-                        message_text.lower() == u'ерш' or\
-                        message_text.lower() == u'евгеха' or\
-                        message_text.lower() == u'жэка':
-                        message_text = 'А'
+                    message_text = parse_input(message_text)
+                    words = message_text.split()
+                    if not words: 
+                        words = ' '
 
-                    elif message_text.lower() == u'how to praise the sun?' or\
-                         message_text.lower() == u'🌞':
-                        response_text = u'\\[T]/\n..🌞\n...||\n'
-
-                    elif re.sub('^( )*', '', message_text).startswith('/'):
-                        message_text = message_text[1:]
-                        if message_text.startswith('/'):
+                    if re.sub('^( )*', '', words[0]).startswith('/'):
+                        words[0] = words[0][1:]
+                        if words[0].startswith('/'):
                             mark_msg = False
-                            message_text = message_text[1:]
-
-                        message_text = parse_input(message_text)
-                        words = message_text.split()
-
-                        if not words: 
-                            words = ' '
+                            words[0] = words[0][1:]   
 
                         if re.match(u'(^help)|(^помощь)|(^info)|(^инфо)|(^информация)|^\?$',\
                             words[0].lower()):
@@ -258,9 +243,16 @@ class LongPollSession(Bot):
                             response_text, self.activated = self.deactivate_bot(message)
 
                         else:
-                            response_text = u'Неизвестная команда. Вы можете использовать /help для получения списка команд.'
+                            print self.custom_commands
+                            response_text = 'Неизвестная команда. Вы можете использовать /help для получения списка команд.'
                     else:
-                        continue
+                        if self.custom_commands and\
+                          words[0].lower() in self.custom_commands.keys():
+                            response_text = self.custom_commands[words[0].lower()]
+                            mark_msg = False
+                        else:
+                            continue
+
 
                     if not self.activated:
                         response_text += u'\n\nБот не активирован. По вопросам активации просьба обратиться к автору: %s' % __author__
@@ -293,8 +285,9 @@ class LongPollSession(Bot):
         print('__STOPPED__')
 
 
-    def start_bot(self, activated=False):
+    def start_bot(self, activated=False, use_custom_commands=False):
         self.activated = activated
+        self.use_custom_commands = use_custom_commands
         self.run_bot = True
 
         self.update_processing = Thread(target=self._process_updates)
