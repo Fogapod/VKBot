@@ -44,16 +44,23 @@ class ChatBot(App):
 		
 	def build_config(self, config):
 		config.setdefaults('General', 
-				{'show_bot_activity': 'False', "bot_activated": 'False'}
+				{'show_bot_activity':'False', "bot_activated":'False', 'custom_commands':'False'}
 			)
 
 	def build_settings(self, settings):
 		settings.add_json_panel("Настройки бота", self.config, data=
 			'''[
 				{"type": "bool",
-				"title": "Отображать состояние бота в статусе (WIP)",
+				"title": "Отображать состояние бота в статусе",
 				"section": "General",
 				"key": "show_bot_activity",
+				"values": ["False","True"],
+				"disabled": 1
+				},
+				{"type": "bool",
+				"title": "Использоаать пользовательские команды (WIP)",
+				"section": "General",
+				"key": "custom_commands",
 				"values": ["False","True"]
 				},
 				{"type": "bool",
@@ -92,19 +99,24 @@ class HomeScreen(Screen):
 
 		if self.parent.current_screen.ids.button.text == run_bot_text:
 			self.activation_status = config.getdefault('General', 'bot_activated', 'False')
+			use_custom_commands = config.getdefault('General', 'custom_commands', 'False')
 
-			while not session.start_bot(activated=self.activation_status == 'True'): continue
+			while not session.start_bot(activated=self.activation_status == 'True',\
+				use_custom_commands=use_custom_commands == 'True'): continue
+
 			self.ids.button.text = stop_bot_text
 			self.bot_check_event()
 		else:
 			self.bot_check_event.cancel()
 			bot_stopped = False
+
 			while not bot_stopped:
 				bot_stopped, new_activation_status = session.stop_bot()
 
 			if new_activation_status != self.activation_status:
 				config.set('General', 'bot_activated', str(new_activation_status))
 				config.write()
+
 			self.ids.button.text = run_bot_text
 
 		#self.update_answers_count()
