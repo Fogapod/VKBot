@@ -5,11 +5,15 @@ import os
 
 from program import ChatBot
 from __init__ import PATH
+from __init__ import DATA_PATH
 
 def main():
     try:
         if not os.path.exists(PATH):
-            os.makedirs(PATH)    
+            os.makedirs(PATH)
+        if not os.path.exists(DATA_PATH):
+            os.makedirs(DATA_PATH)
+
         ChatBot().run()
     except Exception:
         error_text = traceback.format_exc()
