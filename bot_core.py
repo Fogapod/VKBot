@@ -209,7 +209,7 @@ class LongPollSession(Bot):
                         continue
 
                     message_text = parse_input(message_text)
-                    words = message_text.split()
+                    words = message_text.split(' ')
                     if not words: 
                         words = ' '
 
