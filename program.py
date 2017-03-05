@@ -8,6 +8,8 @@ from kivy.clock import Clock
 
 from bot_core import LongPollSession
 
+import androidhelper as sl4a
+droid = sl4a.Android()
 
 Builder.load_string('''
 #:import FadeTransition kivy.uix.screenmanager.FadeTransition
@@ -75,6 +77,9 @@ class ChatBot(App):
 
 class LoginScreen(Screen):
 	def log_in(self):
+		droid.dialogCreateSpinnerProgress('Авторизация. Пожалуйста, подождите.', 'Это может занять несколько секунд')
+		droid.dialogShow()
+
 		login = self.ids.login.text
 		password = self.ids.pass_input.text
 
@@ -84,6 +89,7 @@ class LoginScreen(Screen):
 				self.ids.pass_input.text = ''
 
 		self.ids.login.text = ''
+		droid.dialogDismiss()
 
 
 class HomeScreen(Screen):
