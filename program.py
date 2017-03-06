@@ -79,24 +79,28 @@ class ChatBot(App):
 
 class LoginScreen(Screen):
 	def log_in(self, twofa_key=''):
-		droid.dialogCreateSpinnerProgress('Авторизация. Пожалуйста, подождите', 'Это может занять несколько секунд')
-		droid.dialogShow()
-
 		login = self.ids.login.text
 		password = self.ids.pass_input.text
 
 		if login and password:
-			if session.authorization(login=login, password=password, key=twofa_key):
-				droid.dialogDismiss()
+			droid.dialogCreateSpinnerProgress('Авторизация. Пожалуйста, подождите', 'Это может занять несколько секунд')
+			droid.dialogShow()
+			authorized, error = session.authorization(login=login, password=password, key=twofa_key)
+			if authorized:
 				self.parent.show_home_form()
+			elif error:
+			    if error == 'Auth code is needed':
+			        self.parent.show_twofa_form()
 			else:
 				droid.makeToast('Неверный логин или пароль')
+
+			droid.dialogDismiss()
 
 		self.ids.pass_input.text = ''
 
 class TwoFAKeyEnterForm(Screen):
 	def twofa_auth(self):
-		return LoginScreen().log_in(twofa_key=self.ids.twofa_textinput.text)
+		return LoginScreen.log_in(twofa_key=self.ids.twofa_textinput.text)
 
 class HomeScreen(Screen):
 	def __init__(self, *args, **kwargs):
@@ -151,6 +155,7 @@ class HomeScreen(Screen):
 	def check_if_bot_active(self, _):
 		if not session.running:
 			self.ids.main_btn.text = self.run_bot_text
+			notification.notify(title='VKBot',message='Bot stopped')
 			self.bot_check_event.cancel()
 
 
@@ -162,7 +167,7 @@ class Root(ScreenManager):
 	def show_home_form(self):
 		self.current = 'home_screen'
 
-	def show_twofa_auth_form(self):
+	def show_twofa_form(self):
 		self.current = 'twofa_form'
 
 if __name__ == '__main__':

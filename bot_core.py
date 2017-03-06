@@ -139,10 +139,11 @@ class LongPollSession(Bot):
         self.reply_count = 0
 
 
-    def authorization(self, login= '', password= '', logout=False):
+    def authorization(self, login= '', password= '', key='', logout=False):
         token_path = DATA_PATH + 'token.txt'
         authorized = False
         token = None
+        error = None
         if logout:
             open(token_path, 'w').close()
             self.authorized = False
@@ -159,12 +160,12 @@ class LongPollSession(Bot):
                 open(token_path, 'w').close()
 
             if token:
-                if vkr.log_in(token=token):
+                if vkr.log_in(token=token)[0]:
                     authorized = True
                 else:
                     open(token_path, 'w').close()
         else:
-            new_token = vkr.log_in(login=login, password=password)
+            new_token, error = vkr.log_in(login=login, password=password, key=key)
             if new_token:
                 with open(token_path, 'w') as token_file:
                     token_file.write('{}\n{}'.format(\
@@ -174,11 +175,11 @@ class LongPollSession(Bot):
                 authorized = True
 
         self.authorized = authorized
-        return authorized
+        return authorized, error
 
 
     def _process_updates(self):
-        mlpd = vkr.get_message_long_poll_data()
+        mlpd = vkr.get_message_long_poll_data()[0]
         if self.use_custom_commands:
             self.custom_commands = load_custom_commands()
         else:
@@ -190,7 +191,7 @@ class LongPollSession(Bot):
         while self.run_bot:
             try:
                 time.sleep(1)
-                response = vkr.get_message_updates(ts=mlpd['ts'],pts=mlpd['pts'])
+                response = vkr.get_message_updates(ts=mlpd['ts'],pts=mlpd['pts'])[0]
                 print(response)
                 if response[0]:
                     updates = response[0]

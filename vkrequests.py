@@ -37,13 +37,13 @@ def vk_request_errors(request):
                 #TODO обработать капчу
 
             elif 'Auth check code is needed' in error:
-                print('Auth code is needed!')
+                return 'Auth code is needed'
 
             else:
                 print('\nERROR! ' + error + '\n')
-            return False
+            return False, error
         else:
-            return response
+            return response, True
     return request_errors
 
 
