@@ -31,6 +31,7 @@ class ChatBot(App):
 
 	def build(self):
 		self.root.add_widget(HomeScreen())
+		self.root.add_widget(TwoFAKeyEnterForm())
 		self.root.add_widget(LoginScreen())
 		
 		activation_status = self.config.getdefault('General', 'bot_activated', 'False')
@@ -77,7 +78,7 @@ class ChatBot(App):
 		)
 
 class LoginScreen(Screen):
-	def log_in(self, 2fa_key=''):
+	def log_in(self, twofa_key=''):
 		droid.dialogCreateSpinnerProgress('Авторизация. Пожалуйста, подождите', 'Это может занять несколько секунд')
 		droid.dialogShow()
 
@@ -85,7 +86,7 @@ class LoginScreen(Screen):
 		password = self.ids.pass_input.text
 
 		if login and password:
-			if session.authorization(login=login, password=password, key=2fa_key):
+			if session.authorization(login=login, password=password, key=twofa_key):
 				self.parent.show_home_form()
 			else:
 				droid.makeToast('Неверный логин или пароль')
@@ -93,6 +94,9 @@ class LoginScreen(Screen):
 		self.ids.pass_input.text = ''
 		droid.dialogDismiss()
 
+class TwoFAKeyEnterForm(Screen):
+	def twofa_auth(self):
+		return LoginScreen().log_in(twofa_key=self.ids.twofa_textinput.text)
 
 class HomeScreen(Screen):
 	def __init__(self, *args, **kwargs):
@@ -149,14 +153,17 @@ class HomeScreen(Screen):
 			self.ids.main_btn.text = self.run_bot_text
 			self.bot_check_event.cancel()
 
+
 class Root(ScreenManager):
 	def show_auth_form(self):
-		self.current = 'login_screen'
+		self.current = 'twofa_form'
 		self.current_screen.ids.pass_auth.disabled = not session.authorized
 		
 	def show_home_form(self):
 		self.current = 'home_screen'
 
+	def show_twofa_auth_form(self):
+		self.current = 'twofa_form'
 
 if __name__ == '__main__':
 	ChatBot().run()

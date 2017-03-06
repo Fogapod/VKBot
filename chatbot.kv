@@ -33,6 +33,23 @@
             size: self.size
 
 
+<TwoFAKeyEnterForm>:
+    name: 'twofa_form'
+    
+    Head:
+        text: 'Код для двухфакторной авторизации'
+        pos_hint: {'center_x':.5}
+        pos: self.pos[0], twofa_textinput.pos[1]+twofa_textinput.height*1.4
+    TextInput:
+        id: twofa_textinput
+        size_hint_x: .65
+        pos_hint: {'center_x':.5, 'center_y':.7}
+    Apply:
+        text: 'Подтвердить'
+        pos_hint: {'center_x':.5}
+        pos: self.pos[0], twofa_textinput.pos[1]-twofa_textinput.height*1.5
+        on_release: root.twofa_auth()
+
 <LoginScreen>:
     name: 'login_screen'
 
