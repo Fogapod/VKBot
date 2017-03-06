@@ -108,8 +108,7 @@
 
             FloatLayout:
                 Apply:
-                    id: button
-                    text: 'Запустить бота'
+                    id: main_btn
                     size_hint_x: .5
                     pos_hint: {'center_x':.5}
                     pos_hint_y: None
@@ -119,7 +118,7 @@
                     id: answers_count_lb
                     pos_hint: {'center_x':.5}
                     pos_hint_y: None
-                    pos: self.pos[0], button.pos[1]-actionbar.height*1.3
+                    pos: self.pos[0], main_btn.pos[1]-actionbar.height*1.3
 
             FloatLayout:
                 Apply:
