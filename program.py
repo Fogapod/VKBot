@@ -8,7 +8,9 @@ from kivy.clock import Clock
 
 from bot_core import LongPollSession
 
+
 from plyer import notification
+
 import androidhelper as sl4a
 droid = sl4a.Android()
 
@@ -97,10 +99,13 @@ class LoginScreen(Screen):
 			droid.dialogDismiss()
 
 		self.ids.pass_input.text = ''
+		#return self.parent.current_screen == 'home_screen'
+		
 
 class TwoFAKeyEnterForm(Screen):
 	def twofa_auth(self):
-		return LoginScreen.log_in(twofa_key=self.ids.twofa_textinput.text)
+		if self.ids.twofa_textinput.text and LoginScreen().log_in(twofa_key=self.ids.twofa_textinput.text):
+			self.parent.current = 'login_screen'
 
 class HomeScreen(Screen):
 	def __init__(self, *args, **kwargs):
@@ -117,8 +122,6 @@ class HomeScreen(Screen):
 			self.start_bot(config)
 		else:
 			self.stop_bot(config)
-
-		#self.update_answers_count()
 
 	def start_bot(self, config):
 		self.activation_status = config.getdefault('General', 'bot_activated', 'False')
@@ -153,6 +156,7 @@ class HomeScreen(Screen):
 		self.parent.show_auth_form()
 	
 	def check_if_bot_active(self, _):
+		self.update_answers_count()
 		if not session.running:
 			self.ids.main_btn.text = self.run_bot_text
 			notification.notify(title='VKBot',message='Bot stopped')
