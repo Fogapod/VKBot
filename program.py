@@ -110,8 +110,9 @@ class LoginScreen(Screen):
 
 class TwoFAKeyEnterForm(Screen):
 	def twofa_auth(self):
-		if self.ids.twofa_textinput.text and LoginScreen().log_in(twofa_key=self.ids.twofa_textinput.text):
-			self.parent.current = 'login_screen'
+		if self.ids.twofa_textinput.text:
+			self.parent.show_auth_form(twofa_key=self.ids.twofa_textinput.text)
+			self.ids.twofa_textinput.text = ''
 
 class HomeScreen(Screen):
 	def __init__(self, *args, **kwargs):
@@ -170,8 +171,12 @@ class HomeScreen(Screen):
 
 
 class Root(ScreenManager):
-	def show_auth_form(self):
+	def show_auth_form(self, twofa_key=''):
 		self.current = 'login_screen'
+		if twofa_key:
+			if self.current_screen.log_in(twofa_key=twofa_key):
+				self.show_home_form()
+				return
 		self.current_screen.ids.pass_auth.disabled = not session.authorized
 		
 	def show_home_form(self):
