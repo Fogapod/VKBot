@@ -9,10 +9,10 @@ from kivy.clock import Clock
 from bot_core import LongPollSession
 
 
-from plyer import notification
+#from plyer import notification
 
-import androidhelper as sl4a
-droid = sl4a.Android()
+#import android as sl4a
+#droid = sl4a.Android()
 
 Builder.load_string('''
 #:import FadeTransition kivy.uix.screenmanager.FadeTransition
@@ -30,7 +30,7 @@ class ChatBot(App):
 	
 	def on_stop(self):
 		while not session.stop_bot(): continue
-		notification.notify(title='VKBot',message='Bot stopped')
+		#notification.notify(title='VKBot',message='Bot stopped')
 
 	def build(self):
 		self.root.add_widget(HomeScreen())
@@ -86,18 +86,23 @@ class LoginScreen(Screen):
 		password = self.ids.pass_input.text
 
 		if login and password:
-			droid.dialogCreateSpinnerProgress('Авторизация. Пожалуйста, подождите', 'Это может занять несколько секунд')
-			droid.dialogShow()
+			#droid.dialogCreateSpinnerProgress('Авторизация. Пожалуйста, подождите', 'Это может занять несколько секунд')
+			#droid.dialogShow()
 			authorized, error = session.authorization(login=login, password=password, key=twofa_key)
 			if authorized:
-				self.parent.show_home_form()
+				if twofa_key:
+					self.ids.pass_input.text = ''
+					return True
+				else:
+					self.parent.show_home_form()
 			elif error:
-			    if error == 'Auth code is needed':
+			    if error == 'Auth check code is needed':
 			        self.parent.show_twofa_form()
-			else:
-				droid.makeToast('Неверный логин или пароль')
+			        return
+			#else:
+				#droid.makeToast('Неверный логин или пароль')
 
-			droid.dialogDismiss()
+			#droid.dialogDismiss()
 
 		self.ids.pass_input.text = ''
 		#return self.parent.current_screen == 'home_screen'
@@ -133,7 +138,7 @@ class HomeScreen(Screen):
 
 		self.ids.main_btn.text = self.stop_bot_text
 		self.bot_check_event()
-		notification.notify(title='VKBot',message='Bot active')
+		#notification.notify(title='VKBot',message='Bot active')
 
 	def stop_bot(self, config):
 		self.bot_check_event.cancel()
@@ -147,7 +152,7 @@ class HomeScreen(Screen):
 			config.write()
 
 		self.ids.main_btn.text = self.run_bot_text
-		notification.notify(title='VKBot',message='Bot stopped')
+		#notification.notify(title='VKBot',message='Bot stopped')
 
 	def update_answers_count(self):
 		self.ids.answers_count_lb.text = 'Ответов: {}'.format(session.reply_count)
@@ -160,7 +165,7 @@ class HomeScreen(Screen):
 		self.update_answers_count()
 		if not session.running:
 			self.ids.main_btn.text = self.run_bot_text
-			notification.notify(title='VKBot',message='Bot stopped')
+			#notification.notify(title='VKBot',message='Bot stopped')
 			self.bot_check_event.cancel()
 
 
@@ -174,6 +179,7 @@ class Root(ScreenManager):
 
 	def show_twofa_form(self):
 		self.current = 'twofa_form'
+
 
 if __name__ == '__main__':
 	ChatBot().run()
