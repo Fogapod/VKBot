@@ -87,12 +87,12 @@ class LoginScreen(Screen):
 
 		if login and password:
 			if session.authorization(login=login, password=password, key=twofa_key):
+				droid.dialogDismiss()
 				self.parent.show_home_form()
 			else:
 				droid.makeToast('Неверный логин или пароль')
 
 		self.ids.pass_input.text = ''
-		droid.dialogDismiss()
 
 class TwoFAKeyEnterForm(Screen):
 	def twofa_auth(self):
@@ -156,7 +156,7 @@ class HomeScreen(Screen):
 
 class Root(ScreenManager):
 	def show_auth_form(self):
-		self.current = 'twofa_form'
+		self.current = 'login_screen'
 		self.current_screen.ids.pass_auth.disabled = not session.authorized
 		
 	def show_home_form(self):
