@@ -30,6 +30,7 @@ class ChatBot(App):
 	
 	def on_stop(self):
 		while not session.stop_bot(): continue
+		notification.notify(title='VKBot',message='Bot stopped')
 
 	def build(self):
 		self.root.add_widget(HomeScreen())
