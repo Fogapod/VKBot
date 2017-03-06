@@ -77,7 +77,7 @@ class ChatBot(App):
 		)
 
 class LoginScreen(Screen):
-	def log_in(self):
+	def log_in(self, 2fa_key=''):
 		droid.dialogCreateSpinnerProgress('Авторизация. Пожалуйста, подождите', 'Это может занять несколько секунд')
 		droid.dialogShow()
 
@@ -85,7 +85,7 @@ class LoginScreen(Screen):
 		password = self.ids.pass_input.text
 
 		if login and password:
-			if session.authorization(login=login, password=password):
+			if session.authorization(login=login, password=password, key=2fa_key):
 				self.parent.show_home_form()
 			else:
 				droid.makeToast('Неверный логин или пароль')
