@@ -102,29 +102,29 @@ class Bot(object):
                 is_prime = True if (luc_number - 1) % input_number == 0 else False
                 result = 'Является простым числом' if is_prime else 'Не является простым числом'
             else:
-                result = u'0 не является простым числом'
+                result = '0 не является простым числом'
         else:
-            result = u'Дано неверное или слишком большое значение'
+            result = 'Дано неверное или слишком большое значение'
         return result
 
 
     def activate_bot(self, message):
         if message['user_id'] == __author_vk_id__ and message['title'] != u' ... ':
-            return u'Активация прошла успешно', True
+            return 'Активация прошла успешно', True
         else:
-            return u'Отказано в доступе', False
+            return 'Отказано в доступе', False
 
 
     def deactivate_bot(self, message):
         if message['user_id'] == __author_vk_id__ and message['title'] != u' ... ':
-            return u'Деактивация прошла успешно', False
+            return 'Деактивация прошла успешно', False
         else:
-            return u'Отказано в доступе', True
+            return 'Отказано в доступе', True
 
 
     def _argument_missing(self, words):
         if len(words) == 1:
-            return u'Команду необходимо использовать с аргументом'
+            return 'Команду необходимо использовать с аргументом'
         else:
             return False
 
@@ -211,8 +211,6 @@ class LongPollSession(Bot):
 
                     message_text = parse_input(message_text)
                     words = message_text.split(' ')
-                    if not words: 
-                        words = ' '
 
                     if re.sub('^( )*', '', words[0]).startswith('/'):
                         words[0] = words[0][1:]
@@ -227,7 +225,7 @@ class LongPollSession(Bot):
                         elif re.match(u'(^скажи)|(^say)$', words[0].lower()):
                             response_text = self.say(words)
 
-                        elif re.match(u'(^посчитай)|(^calculate)|$', words[0].lower()) or\
+                        elif re.match(u'(^посчитай)|(^calculate)$', words[0].lower()) or\
                              words[0].startswith('='):
                             response_text = self.calculate(words)    
 
@@ -245,7 +243,6 @@ class LongPollSession(Bot):
                             response_text, self.activated = self.deactivate_bot(message)
 
                         else:
-                            print self.custom_commands
                             response_text = 'Неизвестная команда. Вы можете использовать /help для получения списка команд.'
                     else:
                         if self.custom_commands and\
@@ -310,6 +307,6 @@ class LongPollSession(Bot):
     def _stop_bot_from_message(self, message):
         if message['out']:
             self.run_bot = False
-            return u'Завершаю работу'
+            return 'Завершаю работу'
         else:
-            return u'Отказано в доступе'
+            return 'Отказано в доступе'
