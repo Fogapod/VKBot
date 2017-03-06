@@ -40,7 +40,7 @@ class ChatBot(App):
 		global session
 		session = LongPollSession(activated=activation_status == 'True')
 
-		if not session.authorization():
+		if not session.authorization()[0]:
 			self.root.show_auth_form()
 
 		return self.root
