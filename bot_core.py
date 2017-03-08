@@ -254,7 +254,7 @@ class LongPollSession(Bot):
 
 
                     if not self.activated:
-                        response_text += u'\n\nБот не активирован. По вопросам активации просьба обратиться к автору: %s' % __author__
+                        response_text += '\n\nБот не активирован. По вопросам активации просьба обратиться к автору: %s' % __author__
 
                     if message['title'] != u' ... ': # messege from chat
                         message_to_resend = message['id']
