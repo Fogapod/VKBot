@@ -9,7 +9,7 @@ from kivy.clock import Clock
 from __init__ import DATA_PATH
 from bot_core import LongPollSession
 
-#from plyer import notification
+from plyer import notification
 
 #import android as sl4a
 #droid = sl4a.Android()
@@ -21,6 +21,11 @@ Builder.load_string('''
     transition: FadeTransition()
 ''')
 
+def plyer_notification(title='VKBot', message=''):
+    try:
+        notification.notify(title=title, message=message)
+    except:
+        pass
 
 class ChatBot(App):
     use_kivy_settings = False
@@ -82,7 +87,7 @@ class ChatBot(App):
 
     def on_stop(self):
         while not session.stop_bot(): continue
-        #notification.notify(title='VKBot',message='Bot stopped')
+        plyer_notification(message='Bot stopped')
 
 class LoginScreen(Screen):
     def log_in(self, twofa_key=''):
@@ -142,7 +147,7 @@ class HomeScreen(Screen):
 
         self.ids.main_btn.text = self.stop_bot_text
         self.bot_check_event()
-        #notification.notify(title='VKBot',message='Bot active')
+        plyer_notification(message='Bot active')
 
     def stop_bot(self, config):
         self.bot_check_event.cancel()
@@ -156,7 +161,7 @@ class HomeScreen(Screen):
             config.write()
 
         self.ids.main_btn.text = self.run_bot_text
-        #notification.notify(title='VKBot',message='Bot stopped')
+        plyer_notification('Bot stopped')
 
     def update_answers_count(self):
         self.ids.answers_count_lb.text = 'Ответов: {}'.format(session.reply_count)
@@ -169,7 +174,7 @@ class HomeScreen(Screen):
         self.update_answers_count()
         if not session.running:
             self.ids.main_btn.text = self.run_bot_text
-            #notification.notify(title='VKBot',message='Bot stopped')
+            plyer_notification('Bot stopped')
             self.bot_check_event.cancel()
 
 
