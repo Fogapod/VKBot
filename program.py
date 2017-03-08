@@ -6,6 +6,7 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.utils import platform
 from kivy.clock import Clock
 
+from __init__ import DATA_PATH
 from bot_core import LongPollSession
 
 #from plyer import notification
@@ -41,6 +42,9 @@ class ChatBot(App):
 
         return self.root
 
+    def get_application_config(self):
+        return super(ChatBot, self).get_application_config(
+            '{}.%(appname)s.ini'.format(DATA_PATH))
 
     def build_config(self, config):
         config.setdefaults('General', 
