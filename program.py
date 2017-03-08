@@ -23,7 +23,7 @@ Builder.load_string('''
 
 def plyer_notification(title='VKBot', message=''):
     try:
-        notification.notify(title=title, message=message)
+        pass #notification.notify(title=title, message=message) # всё ещё вызывает падение приложения
     except:
         pass
 
