@@ -148,7 +148,7 @@ def get_user_name(**kwargs):
 def get_message_updates(**kwargs):
     """
     :ts: server
-    :pts: number of uodates to ignore
+    :pts: number of updates to ignore
     
     Возвращает: массив с обновлениямии и новое значение pts или []
     """
