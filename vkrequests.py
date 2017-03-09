@@ -5,7 +5,7 @@ import requests as r
 import vk
 
 def error_catcher(request):
-    def request_errors(*args, **kwargs):
+    def do_request(*args, **kwargs):
         # response = request(*args, **kwargs); time.sleep(0.66)
         # Для вывода ошибки в консоль
         try:
@@ -43,7 +43,7 @@ def error_catcher(request):
             return False, error
         else:
             return response, None
-    return request_errors
+    return do_request
 
 
 def log_in(**kwargs):
