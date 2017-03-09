@@ -12,42 +12,40 @@ def vk_request_errors(request):
             response = request(*args, **kwargs)
         except Exception as error:
             error = str(error)
-            if 'Too many requests per second' in error or 'timed out' in error:
+            check_error = error.lower()
+            if 'Too many requests' in check_error or 'timed out' in\
+                check_error or 'Read timed out' in check_error:
+                print 'Too many requests/response time out'
                 time.sleep(0.33)
                 return request_errors(*args, **kwargs)
 
-            elif 'Failed to establish a new connection' in error:
-                print('Check your connection!')
-                time.sleep(2)
-                return request_errors(*args, **kwargs)
+            elif 'connection' in check_error:
+                print 'Check your connection!'
 
-            elif 'incorrect password' in error:
-                print('Incorrect password!')
+            elif 'incorrect password' in check_error:
+                print 'Incorrect password!'
+            
+            elif 'invalid access_token' in check_error:
+                print 'invalid access_token'
 
-            elif 'Read timed out' in error or 'Connection aborted' in error:
-                print('WARNING\nResponse time exceeded!')
-                time.sleep(0.66)
-                return request_errors(*args, **kwargs)
-
-            elif 'Failed loading' in error:
+            elif 'Failed loading' in check_error:
                 raise
 
-            elif 'Captcha' in error:
-                print('Capthca!!!!!')
+            elif 'Captcha' in check_error:
+                print 'Capthca'
                 #TODO обработать капчу
 
-            elif 'Auth check code is needed' in error:
+            elif 'Auth check code is needed' in check_error:
                 print 'Auth code is needed'
 
             else:
-                print('\nERROR! ' + error + '\n')
+                print('\nUnknown error: ' + error + '\n')
             return False, error
         else:
-            return response, True
+            return response, None
     return request_errors
 
 
-@vk_request_errors
 def log_in(**kwargs):
     # vk.logger.setLevel('DEBUG')
     """
@@ -82,14 +80,14 @@ def log_in(**kwargs):
         )
 
     global api
-    try:
-        api = vk.API(session, v='5.60')
-        if not track_visitor():
-            raise
-    except: # session was not created
-        return False
+    api = vk.API(session, v='5.60')
+    error = None
+
+    response, error = track_visitor()
+    if error:
+        return response, error
     else:
-        return session.access_token
+        return session.access_token, error
 
 
 @vk_request_errors
