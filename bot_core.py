@@ -130,8 +130,8 @@ class Bot(object):
 
 
 class LongPollSession(Bot):
-    def __init__(self, activated=False):
-        self.activated = activated
+    def __init__(self):
+        self.activated = False
         self.authorized = False
         self.update_processing = None
         self.run_bot = False
@@ -179,6 +179,8 @@ class LongPollSession(Bot):
 
 
     def _process_updates(self):
+        if not self.authorized: return
+
         mlpd = vkr.get_message_long_poll_data()[0]
         if self.use_custom_commands:
             self.custom_commands = load_custom_commands()

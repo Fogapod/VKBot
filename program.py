@@ -38,9 +38,8 @@ class ChatBot(App):
         self.root.add_widget(TwoFAKeyEnterForm())
         self.root.add_widget(LoginScreen())
         
-        activation_status = self.config.getdefault('General', 'bot_activated', 'False')
         global session
-        session = LongPollSession(activated=activation_status == 'True')
+        session = LongPollSession()
 
         if not session.authorization()[0]:
             self.root.show_auth_form()
@@ -170,7 +169,7 @@ class HomeScreen(Screen):
         session.authorization(logout=True)
         self.parent.show_auth_form()
     
-    def check_if_bot_active(self, _):
+    def check_if_bot_active(self, tick):
         self.update_answers_count()
         if not session.running:
             self.ids.main_btn.text = self.run_bot_text
