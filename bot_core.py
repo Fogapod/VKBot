@@ -160,13 +160,17 @@ class LongPollSession(Bot):
                 open(token_path, 'w').close()
 
             if token:
-                if vkr.log_in(token=token)[0]:
+                response, error = vkr.log_in(token=token)
+                if response and not error:
                     authorized = True
-                else:
-                    open(token_path, 'w').close()
+                    if error:
+                        if 'connection' in error:
+                            pass
+                        elif 'invalid access_token' in error:
+                            open(token_path, 'w').close()
         else:
             new_token, error = vkr.log_in(login=login, password=password, key=key)
-            if new_token:
+            if new_token and not error:
                 with open(token_path, 'w') as token_file:
                     token_file.write('{}\n{}'.format(\
                         new_token, 'НИКОМУ НЕ ПОКАЗЫВАЙТЕ СОДЕРЖИМОЕ ЭТОГО ФАЙЛА'
@@ -315,3 +319,10 @@ class LongPollSession(Bot):
             return 'Завершаю работу'
         else:
             return 'Отказано в доступе'
+
+if __name__ == '__main__':
+    session = LongPollSession()
+    if not session.authorization()[0]:
+        login = raw_input('Логин: ')
+        password = raw_input('Пароль: ')
+        session.authirization(login=login, password=password)
