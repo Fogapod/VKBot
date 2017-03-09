@@ -56,12 +56,31 @@ def log_in(**kwargs):
 
     :return: string ( token )
     """
+    error = None
+
+    session, error = _create_session(**kwargs)
+    if error:
+        return response, error
+
+    global api
+    api, error = _create_api(session, v='5.60')
+    if error:
+        return response, error
+
+    response, error = track_visitor()
+    if error:
+        return response, error
+    else:
+        return session.access_token, error
+
+
+@vk_request_errors
+def _create_session(**kwargs):
     scope = '70656' # messages, status, offline permissions
     app_id = '5746984'
 
     token = kwargs.get('token')
     key = str(kwargs.get('key'))
-
     if token:
         session = vk.AuthSession(
             access_token=token, scope=scope, app_id=app_id
@@ -78,16 +97,12 @@ def log_in(**kwargs):
             user_login=login, user_password=password,
             scope=scope, app_id=app_id
         )
+    return session
 
-    global api
-    api = vk.API(session, v='5.60')
-    error = None
 
-    response, error = track_visitor()
-    if error:
-        return response, error
-    else:
-        return session.access_token, error
+@vk_request_errors
+def _create_api(session, v='5.60'):
+    return vk.API(session, v)
 
 
 @vk_request_errors
