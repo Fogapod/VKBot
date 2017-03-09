@@ -4,7 +4,7 @@ import requests as r
 
 import vk
 
-def vk_request_errors(request):
+def error_catcher(request):
     def request_errors(*args, **kwargs):
         # response = request(*args, **kwargs); time.sleep(0.66)
         # Для вывода ошибки в консоль
@@ -47,7 +47,6 @@ def vk_request_errors(request):
 
 
 def log_in(**kwargs):
-    # vk.logger.setLevel('DEBUG')
     """
     :token:
     :key:
@@ -72,7 +71,7 @@ def log_in(**kwargs):
         return session.access_token, error
 
 
-@vk_request_errors
+@error_catcher
 def _create_session(**kwargs):
     scope = '70656' # messages, status, offline permissions
     app_id = '5746984'
@@ -98,7 +97,7 @@ def _create_session(**kwargs):
     return session
 
 
-@vk_request_errors
+@error_catcher
 def get_message_long_poll_data():
     response = api.messages.getLongPollServer(
     	    need_pts=1
@@ -106,7 +105,7 @@ def get_message_long_poll_data():
     return response
 
 
-@vk_request_errors
+@error_catcher
 def send_message(**kwargs):
     """
     :gid:
@@ -133,7 +132,7 @@ def send_message(**kwargs):
     return response
 
 
-@vk_request_errors
+@error_catcher
 def get_user_name(**kwargs):
     uid = kwargs['uid']
 
@@ -146,7 +145,7 @@ def get_user_name(**kwargs):
     return name
 
 
-@vk_request_errors
+@error_catcher
 def get_message_updates(**kwargs):
     """
     :ts: server
@@ -165,20 +164,20 @@ def get_message_updates(**kwargs):
         return response['history'], response['new_pts'], response['messages']
 
 
-@vk_request_errors
+@error_catcher
 def get_status():
     response = api.status.get()
     return response
 
 
-@vk_request_errors
+@error_catcher
 def set_status(**kwargs):
     text = kwargs['text']
     api.status.set(text=text)
     return True
 
 
-@vk_request_errors
+@error_catcher
 def track_visitor():
     api.stats.trackVisitor()
     return True
