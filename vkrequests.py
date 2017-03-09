@@ -150,7 +150,7 @@ def get_message_updates(**kwargs):
     :ts: server
     :pts: number of uodates to ignore
     
-    Возвращает: массив с обновлениямии и ноаое значение pts или []
+    Возвращает: массив с обновлениямии и новое значение pts или []
     """
     ts = kwargs['ts']
     pts = kwargs['pts']
