@@ -8,13 +8,15 @@ def error_catcher(request):
     def do_request(*args, **kwargs):
         # response = request(*args, **kwargs); time.sleep(0.66)
         # Для вывода ошибки в консоль
+
+        error = None
         try:
             response = request(*args, **kwargs)
         except Exception as error:
             error = str(error)
             check_error = error.lower()
-            if 'Too many requests' in check_error or 'timed out' in\
-                check_error or 'Read timed out' in check_error:
+            if 'too many requests' in check_error or 'timed out' in\
+                check_error or 'read timed out' in check_error:
                 print 'Too many requests/response time out'
                 time.sleep(0.33)
                 return request_errors(*args, **kwargs)
@@ -28,21 +30,18 @@ def error_catcher(request):
             elif 'invalid access_token' in check_error:
                 print 'invalid access_token'
 
-            elif 'Failed loading' in check_error:
-                raise
-
-            elif 'Captcha' in check_error:
+            elif 'captcha' in check_error:
                 print 'Capthca'
                 #TODO обработать капчу
 
-            elif 'Auth check code is needed' in check_error:
+            elif 'auth check code is needed' in check_error:
                 print 'Auth code is needed'
 
             else:
                 print('\nUnknown error: ' + error + '\n')
             return False, error
         else:
-            return response, None
+            return response, error
     return do_request
 
 
