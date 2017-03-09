@@ -63,9 +63,7 @@ def log_in(**kwargs):
         return response, error
 
     global api
-    api, error = _create_api(session, v='5.60')
-    if error:
-        return response, error
+    api = vk.API(session, v='5.60')
 
     response, error = track_visitor()
     if error:
@@ -98,11 +96,6 @@ def _create_session(**kwargs):
             scope=scope, app_id=app_id
         )
     return session
-
-
-@vk_request_errors
-def _create_api(session, v='5.60'):
-    return vk.API(session, v)
 
 
 @vk_request_errors
