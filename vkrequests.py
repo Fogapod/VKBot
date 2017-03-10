@@ -56,9 +56,11 @@ def log_in(**kwargs):
     """
     error = None
 
-    session, error = _create_session(**kwargs)
+    response, error = _create_session(**kwargs)
     if error:
         return response, error
+    
+    session = response
 
     global api
     api = vk.API(session, v='5.60')
@@ -148,9 +150,9 @@ def get_user_name(**kwargs):
 def get_message_updates(**kwargs):
     """
     :ts: server
-    :pts: number of updates to ignore
+    :pts: number of uodates to ignore
     
-    Возвращает: массив с обновлениямии и новое значение pts или []
+    Возвращает: массив с обновлениямии и ноаое значение pts или []
     """
     ts = kwargs['ts']
     pts = kwargs['pts']
