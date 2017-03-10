@@ -99,14 +99,6 @@ def _create_session(**kwargs):
 
 
 @error_catcher
-def get_message_long_poll_data():
-    response = api.messages.getLongPollServer(
-    	    need_pts=1
-    	)
-    return response
-
-
-@error_catcher
 def send_message(**kwargs):
     """
     :gid:
@@ -147,6 +139,14 @@ def get_user_name(**kwargs):
 
 
 @error_catcher
+def get_message_long_poll_data():
+    response = api.messages.getLongPollServer(
+    	    need_pts=1
+    	)
+    return response
+
+
+@error_catcher
 def get_message_updates(**kwargs):
     """
     :ts: server
@@ -160,9 +160,7 @@ def get_message_updates(**kwargs):
     response = api.messages.getLongPollHistory(
     	    ts=ts, pts=pts
     	)
-
-    if response:
-        return response['history'], response['new_pts'], response['messages']
+    return response['history'], response['new_pts'], response['messages']
 
 
 @error_catcher
