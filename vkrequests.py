@@ -12,33 +12,33 @@ def error_catcher(request):
         error = None
         try:
             response = request(*args, **kwargs)
-        except Exception as error:
-            error = str(error)
-            check_error = error.lower()
-            if 'too many requests' in check_error or 'timed out' in\
-                check_error or 'read timed out' in check_error:
+        except Exception as raw_error:
+            raw_error = str(raw_error)
+            error = raw_error.lower()
+
+            if 'too many requests' in error or 'timed out' in error:
                 print 'Too many requests/response time out'
                 time.sleep(0.33)
                 return request_errors(*args, **kwargs) # TODO: add counter
 
-            elif 'connection' in check_error:
-                print 'Check your connection!'
+            elif 'connection' in error:
+                print 'Check your connection'
 
-            elif 'incorrect password' in check_error:
-                print 'Incorrect password!'
+            elif 'incorrect password' in error:
+                print 'Incorrect password'
             
-            elif 'invalid access_token' in check_error:
+            elif 'invalid access_token' in error:
                 print 'invalid access_token'
 
-            elif 'captcha' in check_error:
+            elif 'captcha' in error:
                 print 'Capthca'
                 #TODO обработать капчу
 
-            elif 'auth check code is needed' in check_error:
+            elif 'auth check code is needed' in error:
                 print 'Auth code is needed'
 
             else:
-                print('\nUnknown error: ' + error + '\n')
+                print('\nUnknown error: ' + raw_error + '\n')
             return False, error
         else:
             return response, error
