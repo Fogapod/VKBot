@@ -91,9 +91,6 @@ class ChatBot(App):
 
 
 class LoginScreen(Screen):
-    def __init__(self, *args, **kwargs):
-        super(LoginScreen, self).__init__(*args, **kwargs)
-
     def on_enter(self):
         self.ids.pass_auth.disabled = not session.authorized
 
