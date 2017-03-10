@@ -64,17 +64,17 @@ class Bot(object):
             try:
                 result = str(eval(words))
             except SyntaxError:
-                result = u'Ошибка [0]'
+                result = 'Ошибка [0]'
             except NameError:
-                result = u'Ошибка [1]'
+                result = 'Ошибка [1]'
             except AttributeError:
-                result = u'Ошибка [2]'        
+                result = 'Ошибка [2]'        
             except ZeroDivisionError:
-                result = u'Деление на 0'
+                result = 'Деление на 0'
             except OverflowError:
-                result = u'Слишком большой результат'
+                result = 'Слишком большой результат'
         else:
-            result = u'Не математическая операция'
+            result = 'Не математическая операция'
         return result
 
  
@@ -319,6 +319,7 @@ class LongPollSession(Bot):
             return 'Завершаю работу'
         else:
             return 'Отказано в доступе'
+
 
 if __name__ == '__main__':
     session = LongPollSession()
