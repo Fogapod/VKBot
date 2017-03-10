@@ -23,11 +23,13 @@ Builder.load_string('''
     transition: FadeTransition()
 ''')
 
+
 def plyer_notification(title='VKBot', message=''):
     try:
         pass #notification.notify(title=title, message=message) # всё ещё вызывает падение приложения
     except:
         pass
+
 
 class ChatBot(App):
     use_kivy_settings = False
@@ -87,6 +89,7 @@ class ChatBot(App):
         while not session.stop_bot(): continue
         plyer_notification(message='Bot stopped')
 
+
 class LoginScreen(Screen):
     def __init__(self, *args, **kwargs):
         super(LoginScreen, self).__init__(*args, **kwargs)
@@ -102,19 +105,17 @@ class LoginScreen(Screen):
             #droid.dialogCreateSpinnerProgress('Авторизация. Пожалуйста, подождите', 'Это может занять несколько секунд')
             #droid.dialogShow()
             authorized, error = session.authorization(login=login, password=password, key=twofa_key)
+            #droid.dialogDismiss()
             if authorized:
                 self.ids.pass_input.text = ''
                 if twofa_key:
                     return True
                 self.parent.show_home_form()
             elif error:
-                if error == 'Auth check code is needed':
+                if 'code is needed' in error:
                     self.parent.show_twofa_form()
-                return False
-            #else:
                 #droid.makeToast('Неверный логин или пароль')
-
-            #droid.dialogDismiss()
+                return False
         
 
 class TwoFAKeyEnterForm(Screen):
@@ -123,7 +124,9 @@ class TwoFAKeyEnterForm(Screen):
             login_screen_widget = self.parent.get_screen('login_screen')
             if login_screen_widget.log_in(twofa_key=self.ids.twofa_textinput.text):
                 self.parent.show_home_form()
+            #else: droid.makeToast('Неверный код подтверждения')
             self.ids.twofa_textinput.text = ''
+
 
 class HomeScreen(Screen):
     def __init__(self, *args, **kwargs):
@@ -184,12 +187,12 @@ class HomeScreen(Screen):
 class Root(ScreenManager):
     def show_auth_form(self):
         self.current = 'login_screen'
-        
-    def show_home_form(self):
-        self.current = 'home_screen'
 
     def show_twofa_form(self):
         self.current = 'twofa_form'
+
+    def show_home_form(self):
+        self.current = 'home_screen'
 
 
 if __name__ == '__main__':
