@@ -10,5 +10,6 @@ __pycache__/
 .launch
 *.log
 
+requests
 data/*
 !data/images
