@@ -323,7 +323,7 @@ class LongPollSession(Bot):
 
 if __name__ == '__main__':
     session = LongPollSession()
-    DATA_PATH = '/sdcard/VKBot/data/'
+    DATA_PATH = PATH + DATA_PATH
     while not session.authorized:
         response, error = session.authorization()
         if not response:
@@ -335,5 +335,5 @@ if __name__ == '__main__':
             key = raw_input('key:')
             response, error = session.authorization(login=LOGIN, password=PASSWORD, key=key)
 
-    print('\tАвторизация прошла\n')
+    print('\tУспешная авторизация\n')
     session.start_bot()

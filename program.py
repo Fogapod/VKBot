@@ -11,7 +11,7 @@ from bot_core import LongPollSession
 
 from plyer import notification
 
-#import android as sl4a
+#import androidhelper as sl4a
 #droid = sl4a.Android()
 
 session = LongPollSession()
@@ -105,16 +105,16 @@ class LoginScreen(Screen):
             #droid.dialogCreateSpinnerProgress('Авторизация. Пожалуйста, подождите', 'Это может занять несколько секунд')
             #droid.dialogShow()
             authorized, error = session.authorization(login=login, password=password, key=twofa_key)
+            self.ids.pass_input.text = ''
             #droid.dialogDismiss()
             if authorized:
-                self.ids.pass_input.text = ''
                 if twofa_key:
                     return True
                 self.parent.show_home_form()
             elif error:
                 if 'code is needed' in error:
                     self.parent.show_twofa_form()
-                #droid.makeToast('Неверный логин или пароль')
+                #elif 'incorrect password' in error: droid.makeToast('Неверный логин или пароль')
                 return False
         
 

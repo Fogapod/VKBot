@@ -9,7 +9,7 @@ from __init__ import DATA_PATH
 
 def main():
     try:
-        if not os.path.exists(PATH):
+        if not os.path.exists(PATH) and PATH:
             os.makedirs(PATH)
         if not os.path.exists(DATA_PATH):
             os.makedirs(DATA_PATH)
