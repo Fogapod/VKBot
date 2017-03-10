@@ -2,16 +2,13 @@ __pycache__/
 *.so
 *.pyc
 *.pyo
-.Python
-env/
-build/
-*.manifest
+*.pyx
 *.spec
 
-data/*
-!data/images/*
-
-.kivy/
+.kivy
 .last_tmp.py
 .launch
 *.log
+
+data/*
+!data/images
