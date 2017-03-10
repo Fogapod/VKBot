@@ -9,6 +9,7 @@ build/
 *.spec
 
 data/*
+!data/images/*
 
 .kivy/
 .last_tmp.py
