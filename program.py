@@ -14,6 +14,8 @@ from plyer import notification
 #import android as sl4a
 #droid = sl4a.Android()
 
+session = LongPollSession()
+
 Builder.load_string('''
 #:import FadeTransition kivy.uix.screenmanager.FadeTransition
 <Root>:
@@ -37,9 +39,6 @@ class ChatBot(App):
         self.root.add_widget(HomeScreen())
         self.root.add_widget(TwoFAKeyEnterForm())
         self.root.add_widget(LoginScreen())
-        
-        global session
-        session = LongPollSession()
 
         if not session.authorization()[0]:
             self.root.show_auth_form()
@@ -89,6 +88,12 @@ class ChatBot(App):
         plyer_notification(message='Bot stopped')
 
 class LoginScreen(Screen):
+    def __init__(self, *args, **kwargs):
+        super(LoginScreen, self).__init__(*args, **kwargs)
+
+    def on_enter(self):
+        self.ids.pass_auth.disabled = not session.authorized
+
     def log_in(self, twofa_key=''):
         login = self.ids.login.text
         password = self.ids.pass_input.text
@@ -179,7 +184,6 @@ class HomeScreen(Screen):
 class Root(ScreenManager):
     def show_auth_form(self):
         self.current = 'login_screen'
-        self.current_screen.ids.pass_auth.disabled = not session.authorized
         
     def show_home_form(self):
         self.current = 'home_screen'
