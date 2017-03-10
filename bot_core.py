@@ -322,7 +322,17 @@ class LongPollSession(Bot):
 
 if __name__ == '__main__':
     session = LongPollSession()
-    if not session.authorization()[0]:
-        login = raw_input('Логин: ')
-        password = raw_input('Пароль: ')
-        session.authirization(login=login, password=password)
+    DATA_PATH = '/sdcard/VKBot/data/'
+    while not session.authorized:
+        response, error = session.authorization()
+        if not response:
+            LOGIN = raw_input('login:')
+            PASSWORD = raw_input('password:')
+            response, error = session.authorization(login=LOGIN, password=PASSWORD)
+
+        if error and 'code is needed' in error:
+            key = raw_input('key:')
+            response, error = session.authorization(login=LOGIN, password=PASSWORD, key=key)
+
+    print('\tАвторизация прошла\n')
+    session.start_bot()
