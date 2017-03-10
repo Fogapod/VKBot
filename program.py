@@ -98,27 +98,26 @@ class LoginScreen(Screen):
             #droid.dialogShow()
             authorized, error = session.authorization(login=login, password=password, key=twofa_key)
             if authorized:
+                self.ids.pass_input.text = ''
                 if twofa_key:
-                    self.ids.pass_input.text = ''
                     return True
-                else:
-                    self.parent.show_home_form()
+                self.parent.show_home_form()
             elif error:
                 if error == 'Auth check code is needed':
                     self.parent.show_twofa_form()
-                    return
+                return False
             #else:
                 #droid.makeToast('Неверный логин или пароль')
 
             #droid.dialogDismiss()
-
-        self.ids.pass_input.text = ''
         
 
 class TwoFAKeyEnterForm(Screen):
     def twofa_auth(self):
         if self.ids.twofa_textinput.text:
-            self.parent.show_auth_form(twofa_key=self.ids.twofa_textinput.text)
+            login_screen_widget = self.parent.get_screen('login_screen')
+            if login_screen_widget.log_in(twofa_key=self.ids.twofa_textinput.text):
+                self.parent.show_home_form()
             self.ids.twofa_textinput.text = ''
 
 class HomeScreen(Screen):
@@ -178,12 +177,8 @@ class HomeScreen(Screen):
 
 
 class Root(ScreenManager):
-    def show_auth_form(self, twofa_key=''):
+    def show_auth_form(self):
         self.current = 'login_screen'
-        if twofa_key:
-            if self.current_screen.log_in(twofa_key=twofa_key):
-                self.show_home_form()
-                return
         self.current_screen.ids.pass_auth.disabled = not session.authorized
         
     def show_home_form(self):
