@@ -177,6 +177,8 @@ class LongPollSession(Bot):
                         )
                     )
                 authorized = True
+            elif self.authorized:
+                return authorized, error
 
         self.authorized = authorized
         return authorized, error
