@@ -6,8 +6,8 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.utils import platform
 from kivy.clock import Clock
 
-from __init__ import DATA_PATH
-from bot_core import LongPollSession
+from bot.__init__ import DATA_PATH
+from bot.bot_core import LongPollSession
 
 from plyer import notification
 

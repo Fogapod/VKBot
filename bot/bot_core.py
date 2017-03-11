@@ -50,7 +50,7 @@ class Bot(object):
             words = re.sub(u'(pi)|π', 'math.pi', words)
             words = re.sub('\^', '**', words)
             words = re.sub(',', '.', words)
-            words = re.sub(':', '/', words)            
+            words = re.sub(u':|÷', '/', words)
             while True:
                 if '/' in words:
                     index = re.search('[^.\d]\d+[^.\de]', words)
