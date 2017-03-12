@@ -110,7 +110,10 @@ class LoginScreen(Screen):
                 if 'code is needed' in error:
                     self.parent.show_twofa_form()
                     return
-                elif 'incorrect password' in error: toast_notification(u'Неправильный логин или пароль')
+                elif 'incorrect password' in error:
+                	toast_notification(u'Неправильный логин или пароль')
+            	else:
+            		toast_notification(error, length_long=True)
         self.ids.pass_input.text = ''
         
 
@@ -120,7 +123,8 @@ class TwoFAKeyEnterForm(Screen):
             login_screen_widget = self.parent.get_screen('login_screen')
             if login_screen_widget.log_in(twofa_key=self.ids.twofa_textinput.text):
                 self.parent.show_home_form()
-            else: toast_notification(u'Неправильный код подтверждения')
+            else:
+            	toast_notification(u'Неправильный код подтверждения')
             self.ids.twofa_textinput.text = ''
 
 
@@ -175,9 +179,11 @@ class HomeScreen(Screen):
     def check_if_bot_active(self, tick):
         self.update_answers_count()
         if not session.running:
+        	self.bot_check_event.cancel()
             self.ids.main_btn.text = self.run_bot_text
             statusbar_notification('Bot stopped')
-            self.bot_check_event.cancel()
+            if session.runtime_error:
+            	toast_notification(session.runtime_error, length_long=True)
 
 
 class Root(ScreenManager):

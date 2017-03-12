@@ -136,6 +136,7 @@ class LongPollSession(Bot):
         self.update_processing = None
         self.run_bot = False
         self.running = False
+        self.runtime_error = None
         self.reply_count = 0
 
 
@@ -186,15 +187,16 @@ class LongPollSession(Bot):
 
     def _process_updates(self):
         if not self.authorized: return
-
-        mlpd = vkr.get_message_long_poll_data()[0]
         if self.use_custom_commands:
             self.custom_commands = load_custom_commands()
         else:
             self.custom_commands = None
 
+        mlpd = vkr.get_message_long_poll_data()[0]
         last_response_text = ''
+        self.runtime_error = None
         self.running = True
+
         print('__LAUNCHED__')
         while self.run_bot:
             try:
@@ -287,7 +289,7 @@ class LongPollSession(Bot):
                     self.reply_count += 1
 
             except Exception as e:
-                print 'Bot error: ' + str(e)
+                self.runtime_error = str(e)
                 self.run_bot = False
 
         self.running = False
