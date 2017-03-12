@@ -6,13 +6,11 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.utils import platform
 from kivy.clock import Clock
 
+from plyer import notification
+
 from bot.__init__ import DATA_PATH
 from bot.bot_core import LongPollSession
 
-from plyer import notification
-
-#import androidhelper as sl4a
-#droid = sl4a.Android()
 
 session = LongPollSession()
 
@@ -99,10 +97,7 @@ class LoginScreen(Screen):
         password = self.ids.pass_input.text
 
         if login and password:
-            #droid.dialogCreateSpinnerProgress('Авторизация. Пожалуйста, подождите', 'Это может занять несколько секунд')
-            #droid.dialogShow()
             authorized, error = session.authorization(login=login, password=password, key=twofa_key)
-            #droid.dialogDismiss()
             if authorized:
             	self.ids.pass_input.text = ''
                 if twofa_key:
@@ -112,7 +107,7 @@ class LoginScreen(Screen):
                 if 'code is needed' in error:
                     self.parent.show_twofa_form()
                     return
-                #elif 'incorrect password' in error: droid.makeToast('Неверный логин или пароль')
+                #elif 'incorrect password' in error: 
         self.ids.pass_input.text = ''
         
 
@@ -122,7 +117,7 @@ class TwoFAKeyEnterForm(Screen):
             login_screen_widget = self.parent.get_screen('login_screen')
             if login_screen_widget.log_in(twofa_key=self.ids.twofa_textinput.text):
                 self.parent.show_home_form()
-            #else: droid.makeToast('Неверный код подтверждения')
+            #else: 
             self.ids.twofa_textinput.text = ''
 
 
