@@ -2,7 +2,10 @@
 import time
 import requests as r
 
-import vk
+try:
+    from libs import vk
+except ImportError:
+    from .libs import vk
 
 def error_catcher(request):
     def do_request(*args, **kwargs):

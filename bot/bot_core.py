@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from threading import Thread
 import time
 import re
 import math
+from threading import Thread
 
 from utils import parse_input, load_custom_commands
 import vkrequests as vkr
