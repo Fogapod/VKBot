@@ -6,7 +6,8 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.utils import platform
 from kivy.clock import Clock
 
-from plyer import notification
+from libs.plyer import notification
+from libs.toast import toast
 
 from bot.__init__ import DATA_PATH
 from bot.bot_core import LongPollSession
@@ -22,11 +23,13 @@ Builder.load_string('''
 ''')
 
 
-def plyer_notification(title='VKBot', message=''):
-    try:
-        pass #notification.notify(title=title, message=message) # всё ещё вызывает падение приложения
-    except:
-        pass
+def statusbar_notification(title='VKBot', message=''):
+	#notification.notify(title=title, message=message)
+	pass # всё ещё вызывает падение приложения
+
+def toast_notification(**kwargs):
+	#toast(**kwargs)
+	pass # всё ещё вызывает падение приложения
 
 
 class ChatBot(App):
@@ -85,7 +88,7 @@ class ChatBot(App):
 
     def on_stop(self):
         while not session.stop_bot(): continue
-        plyer_notification(message='Bot stopped')
+        statusbar_notification(message='Bot stopped')
 
 
 class LoginScreen(Screen):
@@ -107,7 +110,7 @@ class LoginScreen(Screen):
                 if 'code is needed' in error:
                     self.parent.show_twofa_form()
                     return
-                #elif 'incorrect password' in error: 
+                elif 'incorrect password' in error: toast_notification(u'Неправильный логин или пароль')
         self.ids.pass_input.text = ''
         
 
@@ -117,7 +120,7 @@ class TwoFAKeyEnterForm(Screen):
             login_screen_widget = self.parent.get_screen('login_screen')
             if login_screen_widget.log_in(twofa_key=self.ids.twofa_textinput.text):
                 self.parent.show_home_form()
-            #else: 
+            else: toast_notification(u'Неправильный код подтверждения')
             self.ids.twofa_textinput.text = ''
 
 
@@ -146,7 +149,7 @@ class HomeScreen(Screen):
 
         self.ids.main_btn.text = self.stop_bot_text
         self.bot_check_event()
-        plyer_notification(message='Bot active')
+        statusbar_notification(message='Bot active')
 
     def stop_bot(self, config):
         self.bot_check_event.cancel()
@@ -160,7 +163,7 @@ class HomeScreen(Screen):
             config.write()
 
         self.ids.main_btn.text = self.run_bot_text
-        plyer_notification('Bot stopped')
+        statusbar_notification('Bot stopped')
 
     def update_answers_count(self):
         self.ids.answers_count_lb.text = 'Ответов: {}'.format(session.reply_count)
@@ -173,7 +176,7 @@ class HomeScreen(Screen):
         self.update_answers_count()
         if not session.running:
             self.ids.main_btn.text = self.run_bot_text
-            plyer_notification('Bot stopped')
+            statusbar_notification('Bot stopped')
             self.bot_check_event.cancel()
 
 
