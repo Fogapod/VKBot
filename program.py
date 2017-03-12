@@ -9,7 +9,7 @@ from kivy.clock import Clock
 from libs.plyer import notification
 from libs.toast import toast
 
-from bot.__init__ import DATA_PATH
+from __init__ import DATA_PATH
 from bot.bot_core import LongPollSession
 
 
@@ -27,8 +27,8 @@ def statusbar_notification(title='VKBot', message=''):
     #notification.notify(title=title, message=message)
     pass # всё ещё вызывает падение приложения
 
-def toast_notification(**kwargs):
-    #toast(**kwargs)
+def toast_notification(text, length_long=False):
+    #toast(text, length_long=False)
     pass # всё ещё вызывает падение приложения
 
 
@@ -114,6 +114,7 @@ class LoginScreen(Screen):
                     toast_notification(u'Неправильный логин или пароль')
                 else:
                     toast_notification(error, length_long=True)
+                    return
         self.ids.pass_input.text = ''
         
 
