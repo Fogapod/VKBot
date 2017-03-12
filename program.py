@@ -24,12 +24,12 @@ Builder.load_string('''
 
 
 def statusbar_notification(title='VKBot', message=''):
-	#notification.notify(title=title, message=message)
-	pass # всё ещё вызывает падение приложения
+    #notification.notify(title=title, message=message)
+    pass # всё ещё вызывает падение приложения
 
 def toast_notification(**kwargs):
-	#toast(**kwargs)
-	pass # всё ещё вызывает падение приложения
+    #toast(**kwargs)
+    pass # всё ещё вызывает падение приложения
 
 
 class ChatBot(App):
@@ -102,7 +102,7 @@ class LoginScreen(Screen):
         if login and password:
             authorized, error = session.authorization(login=login, password=password, key=twofa_key)
             if authorized:
-            	self.ids.pass_input.text = ''
+                self.ids.pass_input.text = ''
                 if twofa_key:
                     return True
                 self.parent.show_home_form()
@@ -111,9 +111,9 @@ class LoginScreen(Screen):
                     self.parent.show_twofa_form()
                     return
                 elif 'incorrect password' in error:
-                	toast_notification(u'Неправильный логин или пароль')
-            	else:
-            		toast_notification(error, length_long=True)
+                    toast_notification(u'Неправильный логин или пароль')
+                else:
+                    toast_notification(error, length_long=True)
         self.ids.pass_input.text = ''
         
 
@@ -124,7 +124,7 @@ class TwoFAKeyEnterForm(Screen):
             if login_screen_widget.log_in(twofa_key=self.ids.twofa_textinput.text):
                 self.parent.show_home_form()
             else:
-            	toast_notification(u'Неправильный код подтверждения')
+                toast_notification(u'Неправильный код подтверждения')
             self.ids.twofa_textinput.text = ''
 
 
@@ -179,11 +179,11 @@ class HomeScreen(Screen):
     def check_if_bot_active(self, tick):
         self.update_answers_count()
         if not session.running:
-        	self.bot_check_event.cancel()
+            self.bot_check_event.cancel()
             self.ids.main_btn.text = self.run_bot_text
             statusbar_notification('Bot stopped')
             if session.runtime_error:
-            	toast_notification(session.runtime_error, length_long=True)
+                toast_notification(session.runtime_error, length_long=True)
 
 
 class Root(ScreenManager):
