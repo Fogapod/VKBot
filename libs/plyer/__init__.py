@@ -12,8 +12,8 @@ __all__ = ('accelerometer', 'audio', 'battery', 'call', 'camera', 'compass',
 __version__ = '1.2.5dev'
 
 
-from plyer import facades
-from plyer.utils import Proxy
+import facades
+from utils import Proxy
 
 #: Accelerometer proxy to :class:`plyer.facades.Accelerometer`
 accelerometer = Proxy('accelerometer', facades.Accelerometer)
@@ -25,7 +25,7 @@ audio = Proxy('audio', facades.Audio)
 battery = Proxy('battery', facades.Battery)
 
 #: Call proxy to  :class `plyer.facades.Call`
-call = Proxy('call', facades.Call)
+#call = Proxy('call', facades.Call)
 
 #: Compass proxy to :class:`plyer.facades.Compass`
 compass = Proxy('compass', facades.Compass)

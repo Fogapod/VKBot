@@ -1,5 +1,5 @@
 '''
-Facades
+Fasades
 =======
 
 Interface of all the features available.
@@ -11,22 +11,22 @@ __all__ = ('Accelerometer', 'Audio', 'Battery', 'Call', 'Camera', 'Compass',
            'Orientation', 'Notification', 'Sms', 'TTS', 'UniqueID', 'Vibrator',
            'Wifi', 'Flash')
 
-from plyer.facades.accelerometer import Accelerometer
-from plyer.facades.audio import Audio
-from plyer.facades.battery import Battery
-from plyer.facades.call import Call
-from plyer.facades.camera import Camera
-from plyer.facades.compass import Compass
-from plyer.facades.email import Email
-from plyer.facades.filechooser import FileChooser
-from plyer.facades.gps import GPS
-from plyer.facades.gyroscope import Gyroscope
-from plyer.facades.irblaster import IrBlaster
-from plyer.facades.orientation import Orientation
-from plyer.facades.notification import Notification
-from plyer.facades.sms import Sms
-from plyer.facades.tts import TTS
-from plyer.facades.uniqueid import UniqueID
-from plyer.facades.vibrator import Vibrator
-from plyer.facades.flash import Flash
-from plyer.facades.wifi import Wifi
+from accelerometer import Accelerometer
+from audio import Audio
+from battery import Battery
+from call import Call
+from camera import Camera
+from compass import Compass
+from email import Email
+from filechooser import FileChooser
+from gps import GPS
+from gyroscope import Gyroscope
+from irblaster import IrBlaster
+from orientation import Orientation
+from notification import Notification
+from sms import Sms
+from tts import TTS
+from uniqueid import UniqueID
+from vibrator import Vibrator
+from flash import Flash
+from wifi import Wifi
