@@ -144,8 +144,8 @@ def get_user_name(**kwargs):
 @error_catcher
 def get_message_long_poll_data():
     response = api.messages.getLongPollServer(
-    	    need_pts=1
-    	)
+            need_pts=1
+        )
     return response
 
 
@@ -161,8 +161,8 @@ def get_message_updates(**kwargs):
     pts = kwargs['pts']
 
     response = api.messages.getLongPollHistory(
-    	    ts=ts, pts=pts
-    	)
+            ts=ts, pts=pts
+        )
     return response['history'], response['new_pts'], response['messages']
 
 

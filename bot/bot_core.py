@@ -243,7 +243,7 @@ class LongPollSession(Bot):
                             response_text = self.prime(words)
 
                         elif re.match(u'(^stop)|(^выйти)|(^exit)|(^стоп)|(^terminate)|(^завершить)|(^close)|^!$',\
-                    	     words[0].lower()):
+                             words[0].lower()):
                             response_text = self._stop_bot_from_message(message)
 
                         elif words[0].lower() == 'activate':
