@@ -303,7 +303,6 @@ class LongPollSession(Bot):
                     self.runtime_error = str(e)
                 except UnicodeEncodeError:
                     self.runtime_error = unicode(e)
-                print(self.runtime_error)
                 self.run_bot = False
 
         self.running = False
