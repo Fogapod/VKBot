@@ -72,7 +72,7 @@ class ChatBot(App):
                 "disabled": 1
                 },
                 {"type": "bool",
-                "title": "Использоаать пользовательские команды (WIP)",
+                "title": "Использовать пользовательские команды (WIP)",
                 "section": "General",
                 "key": "custom_commands",
                 "values": ["False","True"]
