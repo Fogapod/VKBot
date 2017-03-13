@@ -1,1 +1,0 @@
-from bot.__init__ import *

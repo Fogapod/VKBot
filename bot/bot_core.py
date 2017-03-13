@@ -10,9 +10,30 @@ import vkrequests as vkr
 from utils import PATH
 from utils import DATA_PATH
 
-from __init__ import __help__
-from __init__ import __author__
-from __init__ import __author_vk_id__
+__version__ = '0.0.3'
+AUTHOR_VK_ID = 180850898
+__author__ = 'Eugene Ershov - https://vk.com/id%d' % AUTHOR_VK_ID
+
+__help__ = '''
+Версия: {v}
+
+Я умею:
+*Говорить то, что вы попросите
+(/say ... |/скажи ... )
+*Производить математические операции
+(/calculate ... |/посчитай ... ) =
+*Проверять, простое ли число
+(/prime ... |/простое ... ) %
+*Вызывать помощь
+(/help |/помощь ) ?
+
+
+Автор: {author}
+
+В конце моих сообщений ставится знак верхней кавычки
+'''.format(\
+    v = __version__, author = __author__
+)
 
 
 class Bot(object):
@@ -109,14 +130,14 @@ class Bot(object):
 
 
     def activate_bot(self, message):
-        if message['user_id'] == __author_vk_id__ and message['title'] != u' ... ':
+        if message['user_id'] == AUTHOR_VK_ID and message['title'] != u' ... ':
             return 'Активация прошла успешно', True
         else:
             return 'Отказано в доступе', False
 
 
     def deactivate_bot(self, message):
-        if message['user_id'] == __author_vk_id__ and message['title'] != u' ... ':
+        if message['user_id'] == AUTHOR_VK_ID and message['title'] != u' ... ':
             return 'Деактивация прошла успешно', False
         else:
             return 'Отказано в доступе', True
