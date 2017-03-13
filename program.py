@@ -10,7 +10,7 @@ from libs.plyer import notification
 from libs.toast import toast
 
 from bot.utils import DATA_PATH
-from bot.bot_core import LongPollSession
+from bot.core import LongPollSession
 
 
 session = LongPollSession()
