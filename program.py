@@ -56,7 +56,8 @@ class ChatBot(App):
                 {
                 	"show_bot_activity":"False",
                 	"bot_activated":"False",
-                	"custom_commands":"False"
+                	"custom_commands":"False",
+                	"open_cc_form": "Открыть"
                 }
             )
 
@@ -75,6 +76,11 @@ class ChatBot(App):
                 "section": "General",
                 "key": "custom_commands",
                 "values": ["False","True"]
+                },
+                {"type": "options",
+                "title": "Открыть окно настройки пользовательских команд",
+                "section": "General",
+                "key": "open_cc_form"
                 },
                 {"type": "bool",
                 "title": "Бот активирован",
@@ -193,7 +199,17 @@ class HomeScreen(Screen):
                 toast_notification(session.runtime_error, length_long=True)
 
 
+class CustomCommandsScreen(Screen):
+    def leave(self, last_screen):
+        app.open_settings()
+        self.parent.current = last_screen
+
+
 class Root(ScreenManager):
+    def __init__(self, *args, **kwargs):
+        super(Root, self).__init__(*args, **kwargs)
+        self.last_screen = None
+
     def show_auth_form(self):
         self.current = 'login_screen'
 
@@ -202,6 +218,15 @@ class Root(ScreenManager):
 
     def show_home_form(self):
         self.current = 'home_screen'
+    
+    def save_last_screen(self):
+        self.last_screen = self.current_screen
+
+    def open_last_screen(self):
+        if self.last_screen:
+            self.current = self.last_screen
+        else:
+            self.show_home_form()
 
 
 if __name__ == '__main__':

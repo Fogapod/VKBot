@@ -103,7 +103,7 @@
         pos_hint: {'center_x':.5}
         background_color: 0, .2, .4, .5
         pos: self.pos[0], root.height*.05
-        on_release: root.parent.current = 'home_screen'
+        on_release: root.parent.show_home_form()
 
 <HomeScreen>:
     name: 'home_screen'
@@ -151,3 +151,11 @@
                     size_hint_x: .5
                     pos_hint: {'center_x':.5, 'center_y': .5}
                     on_press: self.text = 'В разработке'
+
+<CustomCommandsScreen>:
+    Apply:
+        text: 'Вернуться'
+        pos_hint: {'center_x':.5}
+        background_color: 0, .2, .4, .5
+        pos: self.pos[0], root.height*.05
+        on_release: root.leave()
