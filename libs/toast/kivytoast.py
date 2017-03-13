@@ -67,11 +67,9 @@ class _Toast(Label):
         self.y = size[1] * 0.1
 
     def _in_out(self, dt):
-        print dt
         self._duration -= dt * 1000
         if self._duration <= 0:
             self._transparency = 1.0 + (self._duration / self._rampdown)
-            print self._transparency
         if -(self._duration) > self._rampdown:
             Window.remove_widget(self)
             return False
