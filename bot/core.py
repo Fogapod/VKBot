@@ -304,7 +304,7 @@ class LongPollSession(Bot):
         self.reply_count = 0
         print('__STOPPED__')
 
-    def start_bot(self, activated=False, use_custom_commands=False):
+    def launch_bot(self, activated=False, use_custom_commands=False):
         self.activated = activated
         self.use_custom_commands = use_custom_commands
         self.run_bot = True

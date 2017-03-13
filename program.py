@@ -137,23 +137,23 @@ class HomeScreen(Screen):
     def __init__(self, *args, **kwargs):
         super(HomeScreen, self).__init__(*args, **kwargs)
         self.bot_check_event = Clock.schedule_interval(self.check_if_bot_active, 1)
-        self.run_bot_text = 'Включить бота'
+        self.launch_bot_text = 'Включить бота'
         self.stop_bot_text = 'Выключить бота'
-        self.ids.main_btn.text = self.run_bot_text
+        self.ids.main_btn.text = self.launch_bot_text
 
     def on_main_btn_press(self):
         config = ChatBot.get_running_app().config
 
-        if self.parent.current_screen.ids.main_btn.text == self.run_bot_text:
-            self.start_bot(config)
+        if self.parent.current_screen.ids.main_btn.text == self.launch_bot_text:
+            self.launch_bot(config)
         else:
             self.stop_bot(config)
 
-    def start_bot(self, config):
+    def launch_bot(self, config):
         self.activation_status = config.getdefault('General', 'bot_activated', 'False')
         use_custom_commands = config.getdefault('General', 'custom_commands', 'False')
 
-        while not session.start_bot(activated=self.activation_status == 'True',\
+        while not session.launch_bot(activated=self.activation_status == 'True',\
             use_custom_commands=use_custom_commands == 'True'): continue
 
         self.ids.main_btn.text = self.stop_bot_text
@@ -171,7 +171,7 @@ class HomeScreen(Screen):
             config.set('General', 'bot_activated', str(new_activation_status))
             config.write()
 
-        self.ids.main_btn.text = self.run_bot_text
+        self.ids.main_btn.text = self.launch_bot_text
         bot_stopped_notification()
 
     def update_answers_count(self):
@@ -186,7 +186,7 @@ class HomeScreen(Screen):
         if self.ids.main_btn.text == self.stop_bot_text and\
                 not session.running:
             self.bot_check_event.cancel()
-            self.ids.main_btn.text = self.run_bot_text
+            self.ids.main_btn.text = self.launch_bot_text
             bot_stopped_notification()
 
             if session.runtime_error:
