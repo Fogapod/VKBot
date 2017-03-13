@@ -37,10 +37,6 @@ __help__ = '''
 
 
 class Bot(object):
-    def __init__(self):
-        pass
-
-
     def help(self):
         return __help__
 
