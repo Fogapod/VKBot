@@ -261,6 +261,8 @@ class LongPollSession(Bot):
                         elif words[0].lower() == 'deactivate':
                             response_text, self.activated = self.deactivate_bot(message)
 
+                        elif words[0].lower() == 'raise':
+                            response_text = self.raise_debug_exception(message, words)
                         else:
                             response_text = 'Неизвестная команда. Вы можете использовать /help для получения списка команд.'
                     else:
@@ -297,7 +299,11 @@ class LongPollSession(Bot):
                     self.reply_count += 1
 
             except Exception as e:
-                self.runtime_error = str(e)
+                try:
+                    self.runtime_error = str(e)
+                except UnicodeEncodeError:
+                    self.runtime_error = unicode(e)
+                print(self.runtime_error)
                 self.run_bot = False
 
         self.running = False
@@ -326,6 +332,17 @@ class LongPollSession(Bot):
         if message['out']:
             self.run_bot = False
             return 'Завершаю работу'
+        else:
+            return 'Отказано в доступе'
+
+    def raise_debug_exception(self, message, words):
+        if message['out']:
+            del words[0]
+            if not words:
+                exception_text = 'Default exception text'
+            else:
+                exception_text = ' '.join(words)
+            raise Exception(exception_text)
         else:
             return 'Отказано в доступе'
 
