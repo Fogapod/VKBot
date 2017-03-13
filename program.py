@@ -31,6 +31,12 @@ def toast_notification(text, length_long=False):
     #toast(text, length_long=False)
     pass # всё ещё вызывает падение приложения
 
+def bot_launched_notification():
+    statusbar_notification(u'Бот запущен')
+
+def bot_stopped_notification():
+    statusbar_notification(u'Бот остановлен')
+
 
 class ChatBot(App):
     use_kivy_settings = False
@@ -51,10 +57,15 @@ class ChatBot(App):
     def get_application_config(self):
         return super(ChatBot, self).get_application_config(
             '{}.%(appname)s.ini'.format(DATA_PATH))
+            # FIXME реальный путь конфига - /sdcard/.(appname).ini
 
     def build_config(self, config):
         config.setdefaults('General', 
-                {'show_bot_activity':'False', "bot_activated":'False', 'custom_commands':'False'}
+                {
+                	"show_bot_activity":"False",
+                	"bot_activated":"False",
+                	"custom_commands":"False"
+                }
             )
 
     def build_settings(self, settings):
@@ -87,8 +98,9 @@ class ChatBot(App):
         return True
 
     def on_stop(self):
-        while not session.stop_bot(): continue
-        statusbar_notification(message='Bot stopped')
+        if session.running:
+            while not session.stop_bot(): continue
+            bot_stopped_notification()
 
 
 class LoginScreen(Screen):
@@ -154,7 +166,7 @@ class HomeScreen(Screen):
 
         self.ids.main_btn.text = self.stop_bot_text
         self.bot_check_event()
-        statusbar_notification(message='Bot active')
+        bot_launched_notification()
 
     def stop_bot(self, config):
         self.bot_check_event.cancel()
@@ -168,7 +180,7 @@ class HomeScreen(Screen):
             config.write()
 
         self.ids.main_btn.text = self.run_bot_text
-        statusbar_notification('Bot stopped')
+        bot_stopped_notification()
 
     def update_answers_count(self):
         self.ids.answers_count_lb.text = 'Ответов: {}'.format(session.reply_count)
@@ -179,10 +191,12 @@ class HomeScreen(Screen):
     
     def check_if_bot_active(self, tick):
         self.update_answers_count()
-        if not session.running:
+        if self.ids.main_btn.text == self.stop_bot_text and\
+                not session.running:
             self.bot_check_event.cancel()
             self.ids.main_btn.text = self.run_bot_text
-            statusbar_notification('Bot stopped')
+            bot_stopped_notification()
+
             if session.runtime_error:
                 toast_notification(session.runtime_error, length_long=True)
 
