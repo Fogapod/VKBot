@@ -15,6 +15,7 @@ from bot.core import LongPollSession
 
 session = LongPollSession()
 
+Builder.load_file('uix/kv/chatbot.kv')
 Builder.load_string('''
 #:import FadeTransition kivy.uix.screenmanager.FadeTransition
 <Root>:

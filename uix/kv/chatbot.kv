@@ -1,0 +1,147 @@
+<LB@Label>:
+    font_size: '15sp'
+    color: 0, .2, .4, 1
+    size_hint: None, None
+    size: self.texture_size[0]+5, self.texture_size[1]+5
+
+<Head@LB>:
+    font_size: '17sp'
+    size: self.texture_size[0]+10,self.texture_size[1]+10
+    
+<TextInput@TextInput>:
+    size_hint_y: None
+    font_size: '16sp'
+    height: self.minimum_height+10
+    multiline: False
+
+<Apply@Button>:
+    text: 'Принять'
+    font_size: '15sp'
+    background_normal: ''
+    background_color: 0, .2, .4, 1
+    size_hint: None, None
+    size: self.texture_size[0]*2.3, self.texture_size[1]*2.3
+
+
+<Screen@Screen>:
+    canvas.before:
+        #Color: 
+            #rgba: .85, .66, .01, 1
+        Rectangle:
+            source: 'data/images/background.jpg'
+            pos: self.pos
+            size: self.size
+
+
+<TwoFAKeyEnterForm>:
+    name: 'twofa_form'
+    
+    Head:
+        text: 'Код для двухфакторной авторизации'
+        pos_hint: {'center_x':.5}
+        pos: self.pos[0], twofa_textinput.pos[1]+twofa_textinput.height*1.4
+    TextInput:
+        id: twofa_textinput
+        size_hint_x: .65
+        pos_hint: {'center_x':.5, 'center_y':.7}
+    Apply:
+        text: 'Подтвердить'
+        pos_hint: {'center_x':.5}
+        pos: self.pos[0], twofa_textinput.pos[1]-twofa_textinput.height*1.5
+        on_release: root.twofa_auth()
+
+
+<LoginScreen>:
+    name: 'login_screen'
+
+    Head:
+        text: 'Авторизация ВК'
+        pos_hint: {'center_x':.5}
+        pos: self.pos[0], login.pos[1]+login.height*1.4
+
+    TextInput:
+        hint_text: 'Логин'.decode('utf-8') #KIVY BUG
+        id: login
+        size_hint_x: .65
+        pos_hint: {'center_x':.5,'center_y':.7}
+
+    TextInput:
+        hint_text: 'Пароль'.decode('utf-8') #KIVY BUG
+        id: pass_input
+        size_hint_x: .65
+        pos: login.pos[0], login.pos[1]-login.height*1.1
+        password: show_pass.active == False
+
+    CheckBox:
+        id: show_pass
+        size_hint: None, None
+        size: login.width*.15, login.height*.8
+        pos: login.pos[0]-self.width*.35, pass_input.pos[1]-login.height*1.1
+
+    LB:
+        text: 'Показать пароль'
+        size: self.texture_size[0], show_pass.height
+        pos: show_pass.pos[0]+show_pass.width, show_pass.pos[1]
+
+    Apply:
+        text: 'Войти'
+        id: enter
+        pos_hint: {'center_x':.5}
+        pos: self.pos[0], show_pass.pos[1]-login.height*1.4
+        on_release: root.log_in()
+
+    Apply:
+        text: 'Пропустить'
+        id: pass_auth
+        disabled: False
+        pos_hint: {'center_x':.5}
+        background_color: 0, .2, .4, .5
+        pos: self.pos[0], root.height*.05
+        on_release: root.parent.current = 'home_screen'
+
+<HomeScreen>:
+    name: 'home_screen'
+    BoxLayout:
+        orientation: 'vertical'
+        ActionBar:
+            id: actionbar
+            ActionView:
+                ActionPrevious:
+                ActionOverflow:
+                    mode: 'spinner'
+                    ActionButton:
+                        text: 'Настройки'
+                        on_press: app.open_settings()                        
+                    ActionButton:
+                        text: 'Авторизация'
+                        minimum_width: '110sp'
+                        on_release:  
+                            root.parent.show_auth_form()
+                    ActionButton:
+                        text: 'Выйти'
+                        on_press: root.logout()
+
+        Carousel:
+            loop: True
+
+            FloatLayout:
+                Apply:
+                    id: main_btn
+                    size_hint_x: .5
+                    pos_hint: {'center_x':.5}
+                    pos_hint_y: None
+                    pos: self.pos[0], actionbar.pos[1]-actionbar.height*1.5
+                    on_press: root.on_main_btn_press()
+                Head:
+                    id: answers_count_lb
+                    pos_hint: {'center_x':.5}
+                    pos_hint_y: None
+                    pos: self.pos[0], main_btn.pos[1]-actionbar.height*1.3
+
+            FloatLayout:
+                Apply:
+                    id: crack_pentagon_btn
+                    text: 'Взломать Пентагон'
+                    size_hint_x: .5
+                    pos_hint: {'center_x':.5, 'center_y': .5}
+                    on_press: self.text = 'В разработке'
