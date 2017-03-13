@@ -3,7 +3,6 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyx
-*.spec
 
 .kivy
 .last_tmp.py
