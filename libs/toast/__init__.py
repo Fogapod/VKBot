@@ -7,10 +7,13 @@ _toast = None
 def _get_ref():
     global _toast
     if _toast is None:
-        if platform == 'android': 
+        '''if platform == 'android': 
             from androidtoast import toast
         else:
-            from kivytoast import toast
+            from kivytoast import toast'''
+        # временное решение до исправления бага в buildoizer/p4a
+        # при сборке через android_new
+        from kivytoast import toast
         _toast = toast
     return _toast
 

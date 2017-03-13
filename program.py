@@ -17,11 +17,10 @@ session = LongPollSession()
 
 def statusbar_notification(title='VKBot', message=''):
     #notification.notify(title=title, message=message)
-    pass # всё ещё вызывает падение приложения
+    pass # всё ещё вызывает падение приложения при сборке через android_new
 
 def toast_notification(text, length_long=False):
-    #toast(text, length_long=False)
-    pass # всё ещё вызывает падение приложения
+    toast(text, length_long=length_long)
 
 def bot_launched_notification():
     statusbar_notification(u'Бот запущен')
