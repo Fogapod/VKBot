@@ -40,7 +40,6 @@ class Bot(object):
     def help(self):
         return __help__
 
-
     def say(self, words):
         argument_required = self._argument_missing(words)
         if argument_required:
@@ -49,7 +48,6 @@ class Bot(object):
         del words[0]
         text = ' '.join(words)
         return text
-
 
     def calculate(self, words):
         argument_required = self._argument_missing(words)
@@ -94,7 +92,6 @@ class Bot(object):
             result = 'Не математическая операция'
         return result
 
- 
     def prime(self, words):
         argument_required = self._argument_missing(words)
         if argument_required:
@@ -124,20 +121,17 @@ class Bot(object):
             result = 'Дано неверное или слишком большое значение'
         return result
 
-
     def activate_bot(self, message):
         if message['user_id'] == AUTHOR_VK_ID and message['title'] != u' ... ':
             return 'Активация прошла успешно', True
         else:
             return 'Отказано в доступе', False
 
-
     def deactivate_bot(self, message):
         if message['user_id'] == AUTHOR_VK_ID and message['title'] != u' ... ':
             return 'Деактивация прошла успешно', False
         else:
             return 'Отказано в доступе', True
-
 
     def _argument_missing(self, words):
         if len(words) == 1:
@@ -155,7 +149,6 @@ class LongPollSession(Bot):
         self.running = False
         self.runtime_error = None
         self.reply_count = 0
-
 
     def authorization(self, login= '', password= '', key='', logout=False):
         token_path = DATA_PATH + 'token.txt'
@@ -200,7 +193,6 @@ class LongPollSession(Bot):
 
         self.authorized = authorized
         return authorized, error
-
 
     def _process_updates(self):
         if not self.authorized: return
@@ -279,7 +271,6 @@ class LongPollSession(Bot):
                         else:
                             continue
 
-
                     if not self.activated:
                         try:
                             response_text += '\n\nБот не активирован. По вопросам активации просьба обратиться к автору: %s' % __author__
@@ -313,7 +304,6 @@ class LongPollSession(Bot):
         self.reply_count = 0
         print('__STOPPED__')
 
-
     def start_bot(self, activated=False, use_custom_commands=False):
         self.activated = activated
         self.use_custom_commands = use_custom_commands
@@ -325,14 +315,12 @@ class LongPollSession(Bot):
         while not self.running: continue
         return True
 
-
     def stop_bot(self):
         self.run_bot = False
 
         while self.running: continue
         self.update_processing = None
         return True, self.activated
-
 
     def _stop_bot_from_message(self, message):
         if message['out']:
