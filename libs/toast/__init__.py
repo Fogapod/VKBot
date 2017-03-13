@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from kivy import platform
 
 __all__ = ('toast')
