@@ -12,17 +12,8 @@ from libs.toast import toast
 from bot.utils import DATA_PATH
 from bot.core import LongPollSession
 
-
-session = LongPollSession()
-
 Builder.load_file('uix/kv/chatbot.kv')
-Builder.load_string('''
-#:import FadeTransition kivy.uix.screenmanager.FadeTransition
-<Root>:
-    id: rootscr
-    transition: FadeTransition()
-''')
-
+session = LongPollSession()
 
 def statusbar_notification(title='VKBot', message=''):
     #notification.notify(title=title, message=message)
