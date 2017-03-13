@@ -9,7 +9,7 @@ from kivy.clock import Clock
 from libs.plyer import notification
 from libs.toast import toast
 
-from __init__ import DATA_PATH
+from bot.utils import DATA_PATH
 from bot.bot_core import LongPollSession
 
 

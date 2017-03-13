@@ -4,7 +4,11 @@ import time
 import os
 import json
 
-from __init__ import PATH
+from kivy import platform
+
+PATH = '/sdcard/VKBot/' if platform == 'android' else ''
+DATA_PATH = 'data/'
+
 
 class Profiler():
     def __enter__(self):

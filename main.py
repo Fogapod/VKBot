@@ -4,8 +4,8 @@ import traceback
 import os
 
 from program import ChatBot
-from __init__ import PATH
-from __init__ import DATA_PATH
+from bot.utils import PATH
+from bot.utils import DATA_PATH
 
 def main():
     try:

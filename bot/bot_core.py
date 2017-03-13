@@ -7,8 +7,8 @@ from threading import Thread
 from utils import parse_input, load_custom_commands
 import vkrequests as vkr
 
-from __init__ import PATH
-from __init__ import DATA_PATH
+from utils import PATH
+from utils import DATA_PATH
 
 from __init__ import __help__
 from __init__ import __author__
