@@ -48,7 +48,7 @@ class ChatBot(App):
 
     def get_application_config(self):
         return super(ChatBot, self).get_application_config(
-            '{}.%(appname)s.ini'.format(DATA_PATH))
+            '~{}.%(appname)s.ini'.format(DATA_PATH))
             # FIXME реальный путь конфига - /sdcard/.(appname).ini
 
     def build_config(self, config):
