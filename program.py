@@ -12,12 +12,19 @@ from libs.toast import toast
 from bot.utils import DATA_PATH
 from bot.core import LongPollSession
 
+try:
+    import android
+except ImportError:
+    android = None
+
 Builder.load_file('uix/kv/chatbot.kv')
 session = LongPollSession()
 
 def statusbar_notification(title='VKBot', message=''):
-    #notification.notify(title=title, message=message)
-    pass # всё ещё вызывает падение приложения при сборке через android_new
+    if android is not None:
+        notification.notify(title=title, message=message)
+    else:
+        pass
 
 def toast_notification(text, length_long=False):
     toast(text, length_long=length_long)
