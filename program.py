@@ -224,6 +224,9 @@ class Root(ScreenManager):
 
     def show_home_form(self):
         self.current = 'home_screen'
+
+    def show_custom_commands_screen(self):
+        self.current = 'cc_screen'
     
     def save_last_screen(self):
         self.last_screen = self.current_screen
