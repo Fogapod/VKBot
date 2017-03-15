@@ -1,3 +1,5 @@
+from kivy import platform
+
 __all__ = ('toast')
 
 _toast = None
@@ -5,12 +7,11 @@ _toast = None
 def _get_ref():
     global _toast
     if _toast is None:
-        try:
-            import android
-        except ImportError:
+        if platform == 'android':
             from kivytoast import toast
+            #from androidtoast import toast
         else:
-            from androidtoast import toast
+            from kivytoast import toast
 
         _toast = toast
     return _toast
