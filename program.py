@@ -9,7 +9,7 @@ from kivy.clock import Clock
 from libs.plyer import notification
 from libs.toast import toast
 
-from bot.utils import DATA_PATH
+from bot.utils import PATH, DATA_PATH
 from bot.core import LongPollSession
 
 try:
@@ -80,6 +80,7 @@ class ChatBot(App):
                 },
                 {"type": "bool",
                 "title": "Использовать пользовательские команды (WIP)",
+                "desc": "Пользовательские команды хранятся в файле %spresets.txt",
                 "section": "General",
                 "key": "custom_commands",
                 "values": ["False","True"]
@@ -96,7 +97,7 @@ class ChatBot(App):
                 "values": ["False","True"],
                 "disabled": 1
                 }
-            ]'''
+            ]''' % PATH
         )
 
     def on_pause(self):
@@ -106,7 +107,7 @@ class ChatBot(App):
         if session.running:
             while not session.stop_bot(): continue
             bot_stopped_notification()
-
+            
 
 class LoginScreen(Screen):
     def on_enter(self):
