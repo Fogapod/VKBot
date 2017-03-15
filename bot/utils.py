@@ -41,4 +41,12 @@ def load_custom_commands():
         return False
     else:    
         with open(PATH + 'presets.txt', 'r') as f:
-            return json.load(f)
+            try:
+                content = json.load(f)
+            except ValueError:
+                return False
+
+            if type(content) is dict:
+                return content
+            else:
+                return False
