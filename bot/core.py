@@ -4,11 +4,9 @@ import re
 import math
 from threading import Thread
 
-from utils import parse_input, load_custom_commands
-import vkrequests as vkr
+from utils import PATH, DATA_PATH, parse_input, load_custom_commands
 
-from utils import PATH
-from utils import DATA_PATH
+import vkrequests as vkr
 
 __version__ = '0.0.3'
 AUTHOR_VK_ID = 180850898
