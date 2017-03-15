@@ -46,6 +46,7 @@ class ChatBot(App):
         self.root.add_widget(HomeScreen())
         self.root.add_widget(TwoFAKeyEnterForm())
         self.root.add_widget(LoginScreen())
+        self.root.add_widget(CustomCommandsScreen())
 
         if not session.authorization()[0]:
             self.root.show_auth_form()
@@ -206,9 +207,9 @@ class HomeScreen(Screen):
 
 
 class CustomCommandsScreen(Screen):
-    def leave(self, last_screen):
-        app.open_settings()
-        self.parent.current = last_screen
+    def leave(self):
+        self.parent.open_settings()
+        self.parent.open_last_screen()
 
 
 class Root(ScreenManager):
