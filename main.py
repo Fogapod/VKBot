@@ -3,7 +3,7 @@
 import traceback
 import os
 
-from program import ChatBot
+from program import VKBotApp
 from bot.utils import PATH
 from bot.utils import DATA_PATH
 
@@ -14,7 +14,7 @@ def main():
         if not os.path.exists(DATA_PATH):
             os.makedirs(DATA_PATH)
 
-        ChatBot().run()
+        VKBotApp().run()
     except Exception:
         error_text = traceback.format_exc()
         open(PATH + 'error.log', 'w').write(error_text)

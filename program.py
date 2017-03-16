@@ -13,7 +13,7 @@ from bot.utils import PATH, DATA_PATH
 from bot.core import LongPollSession
 
 
-Builder.load_file('uix/kv/chatbot.kv')
+Builder.load_file('uix/kv/vkbotapp.kv')
 session = LongPollSession()
 
 def statusbar_notification(title='VKBot', message=''):
@@ -30,10 +30,10 @@ def bot_stopped_notification():
     statusbar_notification(u'Бот остановлен')
 
 
-class ChatBot(App):
+class VKBotApp(App):
     use_kivy_settings = False
     def __init__(self, *args, **kwargs):
-        super(ChatBot, self).__init__(*args, **kwargs)
+        super(VKBotApp, self).__init__(*args, **kwargs)
         self.root = Root()
     
     def build(self):
@@ -45,10 +45,11 @@ class ChatBot(App):
         if not session.authorization()[0]:
             self.root.show_auth_form()
 
+        self.root.show_home_form()
         return self.root
 
     def get_application_config(self):
-        return super(ChatBot, self).get_application_config(
+        return super(VKBotApp, self).get_application_config(
             '{}.%(appname)s.ini'.format(DATA_PATH))
             # FIXME реальный путь конфига - /sdcard/.(appname).ini
 
@@ -72,8 +73,11 @@ class ChatBot(App):
                 "values": ["False","True"],
                 "disabled": 1
                 },
+                {"type": "title",
+                "title": "Пользовательские команды (WIP)"
+                },
                 {"type": "bool",
-                "title": "Использовать пользовательские команды (WIP)",
+                "title": "Использовать пользовательские команды",
                 "desc": "Пользовательские команды хранятся в файле %spresets.txt",
                 "section": "General",
                 "key": "custom_commands",
@@ -82,7 +86,11 @@ class ChatBot(App):
                 {"type": "options",
                 "title": "Открыть окно настройки пользовательских команд",
                 "section": "General",
-                "key": "open_cc_form"
+                "key": "open_cc_form",
+                "disabled": "True"
+                },                
+                {"type": "title",
+                "title": "Активация бота"
                 },
                 {"type": "bool",
                 "title": "Бот активирован",
@@ -150,9 +158,9 @@ class HomeScreen(Screen):
         self.ids.main_btn.text = self.launch_bot_text
 
     def on_main_btn_press(self):
-        config = ChatBot.get_running_app().config
+        config = VKBotApp.get_running_app().config
 
-        if self.parent.current_screen.ids.main_btn.text == self.launch_bot_text:
+        if self.ids.main_btn.text == self.launch_bot_text:
             self.launch_bot(config)
         else:
             self.stop_bot(config)
@@ -203,7 +211,8 @@ class HomeScreen(Screen):
 
 class CustomCommandsScreen(Screen):
     def leave(self):
-        self.parent.open_settings()
+        self.app = VKBotApp.get_running_app()
+        self.app.open_settings()
         self.parent.open_last_screen()
 
 
@@ -235,4 +244,4 @@ class Root(ScreenManager):
 
 
 if __name__ == '__main__':
-    ChatBot().run()
+    VKBotApp().run()
