@@ -17,7 +17,7 @@ Builder.load_file('uix/kv/vkbotapp.kv')
 
 def statusbar_notification(title='VKBot', message=''):
     #notification.notify(title=title, message=message)
-    pass # вызывает падение приложенич
+    pass # вызывает падение приложения
 
 def bot_launched_notification():
     statusbar_notification(u'Бот запущен')
