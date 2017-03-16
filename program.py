@@ -3,7 +3,6 @@
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.utils import platform
 from kivy.clock import Clock
 
 from libs.plyer import notification
@@ -20,14 +19,14 @@ def statusbar_notification(title='VKBot', message=''):
     #notification.notify(title=title, message=message)
     pass # вызывает падение приложенич
 
-def toast_notification(text, length_long=False):
-    toast(text, length_long=length_long)
-
 def bot_launched_notification():
     statusbar_notification(u'Бот запущен')
 
 def bot_stopped_notification():
     statusbar_notification(u'Бот остановлен')
+
+def toast_notification(text, length_long=False):
+    toast(text, length_long=length_long)
 
 
 class VKBotApp(App):
@@ -87,7 +86,7 @@ class VKBotApp(App):
                 "title": "Открыть окно настройки пользовательских команд",
                 "section": "General",
                 "key": "open_cc_form",
-                "disabled": "True"
+                "disabled": "True"                
                 },                
                 {"type": "title",
                 "title": "Активация бота"
@@ -101,6 +100,7 @@ class VKBotApp(App):
                 }
             ]''' % PATH
         )
+        # settings.close_button.text = 'Закрыть'
 
     def on_pause(self):
         return True
