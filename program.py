@@ -45,7 +45,6 @@ class VKBotApp(App):
         if not self.session.authorization()[0]:
             self.root.show_auth_form()
 
-        self.root.show_home_form()
         return self.root
 
     def get_application_config(self):
@@ -66,6 +65,9 @@ class VKBotApp(App):
     def build_settings(self, settings):
         settings.add_json_panel("Настройки бота", self.config, data=
             '''[
+                {"type": "title",
+                "title": "Общие настройки"
+                },
                 {"type": "bool",
                 "title": "Отображать состояние бота в статусе",
                 "desc": "Если включено, в статус будет добавлено уведомление о том, что бот активен. Иначе вернется предыдущий текст",
