@@ -51,7 +51,7 @@ class VKBotApp(App):
     def get_application_config(self):
         return super(VKBotApp, self).get_application_config(
             '{}.%(appname)s.ini'.format(DATA_PATH))
-            # FIXME реальный путь конфига - /sdcard/.(appname).ini
+            # FIXME: реальный путь конфига - /sdcard/.(appname).ini
 
     def build_config(self, config):
         config.setdefaults('General', 
@@ -68,6 +68,7 @@ class VKBotApp(App):
             '''[
                 {"type": "bool",
                 "title": "Отображать состояние бота в статусе",
+                "desc": "Если включено, в статус будет добавлено уведомление о том, что бот активен. Иначе вернется предыдущий текст",
                 "section": "General",
                 "key": "show_bot_activity",
                 "values": ["False","True"],
