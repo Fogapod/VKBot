@@ -13,7 +13,7 @@ from bot.core import LongPollSession
 
 
 Builder.load_file('uix/kv/vkbotapp.kv')
-session = LongPollSession()
+
 
 def statusbar_notification(title='VKBot', message=''):
     #notification.notify(title=title, message=message)
@@ -34,6 +34,7 @@ class VKBotApp(App):
     def __init__(self, *args, **kwargs):
         super(VKBotApp, self).__init__(*args, **kwargs)
         self.root = Root()
+        self.session = LongPollSession()
     
     def build(self):
         self.root.add_widget(HomeScreen())
@@ -41,7 +42,7 @@ class VKBotApp(App):
         self.root.add_widget(LoginScreen())
         self.root.add_widget(CustomCommandsScreen())
 
-        if not session.authorization()[0]:
+        if not self.session.authorization()[0]:
             self.root.show_auth_form()
 
         self.root.show_home_form()
@@ -106,21 +107,25 @@ class VKBotApp(App):
         return True
 
     def on_stop(self):
-        if session.running:
-            while not session.stop_bot(): continue
+        if self.session.running:
+            while not self.session.stop_bot(): continue
             bot_stopped_notification()
             
 
 class LoginScreen(Screen):
+    def __init__(self, *args, **kwargs):
+        super(LoginScreen, self).__init__(*args, **kwargs)
+        self.session = VKBotApp.get_running_app().session
+        
     def on_enter(self):
-        self.ids.pass_auth.disabled = not session.authorized
+        self.ids.pass_auth.disabled = not self.session.authorized
 
     def log_in(self, twofa_key=''):
         login = self.ids.login.text
         password = self.ids.pass_input.text
 
         if login and password:
-            authorized, error = session.authorization(login=login, password=password, key=twofa_key)
+            authorized, error = self.session.authorization(login=login, password=password, key=twofa_key)
             if authorized:
                 self.ids.pass_input.text = ''
                 if twofa_key:
@@ -153,6 +158,7 @@ class HomeScreen(Screen):
     def __init__(self, *args, **kwargs):
         super(HomeScreen, self).__init__(*args, **kwargs)
         self.bot_check_event = Clock.schedule_interval(self.check_if_bot_active, 1)
+        self.session = VKBotApp.get_running_app().session
         self.launch_bot_text = 'Включить бота'
         self.stop_bot_text = 'Выключить бота'
         self.ids.main_btn.text = self.launch_bot_text
@@ -169,7 +175,7 @@ class HomeScreen(Screen):
         self.activation_status = config.getdefault('General', 'bot_activated', 'False')
         use_custom_commands = config.getdefault('General', 'custom_commands', 'False')
 
-        while not session.launch_bot(activated=self.activation_status == 'True',\
+        while not self.session.launch_bot(activated=self.activation_status == 'True',\
             use_custom_commands=use_custom_commands == 'True'): continue
 
         self.ids.main_btn.text = self.stop_bot_text
@@ -181,7 +187,7 @@ class HomeScreen(Screen):
         bot_stopped = False
 
         while not bot_stopped:
-            bot_stopped, new_activation_status = session.stop_bot()
+            bot_stopped, new_activation_status = self.session.stop_bot()
 
         if new_activation_status != self.activation_status:
             config.set('General', 'bot_activated', str(new_activation_status))
@@ -191,22 +197,22 @@ class HomeScreen(Screen):
         bot_stopped_notification()
 
     def update_answers_count(self):
-        self.ids.answers_count_lb.text = 'Ответов: {}'.format(session.reply_count)
+        self.ids.answers_count_lb.text = 'Ответов: {}'.format(self.session.reply_count)
 
     def logout(self):
-        session.authorization(logout=True)
+        self.session.authorization(logout=True)
         self.parent.show_auth_form()
     
     def check_if_bot_active(self, tick):
         self.update_answers_count()
         if self.ids.main_btn.text == self.stop_bot_text and\
-                not session.running:
+                not self.session.running:
             self.bot_check_event.cancel()
             self.ids.main_btn.text = self.launch_bot_text
             bot_stopped_notification()
 
-            if session.runtime_error:
-                toast_notification(session.runtime_error, length_long=True)
+            if self.session.runtime_error:
+                toast_notification(self.session.runtime_error, length_long=True)
 
 
 class CustomCommandsScreen(Screen):
