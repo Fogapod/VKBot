@@ -36,7 +36,7 @@ version.filename = %(source.dir)s/bot/core.py
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy
-requirements = kivy,requests,openssl
+requirements = kivy,requests,openssl,android
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -75,13 +75,13 @@ fullscreen = 1
 android.permissions = INTERNET
 
 # (int) Android API to use
-android.api = 14
+android.api = 15
 
 # (int) Minimum API required
-android.minapi = 8
+#android.minapi = 8
 
 # (int) Android SDK version to use
-android.sdk = 23
+android.sdk = 24
 
 # (str) Android NDK version to use
 #android.ndk = 9c
