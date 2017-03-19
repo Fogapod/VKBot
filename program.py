@@ -5,7 +5,7 @@ from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.clock import Clock
 
-from libs.plyer import notification
+from plyer import notification
 from libs.toast import toast
 
 from bot.utils import PATH, DATA_PATH
@@ -16,8 +16,7 @@ Builder.load_file('uix/kv/vkbotapp.kv')
 
 
 def statusbar_notification(title='VKBot', message=''):
-    #notification.notify(title=title, message=message)
-    pass # вызывает падение приложения
+    notification.notify(title=title, message=message)
 
 def bot_launched_notification():
     statusbar_notification(u'Бот запущен')
