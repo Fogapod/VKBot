@@ -4,7 +4,13 @@ from android import activity
 from android.runnable import run_on_ui_thread
 
 Toast = autoclass('android.widget.Toast')
-context = autoclass('org.renpy.android.PythonActivity').mActivity    
+try:
+	from android import config
+	namespace = config.JAVA_NAMESPACE
+except (ImportError, ValueError):
+	namespace = 'org.renpy.android'
+
+context = autoclass(namespace + '.PythonActivity').mActivity    
 
 @run_on_ui_thread
 def toast(text, length_long=False):

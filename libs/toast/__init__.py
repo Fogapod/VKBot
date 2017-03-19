@@ -8,8 +8,7 @@ def _get_ref():
     global _toast
     if _toast is None:
         if platform == 'android':
-            from kivytoast import toast
-            #from androidtoast import toast
+            from androidtoast import toast
         else:
             from kivytoast import toast
 
