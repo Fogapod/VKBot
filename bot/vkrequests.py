@@ -22,7 +22,7 @@ def error_catcher(request):
             if 'too many requests' in error or 'timed out' in error:
                 print 'Too many requests/response time out'
                 time.sleep(0.33)
-                return request_errors(*args, **kwargs) # TODO: add counter
+                return do_request(*args, **kwargs) # TODO: add counter
 
             elif 'connection' in error:
                 print 'Check your connection'
