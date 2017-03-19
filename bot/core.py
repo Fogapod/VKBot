@@ -201,7 +201,7 @@ class LongPollSession(Bot):
 
         mlpd = vkr.get_message_long_poll_data()[0]
         last_response_text = ''
-        attachments = None
+        attachments = []
         self.runtime_error = None
         self.running = True
 
@@ -300,6 +300,7 @@ class LongPollSession(Bot):
                         forward = message_to_resend,
                         attachments = attachments
                     )
+                    attachments = []
                     last_response_text = response_text
                     self.reply_count += 1
 
