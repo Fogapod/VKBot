@@ -118,11 +118,13 @@ def send_message(**kwargs):
     text = kwargs['text']
     forward = kwargs.get('forward')
     rnd_id = kwargs.get('rnd_id', None)
+    attachments = ','.join(kwargs.get('attachments', ''))
 
     response = api.messages.send(
         peer_id=uid, message=text,
         forward_messages=forward,
-        chat_id=gid, random_id=rnd_id
+        chat_id=gid, random_id=rnd_id,
+        attachment=attachments
     )
     
     return response

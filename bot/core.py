@@ -201,6 +201,7 @@ class LongPollSession(Bot):
 
         mlpd = vkr.get_message_long_poll_data()[0]
         last_response_text = ''
+        attachments = None
         self.runtime_error = None
         self.running = True
 
@@ -266,7 +267,12 @@ class LongPollSession(Bot):
                     else:
                         if self.custom_commands and\
                           message_text.lower() in self.custom_commands.keys():
-                            response_text = self.custom_commands[message_text.lower()]
+                            if self.custom_commands[message_text.lower()].startswith('attach='):
+                                attachments = self.custom_commands[message_text.lower()][7:]
+                                attachments = re.findall('((photo)(\d+_\d+))', attachments)[0]
+                                response_text = ''
+                            else:
+                                response_text = self.custom_commands[message_text.lower()]
                             mark_msg = False
                         else:
                             continue
@@ -291,7 +297,8 @@ class LongPollSession(Bot):
                         text = response_text,
                         uid = user_id,
                         gid = chat_id,
-                        forward = message_to_resend
+                        forward = message_to_resend,
+                        attachments = attachments
                     )
                     last_response_text = response_text
                     self.reply_count += 1
