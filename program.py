@@ -45,7 +45,6 @@ class VKBotApp(App):
         if not self.session.authorization()[0]:
             self.root.show_auth_form()
 
-        self.root.show_home_form()
         return self.root
 
     def get_application_config(self):
