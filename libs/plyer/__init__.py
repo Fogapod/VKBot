@@ -25,7 +25,7 @@ audio = Proxy('audio', facades.Audio)
 battery = Proxy('battery', facades.Battery)
 
 #: Call proxy to  :class `plyer.facades.Call`
-call = Proxy('call', facades.Call)
+#call = Proxy('call', facades.Call)
 
 #: Compass proxy to :class:`plyer.facades.Compass`
 compass = Proxy('compass', facades.Compass)
