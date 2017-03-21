@@ -120,8 +120,9 @@ class Session(object):
         Default behavior on CAPTCHA is to raise exception
         Reload this in child
         """
-        return raw_input('{}\nKey: '.format(captcha_image_url))
-    
+        #return raw_input('{}\nKey: '.format(captcha_image_url))
+        raise VkAuthError('Captcha is needed. Url: {}'.format(captcha_image_url))
+
     def auth_code_is_needed(self, content, session):
         """
         Default behavior on 2-AUTH CODE is to raise exception
