@@ -23,8 +23,8 @@ def parse_input(string, replace_vkurl=True, replace_url=True):
 
 	if replace_vkurl:
 		new_string = re.sub(r'\b(https?://)?m\.?vk\.com/?.*\b',
-			'__vkurl__',
-			new_string # поиск ссылок vk.com
+			'__vkurl__', # поиск ссылок vk.com
+			new_string
 		)
 
 	if replace_url:
@@ -38,11 +38,13 @@ def parse_input(string, replace_vkurl=True, replace_url=True):
 
 def load_custom_commands():
     if not os.path.exists(PATH +  'presets.txt'):
-        return False
+        with open(PATH + 'presets.txt', 'w') as p:
+            p.write('{\n\n}')
+        return {}
     else:    
-        with open(PATH + 'presets.txt', 'r') as f:
+        with open(PATH + 'presets.txt', 'r') as p:
             try:
-                content = json.load(f)
+                content = json.load(p)
             except ValueError:
                 return False
 
@@ -50,3 +52,7 @@ def load_custom_commands():
                 return content
             else:
                 return False
+
+def save_custom_commands(content):
+    with open(PATH + 'presets.txt', 'w') as p:
+        p.write(json.dumps(content, sort_keys=True, indent=4, ensure_ascii=False).encode('utf8'))
