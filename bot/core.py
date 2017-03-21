@@ -4,7 +4,8 @@ import re
 import math
 from threading import Thread
 
-from utils import PATH, DATA_PATH, parse_input, load_custom_commands
+from utils import PATH, DATA_PATH, parse_input, load_custom_commands,\
+save_custom_commands
 
 import vkrequests as vkr
 
@@ -22,6 +23,10 @@ __help__ = '''
 (/calculate ... |/посчитай ... ) =
 *Проверять, простое ли число
 (/prime ... |/простое ... ) %
+*Учить учить ответы
+(/learn command:response |/выучи слово:ответ ) +
+*Забывать ответы
+(/forgot command |/забудь слово ) -
 *Вызывать помощь
 (/help |/помощь ) ?
 
@@ -39,7 +44,7 @@ class Bot(object):
         return __help__
 
     def say(self, words):
-        argument_required = self._argument_missing(words)
+        argument_required = self._is_argument_missing(words)
         if argument_required:
             return argument_required
 
@@ -48,7 +53,7 @@ class Bot(object):
         return text
 
     def calculate(self, words):
-        argument_required = self._argument_missing(words)
+        argument_required = self._is_argument_missing(words)
         if argument_required:
             return argument_required
 
@@ -91,7 +96,7 @@ class Bot(object):
         return result
 
     def prime(self, words):
-        argument_required = self._argument_missing(words)
+        argument_required = self._is_argument_missing(words)
         if argument_required:
             return argument_required
 
@@ -119,6 +124,45 @@ class Bot(object):
             result = 'Дано неверное или слишком большое значение'
         return result
 
+    def learn(self, custom_commands, words):
+        response = u'Команда выучена.\nТеперь на команду «{}» я буду отвечать «{}»'
+        argument_required = self._is_argument_missing(words)
+        del words[0]
+        text = ' '.join(words)
+        text = text.split(':')
+        if argument_required:
+            return custom_commands, argument_required
+        elif len(text) <2:
+            return custom_commands,'Неправильный синтаксис команды' 
+
+        custom_commands[text[0].lower()] = text[1]
+        response = response.format(text[0].lower(), text[1])
+        
+        save_custom_commands(custom_commands)
+        return custom_commands, response
+
+    def forgot(self, custom_commands, words):
+        response = 'Команда забыта'
+        argument_required = self._is_argument_missing(words)
+        if argument_required:
+            return custom_commands, argument_required
+        
+        if not custom_commands.pop(words[1].lower(), None):
+            response = u'Я не знаю такой команды ({})'.format(words[1])
+        
+        save_custom_commands(custom_commands)
+        return custom_commands, response
+
+    def custom_command(self, custom_commands, message):
+        response_text, attachments = '', []
+        if custom_commands and message.lower() in custom_commands.keys():
+            if custom_commands[message.lower()].startswith('attach='):
+                attachments = custom_commands[message.lower()][7:]
+                attachments = re.findall('((photo)(\d+_\d+))', attachments)[0]
+            else:
+                response_text = custom_commands[message.lower()]
+        return response_text, attachments
+
     def activate_bot(self, message):
         if message['user_id'] == AUTHOR_VK_ID and message['title'] != u' ... ':
             return 'Активация прошла успешно', True
@@ -131,7 +175,7 @@ class Bot(object):
         else:
             return 'Отказано в доступе', True
 
-    def _argument_missing(self, words):
+    def _is_argument_missing(self, words):
         if len(words) == 1:
             return 'Команду необходимо использовать с аргументом'
         else:
@@ -243,13 +287,18 @@ class LongPollSession(Bot):
                         elif re.match(u'(^скажи)|(^say)$', words[0].lower()):
                             response_text = self.say(words)
 
-                        elif re.match(u'(^посчитай)|(^calculate)$', words[0].lower()) or\
-                             words[0].startswith('='):
+                        elif re.match(u'(^посчитай)|(^calculate)|^=$', words[0].lower()):
                             response_text = self.calculate(words)    
 
                         elif re.match(u'(^простое)|(^prime)|%$', words[0].lower()):
                             response_text = self.prime(words)
 
+                        elif re.match(u'(^выучи)|(^learn)|\+$', words[0].lower()):
+                            self.custom_commands, response_text = self.learn(self.custom_commands, words)
+
+                        elif re.match(u'(^забудь)|(^forgot)|\-$', words[0].lower()):
+                            self.custom_commands, response_text = self.forgot(self.custom_commands, words)
+                            
                         elif re.match(u'(^stop)|(^выйти)|(^exit)|(^стоп)|(^terminate)|(^завершить)|(^close)|^!$',\
                     	     words[0].lower()):
                             response_text = self._stop_bot_from_message(message)
@@ -263,25 +312,19 @@ class LongPollSession(Bot):
                         elif words[0].lower() == 'raise':
                             response_text = self.raise_debug_exception(message, words)
                         else:
-                            response_text = 'Неизвестная команда. Вы можете использовать /help для получения списка команд.'
+                            response_text, attachments = self.custom_command(self.custom_commands, message_text)
+                            if not (response_text or attachments):
+                                response_text = 'Неизвестная команда. Вы можете использовать /help для получения списка команд.'
                     else:
-                        if self.custom_commands and\
-                          message_text.lower() in self.custom_commands.keys():
-                            if self.custom_commands[message_text.lower()].startswith('attach='):
-                                attachments = self.custom_commands[message_text.lower()][7:]
-                                attachments = re.findall('((photo)(\d+_\d+))', attachments)[0]
-                                response_text = ''
-                            else:
-                                response_text = self.custom_commands[message_text.lower()]
-                            mark_msg = False
-                        else:
-                            continue
+                        response_text, attachments = self.custom_command(self.custom_commands, message_text)
+                        mark_msg = False
+
+                    if not (response_text or attachments):
+                        continue
 
                     if not self.activated:
-                        try:
-                            response_text += '\n\nБот не активирован. По вопросам активации просьба обратиться к автору: %s' % __author__
-                        except UnicodeDecodeError: # TODO
-                            response_text += u'\n\nБот не активирован. По вопросам активации просьба обратиться к автору: %s' % __author__
+                        response_text = response_text.decode('utf8')\
+                            + u'\n\nБот не активирован. По вопросам активации просьба обратиться к автору: %s' % __author__
 
                     if message['title'] != u' ... ': # messege from chat
                         message_to_resend = message['id']
@@ -293,15 +336,15 @@ class LongPollSession(Bot):
                         user_id = message['user_id']
 
                     response_text += "'" if mark_msg else ''
-                    vkr.send_message(
-                        text = response_text,
-                        uid = user_id,
-                        gid = chat_id,
-                        forward = message_to_resend,
-                        attachments = attachments
-                    )
-                    attachments = []
+                    msg_id, error = vkr.send_message(
+                            text = response_text,
+                            uid = user_id,
+                            gid = chat_id,
+                            forward = message_to_resend,
+                            attachments = attachments
+                            )
                     last_response_text = response_text
+                    attachments = []
                     self.reply_count += 1
 
             except Exception as e:
