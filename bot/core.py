@@ -282,7 +282,8 @@ class LongPollSession(Bot):
                         words[0] = words[0][1:]
                         if words[0].startswith('/'):
                             mark_msg = False
-                            words[0] = words[0][1:]   
+                            words[0] = words[0][1:]
+                        message_text = ' '.join(words)
 
                         if re.match(u'(^help)|(^помощь)|(^info)|(^инфо)|(^информация)|^\?$',\
                             words[0].lower()):
@@ -347,6 +348,8 @@ class LongPollSession(Bot):
                             forward = message_to_resend,
                             attachments = attachments
                             )
+                    if error:
+                        raise Exception(error)
                     last_response_text = response_text
                     attachments = []
                     self.reply_count += 1
