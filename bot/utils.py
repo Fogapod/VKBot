@@ -55,4 +55,4 @@ def load_custom_commands():
 
 def save_custom_commands(content):
     with open(PATH + 'presets.txt', 'w') as p:
-        p.write(json.dumps(content, sort_keys=True, indent=4, ensure_ascii=False).encode('utf8'))
+        p.write(json.dumps(content, sort_keys=True, indent=0, ensure_ascii=False).encode('utf8'))
