@@ -165,7 +165,8 @@ class Bot(object):
         if custom_commands and message.lower() in custom_commands.keys():
             if custom_commands[message.lower()].startswith('attach='):
                 attachments = custom_commands[message.lower()][7:]
-                attachments = re.findall('((photo)(\d+_\d+))', attachments)[0]
+                attachments = re.findall('((photo)|(video)|(audio)|(doc)|(wall)|(market))(\d+_\d+)', attachments)[0]
+                attachments = attachments[0] + attachments[-1] # URGLY # FIXME
             else:
                 response_text = custom_commands[message.lower()]
         return response_text, attachments

@@ -118,7 +118,9 @@ def send_message(**kwargs):
     text = kwargs['text']
     forward = kwargs.get('forward')
     rnd_id = kwargs.get('rnd_id', None)
-    attachments = ','.join(kwargs.get('attachments', ''))
+    attachments = kwargs.get('attachments', '')
+    if type(attachments) is list:
+        attachments = ','.join(attachments)
 
     response = api.messages.send(
         peer_id=uid, message=text,
