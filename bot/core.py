@@ -4,7 +4,7 @@ import re
 import math
 from threading import Thread
 
-from utils import PATH, DATA_PATH, parse_input, load_custom_commands,\
+from utils import PATH, DATA_PATH, load_custom_commands,\
 save_custom_commands
 
 import vkrequests as vkr
@@ -127,12 +127,15 @@ class Bot(object):
     def learn(self, custom_commands, words):
         response = u'Команда выучена.\nТеперь на команду «{}» я буду отвечать «{}»'
         argument_required = self._is_argument_missing(words)
+
         del words[0]
         text = ' '.join(words)
         text = text.split(':')
+        text[1] = ':'.join(text[1:])
+
         if argument_required:
             return custom_commands, argument_required
-        elif len(text) <2:
+        elif len(text) <2 or not (text[0] and text[1]):
             return custom_commands,'Неправильный синтаксис команды' 
         elif text[0] in custom_commands.keys():
             return custom_commands, 'Я уже знаю такую команду'
@@ -275,7 +278,6 @@ class LongPollSession(Bot):
                     else:
                         continue
 
-                    message_text = parse_input(message_text)
                     words = message_text.split(' ')
 
                     if re.sub('^( )*', '', words[0]).startswith('/'):
