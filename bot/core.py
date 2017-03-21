@@ -149,8 +149,10 @@ class Bot(object):
         if argument_required:
             return custom_commands, argument_required
         
-        if not custom_commands.pop(words[1].lower(), None):
-            response = u'Я не знаю такой команды ({})'.format(words[1])
+        del words[0]
+        command = ' '.join(words)
+        if not custom_commands.pop(command.lower(), None):
+            response = u'Я не знаю такой команды ({})'.format(command)
         
         save_custom_commands(custom_commands)
         return custom_commands, response
