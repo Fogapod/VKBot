@@ -134,6 +134,8 @@ class Bot(object):
             return custom_commands, argument_required
         elif len(text) <2:
             return custom_commands,'Неправильный синтаксис команды' 
+        elif text[0] in custom_commands.keys():
+            return custom_commands, 'Я уже знаю такую команду'
 
         custom_commands[text[0].lower()] = text[1]
         response = response.format(text[0].lower(), text[1])
