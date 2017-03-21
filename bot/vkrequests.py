@@ -9,9 +9,6 @@ except ImportError:
 
 def error_catcher(request):
     def do_request(*args, **kwargs):
-        # response = request(*args, **kwargs); time.sleep(0.66)
-        # Для вывода ошибки в консоль
-
         error = None
         try:
             response = request(*args, **kwargs)
