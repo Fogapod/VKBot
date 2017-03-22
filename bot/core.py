@@ -145,7 +145,7 @@ class Bot(object):
         elif command in custom_commands.keys():
             custom_commands[command.lower()].append(response)
         else:
-            custom_commands[command.lower()] = list(response)
+            custom_commands[command.lower()] = [response]
 
         response_text = response_text.format(command.lower(), response)
         
@@ -188,6 +188,15 @@ class Bot(object):
         response_text, attachments = '', []
         if custom_commands and message.lower() in custom_commands.keys():
             response = random.choice(custom_commands[message.lower()])
+
+            if response.startswith('self='):
+                command = '_' + response[5:]
+                if command.lower() in custom_commands.keys():
+                    response = custom_commands[command.lower()]
+                    response = random.choice(response)
+                else:
+                    response = 'Ошибка. Нет указанного ключа'
+
             if response.startswith('attach='):
                 attachments = response[7:]
                 attachments = re.findall('((photo)|(video)|(audio)|(doc)|(wall)|(market))(\d+_\d+)', attachments)[0]
