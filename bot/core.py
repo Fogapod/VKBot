@@ -188,8 +188,8 @@ class Bot(object):
                 custom_commands[command.lower()].remove(response)
                 response_text = 'Ключ для команды забыт'
 
-        if not response and  not custom_commands.pop(command.lower(), None):
-            response = u'Я не знаю такой команды ({})'.format(command)
+        if not response and not custom_commands.pop(command.lower(), None):
+            response_text = u'Я не знаю такой команды ({})'.format(command)
         
         save_custom_commands(custom_commands)
         return custom_commands, response_text
