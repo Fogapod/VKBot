@@ -209,8 +209,10 @@ class Bot(object):
 
             if response.startswith('attach='):
                 attachments = response[7:]
-                attachments = re.findall('((photo)|(video)|(audio)|(doc)|(wall)|(market))(\d+_\d+)', attachments)[0]
-                attachments = attachments[0] + attachments[-1] # URGLY # FIXME
+                if re.match('.*/((photo)|(video)|(audio)|(doc)|(wall)|(market))(\d+_\d+(_\d+)?)$', attachments):
+                    attachments = attachments.split('/')[-1] # URGLY # FIXME
+                else:
+                    response_text = 'Не могу показать вложение. Неправильная ссылка'
             else:
                 response_text = response
         return response_text, attachments
