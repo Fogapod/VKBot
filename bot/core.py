@@ -131,46 +131,48 @@ class Bot(object):
             if not out:
                 return custom_commands, 'Отказано в доступе'
 
-        response_text = u'Команда выучена.\nТеперь на команду «{}» я буду отвечать «{}»'
+        response_text = u'Команда выучена.\nТеперь на «{}» я буду отвечать «{}»'
         argument_required = self._is_argument_missing(words)
 
         del words[0]
         text = ' '.join(words)
         text = text.split(':')
-        command, response = text[0], ':'.join(text[1:])
+        command = text[0]
+        response = ':'.join(text[1:])
 
         if argument_required:
-            return custom_commands, argument_required
+            response_text = argument_required
         elif len(text) <2 or not (command and response):
-            return custom_commands,'Неправильный синтаксис команды' 
+            response_text = 'Неправильный синтаксис команды' 
         elif command.lower() in custom_commands.keys() and response\
                 in custom_commands[command.lower()]:
-            return custom_commands, 'Я уже знаю такой ответ'
+            response_text = 'Я уже знаю такой ответ'
         elif command in custom_commands.keys():
             custom_commands[command.lower()].append(response)
+            response_text = response_text.format(command.lower(), response)
         else:
             custom_commands[command.lower()] = [response]
+            response_text = response_text.format(command.lower(), response)
 
-        response_text = response_text.format(command.lower(), response)
-        
         save_custom_commands(custom_commands)
         return custom_commands, response_text
 
     def forgot(self, custom_commands, words, protect=True, out=0):
         if protect:
             if not out:
-                return custom_commands, 'Отказанг в доступе'
+                return custom_commands, 'Отказано в доступе'
 
         response_text = 'Команда забыта'
         argument_required = self._is_argument_missing(words)
         if argument_required:
-            return custom_commands, argument_required
+            return custom_commands, argument_required        
         
         del words[0]
         text = ' '.join(words)
         if ':' in text:
             text = text.split(':')
-            command, response = text[0], ':'.join(text[1:])
+            command = text[0]
+            response = ':'.join(text[1:])
         else:
             command = text
             response = ''
