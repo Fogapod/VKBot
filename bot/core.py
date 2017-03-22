@@ -2,6 +2,8 @@
 import time
 import re
 import math
+import random
+
 from threading import Thread
 
 from utils import PATH, DATA_PATH, load_custom_commands,\
@@ -125,50 +127,73 @@ class Bot(object):
         return result
 
     def learn(self, custom_commands, words):
-        response = u'Команда выучена.\nТеперь на команду «{}» я буду отвечать «{}»'
+        response_text = u'Команда выучена.\nТеперь на команду «{}» я буду отвечать «{}»'
         argument_required = self._is_argument_missing(words)
 
         del words[0]
         text = ' '.join(words)
         text = text.split(':')
-        text[1] = ':'.join(text[1:])
+        command, response = text[0], ':'.join(text[1:])
 
         if argument_required:
             return custom_commands, argument_required
-        elif len(text) <2 or not (text[0] and text[1]):
+        elif len(text) <2 or not (command and response):
             return custom_commands,'Неправильный синтаксис команды' 
-        elif text[0] in custom_commands.keys():
-            return custom_commands, 'Я уже знаю такую команду'
+        elif command.lower() in custom_commands.keys() and response\
+                in custom_commands[command.lower()]:
+            return custom_commands, 'Я уже знаю такой ответ'
+        elif command in custom_commands.keys():
+            custom_commands[command.lower()].append(response)
+        else:
+            custom_commands[command.lower()] = list(response)
 
-        custom_commands[text[0].lower()] = text[1]
-        response = response.format(text[0].lower(), text[1])
+        response_text = response_text.format(command.lower(), response)
         
         save_custom_commands(custom_commands)
-        return custom_commands, response
+        return custom_commands, response_text
 
     def forgot(self, custom_commands, words):
-        response = 'Команда забыта'
+        response_text = 'Команда забыта'
         argument_required = self._is_argument_missing(words)
         if argument_required:
             return custom_commands, argument_required
         
         del words[0]
-        command = ' '.join(words)
-        if not custom_commands.pop(command.lower(), None):
+        text = ' '.join(words)
+        if ':' in text:
+            text = text.split(':')
+            command, response = text[0], ':'.join(text[1:])
+        else:
+            command = text
+            response = ''
+
+        if command and response:
+            if len(custom_commands[command.lower()]) < 2:
+                response = ''
+            elif response not in custom_commands[command.lower()]:
+                response_text = 'В команде «{}» нет ключа «{}»'.format(
+                                custom_commands[command.lower()], response
+                                )
+            else:
+                custom_commands[command.lower()].remove(response)
+                response_text = 'Ключ для команды забыт'
+
+        if not response and  not custom_commands.pop(command.lower(), None):
             response = u'Я не знаю такой команды ({})'.format(command)
         
         save_custom_commands(custom_commands)
-        return custom_commands, response
+        return custom_commands, response_text
 
     def custom_command(self, custom_commands, message):
         response_text, attachments = '', []
         if custom_commands and message.lower() in custom_commands.keys():
-            if custom_commands[message.lower()].startswith('attach='):
-                attachments = custom_commands[message.lower()][7:]
+            response = random.choice(custom_commands[message.lower()])
+            if response.startswith('attach='):
+                attachments = response[7:]
                 attachments = re.findall('((photo)|(video)|(audio)|(doc)|(wall)|(market))(\d+_\d+)', attachments)[0]
                 attachments = attachments[0] + attachments[-1] # URGLY # FIXME
             else:
-                response_text = custom_commands[message.lower()]
+                response_text = response
         return response_text, attachments
 
     def activate_bot(self, message):
