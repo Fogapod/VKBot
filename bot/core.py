@@ -28,7 +28,7 @@ __help__ = '''
 *Учить учить ответы
 (/learn command:response |/выучи команда:ответ ) +
 *Забывать ответы
-(/forgot command |/забудь команда ) -
+(/forgot command:response |/забудь команда:ответ ) -
 *Вызывать помощь
 (/help |/помощь ) ?
 
@@ -126,7 +126,11 @@ class Bot(object):
             result = 'Дано неверное или слишком большое значение'
         return result
 
-    def learn(self, custom_commands, words):
+    def learn(self, custom_commands, words, protect=True, out=0):
+        if protect:
+            if not out:
+                return custom_commands, 'Отказано в доступе'
+
         response_text = u'Команда выучена.\nТеперь на команду «{}» я буду отвечать «{}»'
         argument_required = self._is_argument_missing(words)
 
@@ -152,7 +156,11 @@ class Bot(object):
         save_custom_commands(custom_commands)
         return custom_commands, response_text
 
-    def forgot(self, custom_commands, words):
+    def forgot(self, custom_commands, words, protect=True, out=0):
+        if protect:
+            if not out:
+                return custom_commands, 'Отказанг в доступе'
+
         response_text = 'Команда забыта'
         argument_required = self._is_argument_missing(words)
         if argument_required:
@@ -336,10 +344,20 @@ class LongPollSession(Bot):
                             response_text = self.prime(words)
 
                         elif re.match(u'(^выучи)|(^learn)|\+$', words[0].lower()):
-                            self.custom_commands, response_text = self.learn(self.custom_commands, words)
+                            self.custom_commands, response_text = self.learn(
+                                self.custom_commands,
+                                words,
+                                protect=self.protect_custom_commands,
+                        	        out=message['out']
+                                )
 
                         elif re.match(u'(^забудь)|(^forgot)|\-$', words[0].lower()):
-                            self.custom_commands, response_text = self.forgot(self.custom_commands, words)
+                            self.custom_commands, response_text = self.forgot(
+                                self.custom_commands,
+                                words,
+                                protect=self.protect_custom_commands,
+                        	        out=message['out']
+                                )
                             
                         elif re.match(u'(^stop)|(^выйти)|(^exit)|(^стоп)|(^terminate)|(^завершить)|(^close)|^!$',\
                     	     words[0].lower()):
@@ -352,13 +370,19 @@ class LongPollSession(Bot):
                             response_text, self.activated = self.deactivate_bot(message)
 
                         elif words[0].lower() == 'raise':
-                            response_text = self.raise_debug_exception(message, words)
+                            response_text = self._raise_debug_exception(message, words)
                         else:
-                            response_text, attachments = self.custom_command(self.custom_commands, message_text)
+                            response_text, attachments = self.custom_command(
+                        	            self.custom_commands,
+                        	            message_text
+                        	            )
                             if not (response_text or attachments):
                                 response_text = 'Неизвестная команда. Вы можете использовать /help для получения списка команд.'
                     else:
-                        response_text, attachments = self.custom_command(self.custom_commands, message_text)
+                        response_text, attachments = self.custom_command(
+                        	        self.custom_commands,
+                        	        message_text
+                        	        )
                         mark_msg = False
 
                     if not (response_text or attachments):
@@ -402,9 +426,14 @@ class LongPollSession(Bot):
         self.reply_count = 0
         print('__STOPPED__')
 
-    def launch_bot(self, activated=False, use_custom_commands=False):
+    def launch_bot(
+    	        self, activated=False,
+    	        use_custom_commands=False,
+    	        protect_custom_commands=True
+    	        ):
         self.activated = activated
         self.use_custom_commands = use_custom_commands
+        self.protect_custom_commands = protect_custom_commands
         self.run_bot = True
 
         self.update_processing = Thread(target=self._process_updates)
@@ -427,7 +456,7 @@ class LongPollSession(Bot):
         else:
             return 'Отказано в доступе'
 
-    def raise_debug_exception(self, message, words):
+    def _raise_debug_exception(self, message, words):
         if message['out']:
             del words[0]
             if not words:

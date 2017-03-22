@@ -57,6 +57,7 @@ class VKBotApp(App):
                 	"show_bot_activity":"False",
                 	"bot_activated":"False",
                 	"custom_commands":"False",
+                	"protect_cc": "True",
                 	"open_cc_form": "Открыть"
                 }
             )
@@ -89,8 +90,15 @@ class VKBotApp(App):
                 "title": "Открыть окно настройки пользовательских команд",
                 "section": "General",
                 "key": "open_cc_form",
-                "disabled": "True"                
-                },                
+                "disabled": "True"
+                },
+                {"type": "bool",
+                "title": "Защитить пользовательские команды",
+                "desc": "Только владелец сможет менятьть пользовательские команды через сообщения",
+                "section": "General",
+                "key": "protect_cc",
+                "values": ["False", "True"]
+                },
                 {"type": "title",
                 "title": "Активация бота"
                 },
@@ -176,9 +184,14 @@ class HomeScreen(Screen):
     def launch_bot(self, config):
         self.activation_status = config.getdefault('General', 'bot_activated', 'False')
         use_custom_commands = config.getdefault('General', 'custom_commands', 'False')
+        protect_custom_commands = config.getdefault('General', 'protect_cc', "True")
 
-        while not self.session.launch_bot(activated=self.activation_status == 'True',\
-            use_custom_commands=use_custom_commands == 'True'): continue
+        while not self.session.launch_bot(
+        	       activated=self.activation_status == 'True',
+                use_custom_commands=use_custom_commands == 'True',
+                protect_custom_commands=protect_custom_commands == 'True'
+                ):
+            continue
 
         self.ids.main_btn.text = self.stop_bot_text
         self.bot_check_event()
