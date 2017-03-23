@@ -45,7 +45,8 @@ class Bot(object):
     def help(self):
         return __help__
 
-    def say(self, words):
+    def say(self, cmd):
+        words = cmd.words
         argument_required = self._is_argument_missing(words)
         if argument_required:
             return argument_required
@@ -54,7 +55,8 @@ class Bot(object):
         text = ' '.join(words)
         return text
 
-    def calculate(self, words):
+    def calculate(self, cmd):
+        words = cmd.words
         argument_required = self._is_argument_missing(words)
         if argument_required:
             return argument_required
@@ -97,7 +99,8 @@ class Bot(object):
             result = 'Не математическая операция'
         return result
 
-    def prime(self, words):
+    def prime(self, cmd):
+        words =cmd.words
         argument_required = self._is_argument_missing(words)
         if argument_required:
             return argument_required
@@ -196,7 +199,7 @@ class Bot(object):
         save_custom_commands(custom_commands)
         return custom_commands, response_text
 
-    def custom_command(self, custom_commands, cmd):
+    def custom_command(self, cmd, custom_commands):
         response_text, attachments = '', []
         if custom_commands and cmd.parsed_text.lower() in custom_commands.keys():
             response = random.choice(custom_commands[cmd.parsed_text.lower()])
@@ -219,14 +222,14 @@ class Bot(object):
                 response_text = response
         return response_text, attachments
 
-    def activate_bot(self, command):
-        if command.from_chat and command.chat_user == AUTHOR_VK_ID:
+    def activate_bot(self, cmd):
+        if cmd.from_chat and cmd.chat_user == AUTHOR_VK_ID:
             return 'Активация прошла успешно', True
         else:
             return 'Отказано в доступе', False
 
-    def deactivate_bot(self, command):
-        if command.from_chat and command.chat_user == AUTHOR_VK_ID:
+    def deactivate_bot(self, cmd):
+        if cmd.from_chat and cmd.chat_user == AUTHOR_VK_ID:
             return 'Деактивация прошла успешно', False
         else:
             return 'Отказано в доступе', True
@@ -380,13 +383,13 @@ class LongPollSession(Bot):
                             response_text = self.help()
 
                         elif re.match(u'(^скажи)|(^say)$', command.words[0].lower()):
-                            response_text = self.say(command.words)
+                            response_text = self.say(command)
 
                         elif re.match(u'(^посчитай)|(^calculate)|^=$', command.words[0].lower()):
-                            response_text = self.calculate(command.words)    
+                            response_text = self.calculate(command)    
 
                         elif re.match(u'(^простое)|(^prime)|%$', command.words[0].lower()):
-                            response_text = self.prime(command.words)
+                            response_text = self.prime(command)
 
                         elif re.match(u'(^выучи)|(^learn)|\+$', command.words[0].lower()):
                             self.custom_commands, response_text = self.learn(
@@ -417,16 +420,16 @@ class LongPollSession(Bot):
 
                         elif self.use_custom_commands:
                             response_text, attachments = self.custom_command(
-                        	            self.custom_commands,
-                        	            command
+                        	            command,
+                        	            self.custom_commands
                         	            )
                             if not (response_text or attachments):
                                 response_text = 'Неизвестная команда. Вы можете использовать /help для получения списка команд.'
 
                     elif self.use_custom_commands:
                         response_text, attachments = self.custom_command(
-                        	        self.custom_commands,
-                        	        command
+                        	        command,
+                        	        self.custom_commands
                         	        )
 
                     if not (response_text or attachments):
