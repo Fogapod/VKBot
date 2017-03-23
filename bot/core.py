@@ -183,10 +183,12 @@ class Bot(object):
             response = ''
 
         if command and response:
-            if len(custom_commands[command.lower()]) < 2:
+            if not command in custom_commands.keys():
+                response = ''
+            elif len(custom_commands[command.lower()]) < 2:
                 response = ''
             elif response not in custom_commands[command.lower()]:
-                response_text = 'В команде «{}» нет ключа «{}»'.format(
+                response_text = u'В команде «{}» нет ключа «{}»'.format(
                                 custom_commands[command.lower()], response
                                 )
             else:
@@ -222,17 +224,21 @@ class Bot(object):
                 response_text = response
         return response_text, attachments
 
-    def activate_bot(self, cmd):
-        if cmd.from_chat and cmd.chat_user == AUTHOR_VK_ID:
+    def activate_bot(self, cmd, activated):
+        if activated:
+            return 'Бот уже активирован', True
+        elif cmd.from_chat and cmd.chat_user == AUTHOR_VK_ID:
             return 'Активация прошла успешно', True
         else:
             return 'Отказано в доступе', False
 
-    def deactivate_bot(self, cmd):
+    def deactivate_bot(self, cmd, activated):
         if cmd.from_chat and cmd.chat_user == AUTHOR_VK_ID:
             return 'Деактивация прошла успешно', False
-        else:
+        elif activated:
             return 'Отказано в доступе', True
+        else:
+            return 'Отказано в доступе', False
 
     def _is_argument_missing(self, words):
         if len(words) == 1:
@@ -364,7 +370,7 @@ class LongPollSession(Bot):
                 time.sleep(1)
                 response = vkr.get_message_updates(ts=mlpd['ts'],pts=mlpd['pts'])[0]
                 print(response)
-                if response[0]:
+                if response and response[0]:
                     updates = response[0]
                     mlpd['pts'] = response[1]
                     messages = response[2]
@@ -410,10 +416,10 @@ class LongPollSession(Bot):
                             response_text = self._stop_bot_from_message(command)
 
                         elif command.words[0].lower() == 'activate':
-                            response_text, self.activated = self.activate_bot(command)
+                            response_text, self.activated = self.activate_bot(command, self.activated)
 
                         elif command.words[0].lower() == 'deactivate':
-                            response_text, self.activated = self.deactivate_bot(command)
+                            response_text, self.activated = self.deactivate_bot(command, self.activated)
 
                         elif command.words[0].lower() == 'raise':
                             response_text = self._raise_debug_exception(command)
@@ -436,8 +442,8 @@ class LongPollSession(Bot):
                         continue
 
                     if not self.activated:
-                        response_text = response_text.decode('utf8')\
-                            + u'\n\nБот не активирован. По вопросам активации просьба обратиться к автору: %s' % __author__
+                        response_text = response_text.decode('utf8').encode('utf8')\
+                            + '\n\nБот не активирован. По вопросам активации просьба обратиться к автору: %s' % __author__
 
                     if command.mark_msg:
                         response_text += "'"
