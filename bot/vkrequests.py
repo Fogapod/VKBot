@@ -129,16 +129,9 @@ def send_message(**kwargs):
 
 
 @error_catcher
-def get_user_name(**kwargs):
-    uid = kwargs['uid']
-
-    if uid < 0: # группа
-        response = api.groups.getById(group_id=uid[1:])
-        name = response[0]['name']
-    else:
-        response = api.users.get(user_ids=uid)
-        name = response[0]['first_name'] + ' ' + response[0]['last_name']
-    return name
+def get_self_id(**kwargs):
+    id = api.users.get()[0]['id']
+    return id
 
 
 @error_catcher
