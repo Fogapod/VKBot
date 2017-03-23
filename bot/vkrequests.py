@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import time
-import requests as r
 
 try:
     from libs import vk
