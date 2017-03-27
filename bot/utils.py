@@ -6,16 +6,17 @@ import json
 
 from kivy import platform
 
+
+__all__ = (
+    'PATH',
+    'DATA_PATH',
+    'parse_input',
+    'load_custom_commands',
+    'save_custom_commands'
+    )
+
 PATH = '/sdcard/VKBot/' if platform == 'android' else ''
 DATA_PATH = 'data/'
-
-
-class Profiler():
-    def __enter__(self):
-        self._startTime = time.time()
-
-    def __exit__(self, type, value, traceback):
-        print('Время выполнения: {:.3f} с.'.format(time.time() - self._startTime))
 
 
 def parse_input(string, replace_vkurl=True, replace_url=True):
