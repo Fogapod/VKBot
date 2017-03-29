@@ -1,5 +1,3 @@
-#:import FadeTransition kivy.uix.screenmanager.FadeTransition
-
 <LB@Label>:
     font_size: '15sp'
     color: 0, .2, .4, 1
@@ -23,11 +21,6 @@
     background_color: 0, .2, .4, 1
     size_hint: None, None
     size: self.texture_size[0]*2.3, self.texture_size[1]*2.3
-
-<Root>:
-    id: rootscr
-    transition: FadeTransition()
-
 
 <Screen@Screen>:
     canvas.before:
@@ -105,6 +98,7 @@
         pos: self.pos[0], root.height*.05
         on_release: root.parent.show_home_form()
 
+
 <HomeScreen>:
     name: 'home_screen'
     BoxLayout:
@@ -152,12 +146,25 @@
                     pos_hint: {'center_x':.5, 'center_y': .5}
                     on_press: self.text = 'В разработке'
 
+
 <CustomCommandsScreen>:
     name: 'cc_screen'
 
-    Apply:
-        text: 'Вернуться'
-        pos_hint: {'center_x':.5}
-        background_color: 0, .2, .4, .5
-        pos: self.pos[0], root.height*.05
-        on_release: root.leave()
+    ScrollView:
+        GridLayout:
+            cols: 1
+            size_hint_y: None
+            height: self.minimum_height
+
+            GridLayout:
+                rows: 2
+                size_hint_y: None
+                height: self.minimum_height
+                LB:
+                    text: open('/sdcard/VKBot/presets.txt', 'r').read()
+            Apply:
+                text: 'Вернуться'
+                pos_hint: {'center_x':.5}
+                background_color: 0, .2, .4, .5
+                on_press: root.leave()
+                

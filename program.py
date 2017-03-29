@@ -2,19 +2,20 @@
 #qpy:kivy
 
 
+import os
+import re
+
 from kivy.app import App
 from kivy.lang import Builder
-from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition
 from kivy.clock import Clock
+from kivy.uix.settings import SettingsWithNoMenu
 
 from plyer import notification
 from libs.toast import toast
 
 from bot.utils import PATH, DATA_PATH
 from bot.core import LongPollSession
-
-
-Builder.load_file('uix/kv/vkbotapp.kv')
 
 
 def statusbar_notification(title='VKBot', message=''):
@@ -32,26 +33,35 @@ def toast_notification(text, length_long=False):
 
 class VKBotApp(App):
     use_kivy_settings = False
+    settings_cls = SettingsWithNoMenu
+
     def __init__(self, *args, **kwargs):
         super(VKBotApp, self).__init__(*args, **kwargs)
         self.root = Root()
         self.session = LongPollSession()
-    
+
     def build(self):
-        self.root.add_widget(HomeScreen())
-        self.root.add_widget(TwoFAKeyEnterForm())
-        self.root.add_widget(LoginScreen())
-        self.root.add_widget(CustomCommandsScreen())
+        self.load_kv_files('uix/kv/')
 
         if not self.session.authorization()[0]:
             self.root.show_auth_form()
+        else:
+            self.root.show_home_form()
 
+        #self.root.show_custom_commands_screen()
         return self.root
+
+    def load_kv_files(self, path):
+        for kv_file in os.listdir(path):
+            if re.match('.*\.kv$', kv_file):
+                Builder.load_file(path + kv_file)
+            else:
+                continue
 
     def get_application_config(self):
         return super(VKBotApp, self).get_application_config(
             '{}.%(appname)s.ini'.format(DATA_PATH))
-            # FIXME: реальный путь конфига - /sdcard/.(appname).ini
+            # FIXME: реальный путь конфига для андроида - /sdcard/.(appname).ini
 
     def build_config(self, config):
         config.setdefaults('General', 
@@ -67,9 +77,6 @@ class VKBotApp(App):
     def build_settings(self, settings):
         settings.add_json_panel("Настройки бота", self.config, data=
             '''[
-                {"type": "title",
-                "title": "Общие настройки"
-                },
                 {"type": "bool",
                 "title": "Отображать состояние бота в статусе",
                 "desc": "Если включено, в статус будет добавлено уведомление о том, что бот активен. Иначе вернется предыдущий текст",
@@ -242,18 +249,27 @@ class CustomCommandsScreen(Screen):
 class Root(ScreenManager):
     def __init__(self, *args, **kwargs):
         super(Root, self).__init__(*args, **kwargs)
+        self.transition = FadeTransition()
         self.last_screen = None
 
     def show_auth_form(self):
+        if not 'login_screen' in self.screen_names:
+            self.add_widget(LoginScreen())
         self.current = 'login_screen'
 
     def show_twofa_form(self):
+        if not 'twofa_form' in self.screen_names:
+            self.add_widget(TwoFAKeyEnterForm())
         self.current = 'twofa_form'
 
     def show_home_form(self):
+        if not 'home_screen' in self.screen_names:
+            self.add_widget(HomeScreen())
         self.current = 'home_screen'
 
     def show_custom_commands_screen(self):
+        if not 'cc_screen' in self.screen_names:
+            self.add_widget(CustomCommandsScreen())
         self.current = 'cc_screen'
     
     def save_last_screen(self):
