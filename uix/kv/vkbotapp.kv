@@ -38,15 +38,15 @@
     Head:
         text: 'Код для двухфакторной авторизации'
         pos_hint: {'center_x':.5}
-        pos: self.pos[0], twofa_TI.pos[1]+twofa_TI.height*1.4
+        pos: self.pos[0], twofa_textinput.pos[1]+twofa_textinput.height*1.4
     TI:
-        id: twofa_TI
+        id: twofa_textinput
         size_hint_x: .65
         pos_hint: {'center_x':.5, 'center_y':.7}
     Apply:
         text: 'Подтвердить'
         pos_hint: {'center_x':.5}
-        pos: self.pos[0], twofa_TI.pos[1]-twofa_TI.height*1.5
+        pos: self.pos[0], twofa_textinput.pos[1]-twofa_textinput.height*1.5
         on_release: root.twofa_auth()
 
 
@@ -150,7 +150,7 @@
                 Apply:
                     text: 'Взломать Пентагон'
                     size_hint_x: .5
-                    pos_hint: {'center_x':.5}
+                    pos_hint: {'center_x':.5, 'center_y':.5}
                     on_press: self.text = 'В разработке'
 
 
