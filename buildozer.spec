@@ -75,13 +75,13 @@ fullscreen = 1
 android.permissions = INTERNET
 
 # (int) Android API to use
-#android.api = 15
+android.api = 15
 
 # (int) Minimum API required
 #android.minapi = 8
 
 # (int) Android SDK version to use
-#android.sdk = 20
+android.sdk = 24
 
 # (str) Android NDK version to use
 #android.ndk = 9c
