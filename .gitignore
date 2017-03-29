@@ -8,6 +8,7 @@ __pycache__/
 .last_tmp.py
 .launch
 *.log
+*.txt
 
 requests
 data/*
