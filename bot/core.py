@@ -367,7 +367,7 @@ class LongPollSession(Bot):
         self.runtime_error = None
         self.running = True
 
-        print('__LAUNCHED__')
+        print('@LAUNCHED')
         while self.run_bot:
             try:
                 time.sleep(1)
@@ -478,7 +478,7 @@ class LongPollSession(Bot):
 
         self.running = False
         self.reply_count = 0
-        print('__STOPPED__')
+        print('@STOPPED')
 
     def launch_bot(
     	        self, activated=False,
