@@ -66,61 +66,60 @@ class VKBotApp(App):
     def build_config(self, config):
         config.setdefaults('General', 
                 {
-                	"show_bot_activity":"False",
-                	"bot_activated":"False",
-                	"custom_commands":"False",
-                	"protect_cc": "True",
-                	"open_cc_form": "Открыть"
+                    "show_bot_activity":"False",
+                    "bot_activated":"False",
+                    "custom_commands":"False",
+                    "protect_cc": "True",
+                    "open_cc_form": "Открыть"
                 }
             )
 
     def build_settings(self, settings):
         settings.add_json_panel("Настройки бота", self.config, data=
-            '''[
-                {"type": "bool",
-                "title": "Отображать состояние бота в статусе",
-                "desc": "Если включено, в статус будет добавлено уведомление о том, что бот активен. Иначе вернется предыдущий текст",
-                "section": "General",
-                "key": "show_bot_activity",
-                "values": ["False","True"],
-                "disabled": 1
-                },
-                {"type": "title",
-                "title": "Пользовательские команды (WIP)"
-                },
-                {"type": "bool",
-                "title": "Использовать пользовательские команды",
-                "desc": "Пользовательские команды хранятся в файле %spresets.txt",
-                "section": "General",
-                "key": "custom_commands",
-                "values": ["False","True"]
-                },
-                {"type": "options",
-                "title": "Открыть окно настройки пользовательских команд",
-                "section": "General",
-                "key": "open_cc_form",
-                "disabled": "True"
-                },
-                {"type": "bool",
-                "title": "Защитить пользовательские команды",
-                "desc": "Только владелец сможет настраивать пользовательские команды через сообщения",
-                "section": "General",
-                "key": "protect_cc",
-                "values": ["False", "True"]
-                },
-                {"type": "title",
-                "title": "Активация бота"
-                },
-                {"type": "bool",
-                "title": "Бот активирован",
-                "section": "General",
-                "key": "bot_activated",
-                "values": ["False","True"],
-                "disabled": 1
-                }
-            ]''' % PATH
+        '''[
+            {"type": "bool",
+            "title": "Отображать состояние бота в статусе",
+            "desc": "Если включено, в статус будет добавлено уведомление о том, что бот активен. Иначе вернется предыдущий текст",
+            "section": "General",
+            "key": "show_bot_activity",
+            "values": ["False","True"],
+            "disabled": 1
+            },
+            {"type": "title",
+            "title": "Пользовательские команды (WIP)"
+            },
+            {"type": "bool",
+            "title": "Использовать пользовательские команды",
+            "desc": "Пользовательские команды хранятся в файле %spresets.txt",
+            "section": "General",
+            "key": "custom_commands",
+            "values": ["False","True"]
+            },
+            {"type": "options",
+            "title": "Открыть окно настройки пользовательских команд",
+            "section": "General",
+            "key": "open_cc_form",
+            "disabled": "True"
+            },
+            {"type": "bool",
+            "title": "Защитить пользовательские команды",
+            "desc": "Только владелец сможет настраивать пользовательские команды через сообщения",
+            "section": "General",
+            "key": "protect_cc",
+            "values": ["False", "True"]
+            },
+            {"type": "title",
+            "title": "Активация бота"
+            },
+            {"type": "bool",
+            "title": "Бот активирован",
+            "section": "General",
+            "key": "bot_activated",
+            "values": ["False","True"],
+            "disabled": 1
+            }
+        ]''' % PATH
         )
-        # settings.close_button.text = 'Закрыть'
 
     def on_pause(self):
         return True
@@ -144,7 +143,9 @@ class LoginScreen(Screen):
         password = self.ids.pass_input.text
 
         if login and password:
-            authorized, error = self.session.authorization(login=login, password=password, key=twofa_key)
+            authorized, error = self.session.authorization(
+                                login=login, password=password, key=twofa_key
+                                )
             if authorized:
                 self.ids.pass_input.text = ''
                 if twofa_key:
@@ -196,7 +197,7 @@ class HomeScreen(Screen):
         protect_custom_commands = config.getdefault('General', 'protect_cc', "True")
 
         while not self.session.launch_bot(
-        	       activated=self.activation_status == 'True',
+                activated=self.activation_status == 'True',
                 use_custom_commands=use_custom_commands == 'True',
                 protect_custom_commands=protect_custom_commands == 'True'
                 ):
