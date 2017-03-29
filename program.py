@@ -144,7 +144,9 @@ class LoginScreen(Screen):
         password = self.ids.pass_input.text
 
         if login and password:
-            authorized, error = self.session.authorization(login=login, password=password, key=twofa_key)
+            authorized, error = self.session.authorization(
+            					login=login, password=password, key=twofa_key
+            					)
             if authorized:
                 self.ids.pass_input.text = ''
                 if twofa_key:
