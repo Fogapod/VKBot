@@ -44,11 +44,15 @@ class VKBotApp(App):
         self.load_kv_files('uix/kv/')
 
         if not self.session.authorization()[0]:
-            self.root.show_auth_form()
+            self.root.show_auth_screen()
         else:
-            self.root.show_home_form()
+            self.root.show_home_screen()
 
-        #self.root.show_custom_commands_screen()
+        self.on_config_change(
+                self.config, 'General', 'use_custom_commands',
+                self.config.getdefault('General', 'use_custom_commands', 'False')
+                ) # URGLY # TODO
+
         return self.root
 
     def load_kv_files(self, path):
@@ -68,16 +72,17 @@ class VKBotApp(App):
                 {
                     "show_bot_activity":"False",
                     "bot_activated":"False",
-                    "custom_commands":"False",
+                    "use_custom_commands":"False",
                     "protect_cc": "True",
-                    "open_cc_form": "Открыть"
+                    "open_cc_screen": "Открыть"
                 }
             )
 
     def build_settings(self, settings):
         settings.add_json_panel("Настройки бота", self.config, data=
         '''[
-            {"type": "bool",
+            {
+            "type": "bool",
             "title": "Отображать состояние бота в статусе",
             "desc": "Если включено, в статус будет добавлено уведомление о том, что бот активен. Иначе вернется предыдущий текст",
             "section": "General",
@@ -85,33 +90,38 @@ class VKBotApp(App):
             "values": ["False","True"],
             "disabled": 1
             },
-            {"type": "title",
+            {
+            "type": "title",
             "title": "Пользовательские команды (WIP)"
             },
-            {"type": "bool",
+            {
+            "type": "bool",
             "title": "Использовать пользовательские команды",
             "desc": "Пользовательские команды хранятся в файле %spresets.txt",
             "section": "General",
-            "key": "custom_commands",
+            "key": "use_custom_commands",
             "values": ["False","True"]
             },
             {"type": "options",
             "title": "Открыть окно настройки пользовательских команд",
             "section": "General",
-            "key": "open_cc_form",
+            "key": "open_cc_screen",
             "disabled": "True"
             },
-            {"type": "bool",
+            {
+            "type": "bool",
             "title": "Защитить пользовательские команды",
             "desc": "Только владелец сможет настраивать пользовательские команды через сообщения",
             "section": "General",
             "key": "protect_cc",
             "values": ["False", "True"]
             },
-            {"type": "title",
+            {
+            "type": "title",
             "title": "Активация бота"
             },
-            {"type": "bool",
+            {
+            "type": "bool",
             "title": "Бот активирован",
             "section": "General",
             "key": "bot_activated",
@@ -120,6 +130,11 @@ class VKBotApp(App):
             }
         ]''' % PATH
         )
+
+    def on_config_change(self, config, section, key, value):
+        if config is self.config:
+            if key == 'use_custom_commands':
+                self.root.current_screen.ids.open_cc_screen_btn.disabled = value != 'True'
 
     def on_pause(self):
         return True
@@ -150,10 +165,10 @@ class LoginScreen(Screen):
                 self.ids.pass_input.text = ''
                 if twofa_key:
                     return True
-                self.parent.show_home_form()
+                self.parent.show_home_screen()
             elif error:
                 if 'code is needed' in error:
-                    self.parent.show_twofa_form()
+                    self.parent.show_twofa_screen()
                     return
                 elif 'incorrect password' in error:
                     toast_notification(u'Неправильный логин или пароль')
@@ -168,7 +183,7 @@ class TwoFAKeyEnterForm(Screen):
         if self.ids.twofa_textinput.text:
             login_screen_widget = self.parent.get_screen('login_screen')
             if login_screen_widget.log_in(twofa_key=self.ids.twofa_textinput.text):
-                self.parent.show_home_form()
+                self.parent.show_home_screen()
             else:
                 toast_notification(u'Неправильный код подтверждения')
             self.ids.twofa_textinput.text = ''
@@ -193,7 +208,7 @@ class HomeScreen(Screen):
 
     def launch_bot(self, config):
         self.activation_status = config.getdefault('General', 'bot_activated', 'False')
-        use_custom_commands = config.getdefault('General', 'custom_commands', 'False')
+        use_custom_commands = config.getdefault('General', 'use_custom_commands', 'False')
         protect_custom_commands = config.getdefault('General', 'protect_cc', "True")
 
         while not self.session.launch_bot(
@@ -226,7 +241,7 @@ class HomeScreen(Screen):
 
     def logout(self):
         self.session.authorization(logout=True)
-        self.parent.show_auth_form()
+        self.parent.show_auth_screen()
     
     def check_if_bot_active(self, tick):
         self.update_answers_count()
@@ -242,28 +257,25 @@ class HomeScreen(Screen):
 
 class CustomCommandsScreen(Screen):
     def leave(self):
-        self.app = VKBotApp.get_running_app()
-        self.app.open_settings()
-        self.parent.open_last_screen()
+        self.parent.show_home_screen()
 
 
 class Root(ScreenManager):
     def __init__(self, *args, **kwargs):
         super(Root, self).__init__(*args, **kwargs)
         self.transition = FadeTransition()
-        self.last_screen = None
 
-    def show_auth_form(self):
+    def show_auth_screen(self):
         if not 'login_screen' in self.screen_names:
             self.add_widget(LoginScreen())
         self.current = 'login_screen'
 
-    def show_twofa_form(self):
-        if not 'twofa_form' in self.screen_names:
+    def show_twofa_screen(self):
+        if not 'twofa_screen' in self.screen_names:
             self.add_widget(TwoFAKeyEnterForm())
-        self.current = 'twofa_form'
+        self.current = 'twofa_screen'
 
-    def show_home_form(self):
+    def show_home_screen(self):
         if not 'home_screen' in self.screen_names:
             self.add_widget(HomeScreen())
         self.current = 'home_screen'
@@ -272,15 +284,6 @@ class Root(ScreenManager):
         if not 'cc_screen' in self.screen_names:
             self.add_widget(CustomCommandsScreen())
         self.current = 'cc_screen'
-    
-    def save_last_screen(self):
-        self.last_screen = self.current_screen
-
-    def open_last_screen(self):
-        if self.last_screen:
-            self.current = self.last_screen
-        else:
-            self.show_home_form()
 
 
 if __name__ == '__main__':

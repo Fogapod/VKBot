@@ -8,7 +8,7 @@
     font_size: '17sp'
     size: self.texture_size[0]+10,self.texture_size[1]+10
     
-<TextInput@TextInput>:
+<TI@TextInput>:
     size_hint_y: None
     font_size: '16sp'
     height: self.minimum_height+10
@@ -38,15 +38,15 @@
     Head:
         text: 'Код для двухфакторной авторизации'
         pos_hint: {'center_x':.5}
-        pos: self.pos[0], twofa_textinput.pos[1]+twofa_textinput.height*1.4
-    TextInput:
-        id: twofa_textinput
+        pos: self.pos[0], twofa_TI.pos[1]+twofa_TI.height*1.4
+    TI:
+        id: twofa_TI
         size_hint_x: .65
         pos_hint: {'center_x':.5, 'center_y':.7}
     Apply:
         text: 'Подтвердить'
         pos_hint: {'center_x':.5}
-        pos: self.pos[0], twofa_textinput.pos[1]-twofa_textinput.height*1.5
+        pos: self.pos[0], twofa_TI.pos[1]-twofa_TI.height*1.5
         on_release: root.twofa_auth()
 
 
@@ -58,13 +58,13 @@
         pos_hint: {'center_x':.5}
         pos: self.pos[0], login.pos[1]+login.height*1.4
 
-    TextInput:
+    TI:
         hint_text: 'Логин'.decode('utf-8') #KIVY BUG
         id: login
         size_hint_x: .65
         pos_hint: {'center_x':.5,'center_y':.7}
 
-    TextInput:
+    TI:
         hint_text: 'Пароль'.decode('utf-8') #KIVY BUG
         id: pass_input
         size_hint_x: .65
@@ -96,7 +96,7 @@
         pos_hint: {'center_x':.5}
         background_color: 0, .2, .4, .5
         pos: self.pos[0], root.height*.05
-        on_release: root.parent.show_home_form()
+        on_release: root.parent.show_home_screen()
 
 
 <HomeScreen>:
@@ -116,7 +116,7 @@
                         text: 'Авторизация'
                         minimum_width: '110sp'
                         on_release:  
-                            root.parent.show_auth_form()
+                            root.parent.show_auth_screen()
                     ActionButton:
                         text: 'Выйти'
                         on_press: root.logout()
@@ -137,34 +137,38 @@
                     pos_hint: {'center_x':.5}
                     pos_hint_y: None
                     pos: self.pos[0], main_btn.pos[1]-actionbar.height*1.3
+                Apply:
+                    id: open_cc_screen_btn
+                    text: 'Настройки пользовательских команд'
+                    width: main_btn.width
+                    pos_hint: {'center_x':.5, 'center_y':.1}
+                    on_press: root.parent.show_custom_commands_screen()
+                    disabled: True
+                    background_color: 1, 0, 0, .8 # WIP feature
 
             FloatLayout:
                 Apply:
-                    id: crack_pentagon_btn
                     text: 'Взломать Пентагон'
                     size_hint_x: .5
-                    pos_hint: {'center_x':.5, 'center_y': .5}
+                    pos_hint: {'center_x':.5}
                     on_press: self.text = 'В разработке'
 
 
 <CustomCommandsScreen>:
     name: 'cc_screen'
 
-    ScrollView:
-        GridLayout:
-            cols: 1
-            size_hint_y: None
-            height: self.minimum_height
+    BoxLayout:
+        orientation: 'vertical'
 
+        ScrollView:
             GridLayout:
-                rows: 2
+                cols: 1
                 size_hint_y: None
-                height: self.minimum_height
+                height: self.minimum_height + 10
+
                 LB:
-                    text: open('/sdcard/VKBot/presets.txt', 'r').read()
-            Apply:
-                text: 'Вернуться'
-                pos_hint: {'center_x':.5}
-                background_color: 0, .2, .4, .5
-                on_press: root.leave()
-                
+                    text: open('presets.txt', 'r').read()
+        Apply:
+            text: 'Вернуться'
+            pos_hint: {'center_x':.5, 'center_y':.1}
+            on_press: root.leave()
