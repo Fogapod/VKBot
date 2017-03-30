@@ -159,16 +159,16 @@
 
     BoxLayout:
         orientation: 'vertical'
+        padding: dp(10)
+        spacing: dp(5)
 
         ScrollView:
             GridLayout:
+                id: cc_list
                 cols: 1
-                size_hint_y: None
-                height: self.minimum_height + 10
+                spacing: dp(2)
 
-                LB:
-                    text: open('presets.txt', 'r').read()
         Apply:
             text: 'Вернуться'
-            pos_hint: {'center_x':.5, 'center_y':.1}
+            pos_hint: {'center_x':.5}
             on_press: root.leave()

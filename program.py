@@ -1,4 +1,4 @@
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 #qpy:kivy
 
 
@@ -8,13 +8,15 @@ import re
 from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition
-from kivy.clock import Clock
+from kivy.clock import Clock, mainthread
 from kivy.uix.settings import SettingsWithNoMenu
 
 from plyer import notification
 from libs.toast import toast
 
-from bot.utils import PATH, DATA_PATH
+from uix.cc_block import CustomCommandBlock
+
+from bot.utils import PATH, DATA_PATH, load_custom_commands
 from bot.core import LongPollSession
 
 
@@ -48,9 +50,9 @@ class VKBotApp(App):
         else:
             self.root.show_home_screen()
 
-        self.on_config_change(
-                self.config, 'General', 'use_custom_commands',
-                self.config.getdefault('General', 'use_custom_commands', 'False')
+            self.on_config_change(
+                    self.config, 'General', 'use_custom_commands',
+                    self.config.getdefault('General', 'use_custom_commands', 'False')
                 ) # URGLY # TODO
 
         return self.root
@@ -153,6 +155,7 @@ class LoginScreen(Screen):
     def on_enter(self):
         self.ids.pass_auth.disabled = not self.session.authorized
 
+    @mainthread
     def log_in(self, twofa_key=''):
         login = self.ids.login.text
         password = self.ids.pass_input.text
@@ -198,6 +201,7 @@ class HomeScreen(Screen):
         self.stop_bot_text = 'Выключить бота'
         self.ids.main_btn.text = self.launch_bot_text
 
+    @mainthread
     def on_main_btn_press(self):
         config = VKBotApp.get_running_app().config
 
@@ -258,6 +262,18 @@ class HomeScreen(Screen):
 class CustomCommandsScreen(Screen):
     def leave(self):
         self.parent.show_home_screen()
+
+    def on_enter(self):
+        custom_commands = load_custom_commands()
+        for i, key in enumerate(custom_commands.keys()):
+            block = CustomCommandBlock(command=key)
+            self.ids.cc_list.add_widget(block)
+        Clock.schedule_once(self.update_commands_list, .1)
+
+
+    def update_commands_list(self, delay):
+        self.ids.cc_list.size_hint_y = None
+        self.ids.cc_list.height = self.ids.cc_list.minimum_height
 
 
 class Root(ScreenManager):
