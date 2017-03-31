@@ -7,14 +7,14 @@ import re
 
 from kivy.app import App
 from kivy.lang import Builder
-from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition
 from kivy.clock import Clock, mainthread
 from kivy.uix.settings import SettingsWithNoMenu
+from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition
 
 from plyer import notification
 from libs.toast import toast
 
-from uix.cc_block import CustomCommandBlock
+from uix.cc_block import CustomCommandBlock, EditCommandPopup
 
 from bot.utils import PATH, DATA_PATH, load_custom_commands
 from bot.core import LongPollSession
@@ -253,20 +253,39 @@ class HomeScreen(Screen):
 
 
 class CustomCommandsScreen(Screen):
+    def __init__(self, **kwargs):
+        super(CustomCommandsScreen, self).__init__(**kwargs)
+        self.included_keys = []
+
     def leave(self):
         self.parent.show_home_screen()
 
     def on_enter(self):
-        custom_commands = load_custom_commands()
-        for i, key in enumerate(custom_commands.keys()):
-            block = CustomCommandBlock(command=key)
-            self.ids.cc_list.add_widget(block)
+        self.custom_commands = load_custom_commands()
+        
+        for key in self.custom_commands.keys():
+            if key not in self.included_keys:
+                block = CustomCommandBlock(command=key)
+                self.ids.cc_list.add_widget(block)
+                self.included_keys.append(key)
         Clock.schedule_once(self.update_commands_list, .1)
-
 
     def update_commands_list(self, delay):
         self.ids.cc_list.size_hint_y = None
         self.ids.cc_list.height = self.ids.cc_list.minimum_height
+
+    def open_edit_popup(self, command):
+        EditCommandPopup(
+            command_text=command,
+            response_text=self.custom_commands[command][0],
+            custom_commands=self.custom_commands
+        ).open()
+
+    def add_command(self):
+        pass
+
+    def remove_command(self, command):
+        pass
 
 
 class Root(ScreenManager):
