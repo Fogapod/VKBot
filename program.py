@@ -75,8 +75,7 @@ class VKBotApp(App):
                     "show_bot_activity":"False",
                     "bot_activated":"False",
                     "use_custom_commands":"False",
-                    "protect_cc": "True",
-                    "open_cc_screen": "Открыть"
+                    "protect_cc": "True"
                 }
             )
 
@@ -103,12 +102,6 @@ class VKBotApp(App):
             "section": "General",
             "key": "use_custom_commands",
             "values": ["False","True"]
-            },
-            {"type": "options",
-            "title": "Открыть окно настройки пользовательских команд",
-            "section": "General",
-            "key": "open_cc_screen",
-            "disabled": "True"
             },
             {
             "type": "bool",
