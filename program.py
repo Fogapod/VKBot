@@ -148,7 +148,6 @@ class LoginScreen(Screen):
     def on_enter(self):
         self.ids.pass_auth.disabled = not self.session.authorized
 
-    @mainthread
     def log_in(self, twofa_key=''):
         login = self.ids.login.text
         password = self.ids.pass_input.text
