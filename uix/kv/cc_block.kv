@@ -1,14 +1,61 @@
 <CustomCommandBlock>:
+    id: command
     cols: 1
     size_hint_y: None
     height: self.minimum_height
 
     Button:
-        id: command
+        id: command_btn
         font_size: '15sp'
         background_normal: ''
         background_color: 0, .2, .4, 1
         size_hint_y: None
         height: self.texture_size[1]*2.3
-        on_press: root.edit_command()
-    
+        on_release: root.parent.parent.parent.parent.open_edit_popup(self.text)
+
+
+<EditCommandPopup>:
+    size_hint_y: None
+    height: content_gl.height*1.3
+    auto_dismiss: False
+    title: 'Настройка команды'
+
+    GridLayout:
+        id: content_gl
+        cols: 1
+        size_hint_y: None
+        height: self.minimum_height
+        spacing: dp(5)
+
+        GridLayout:
+            rows: 2
+            size_hint_y: None
+            height: self.minimum_height
+            spacing: dp(5)
+
+            TextInput
+                id: command_text
+                size_hint_y: None
+                height: self.font_size*6
+                hint_text: 'Команда'.decode('utf8')
+            TextInput
+                id: response_text
+                size_hint_y: None
+                height: self.font_size*6
+                hint_text: 'Ответ'.decode('utf8')
+        GridLayout:
+            cols: 2
+            size_hint_y: None
+            height: self.minimum_height
+            spacing: dp(5)
+
+            Button:
+                text: 'Применить'
+                size_hint_y: None
+                height: self.texture_size[1]*2.3
+                on_release: root.save_edited_command(command_text.text, response_text.text)
+            Button:
+                text: 'Отмена'
+                size_hint_y: None
+                height: self.texture_size[1]*2.3
+                on_release: root.dismiss()
