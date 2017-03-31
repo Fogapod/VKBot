@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+#-*- coding: utf-8 -*-
 #qpy:kivy
 
 
@@ -37,8 +37,8 @@ class VKBotApp(App):
     use_kivy_settings = False
     settings_cls = SettingsWithNoMenu
 
-    def __init__(self, *args, **kwargs):
-        super(VKBotApp, self).__init__(*args, **kwargs)
+    def __init__(self, **kwargs):
+        super(VKBotApp, self).__init__(**kwargs)
         self.root = Root()
         self.session = LongPollSession()
 
@@ -148,8 +148,8 @@ class VKBotApp(App):
             
 
 class LoginScreen(Screen):
-    def __init__(self, *args, **kwargs):
-        super(LoginScreen, self).__init__(*args, **kwargs)
+    def __init__(self, **kwargs):
+        super(LoginScreen, self).__init__(**kwargs)
         self.session = VKBotApp.get_running_app().session
         
     def on_enter(self):
@@ -193,8 +193,8 @@ class TwoFAKeyEnterForm(Screen):
 
 
 class HomeScreen(Screen):
-    def __init__(self, *args, **kwargs):
-        super(HomeScreen, self).__init__(*args, **kwargs)
+    def __init__(self, **kwargs):
+        super(HomeScreen, self).__init__(**kwargs)
         self.bot_check_event = Clock.schedule_interval(self.check_if_bot_active, 1)
         self.session = VKBotApp.get_running_app().session
         self.launch_bot_text = 'Включить бота'
@@ -277,8 +277,8 @@ class CustomCommandsScreen(Screen):
 
 
 class Root(ScreenManager):
-    def __init__(self, *args, **kwargs):
-        super(Root, self).__init__(*args, **kwargs)
+    def __init__(self, **kwargs):
+        super(Root, self).__init__(**kwargs)
         self.transition = FadeTransition()
 
     def show_auth_screen(self):
