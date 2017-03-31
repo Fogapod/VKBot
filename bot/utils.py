@@ -57,5 +57,10 @@ def load_custom_commands():
                 return False
 
 def save_custom_commands(content):
-    with open(PATH + 'presets.txt', 'w') as p:
-        p.write(json.dumps(content, sort_keys=True, indent=0, ensure_ascii=False).encode('utf8'))
+    with open(PATH + 'presets.txt', 'r+') as p:
+        try:
+            p.truncate(0)
+            p.write(json.dumps(content, sort_keys=True, indent=0, ensure_ascii=False).encode('utf8'))
+        except UnicodeEncodeError:
+            p.close()
+            return False
