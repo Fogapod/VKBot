@@ -14,7 +14,8 @@ from kivy.uix.screenmanager import ScreenManager, Screen, FadeTransition
 from plyer import notification
 from libs.toast import toast
 
-from uix.cc_block import CustomCommandBlock, EditCommandPopup
+from uix.customcommandblock import CustomCommandBlock
+from uix.editcommandpopup import EditCommandPopup
 
 from bot.utils import PATH, DATA_PATH, load_custom_commands, save_custom_commands
 from bot.core import LongPollSession

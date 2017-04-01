@@ -1,0 +1,14 @@
+<CustomCommandBlock>:
+    cols: 1
+    size_hint_y: None
+    height: self.minimum_height
+
+    Button:
+        id: command_btn
+        font_size: '15sp'
+        background_normal: ''
+        background_color: 0, .2, .4, 1
+        size_hint_y: None
+        height: self.texture_size[1]*2.3
+        on_release:
+            root.parent.parent.parent.parent.open_edit_popup(self.text, self.parent)
