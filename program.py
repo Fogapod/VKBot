@@ -16,7 +16,7 @@ from libs.toast import toast
 
 from uix.cc_block import CustomCommandBlock, EditCommandPopup
 
-from bot.utils import PATH, DATA_PATH, load_custom_commands
+from bot.utils import PATH, DATA_PATH, load_custom_commands, save_custom_commands
 from bot.core import LongPollSession
 
 
@@ -262,28 +262,49 @@ class CustomCommandsScreen(Screen):
     def on_enter(self):
         self.custom_commands = load_custom_commands()
         
-        for key in self.custom_commands.keys():
-            if key not in self.included_keys:
+        for key in sorted(self.custom_commands.keys()):
+            if key not in self.included_keys and len(self.custom_commands[key]) == 1:
                 block = CustomCommandBlock(command=key)
                 self.ids.cc_list.add_widget(block)
                 self.included_keys.append(key)
-        Clock.schedule_once(self.update_commands_list, .1)
+        Clock.schedule_once(self.update_commands_list_size, .1)
 
-    def update_commands_list(self, delay):
+    def update_commands_list_size(self, delay):
         self.ids.cc_list.size_hint_y = None
         self.ids.cc_list.height = self.ids.cc_list.minimum_height
 
-    def open_edit_popup(self, command):
-        EditCommandPopup(
+    def open_edit_popup(self, command, item):
+        popup = EditCommandPopup(
             command_text=command,
             response_text=self.custom_commands[command][0],
-            custom_commands=self.custom_commands
-        ).open()
+            item=item
+            )
+        popup.ids.delete_command_btn.bind(
+            on_press=lambda x: self.remove_command(
+                popup.ids.command_text.text.decode('utf8'),
+                item
+                )
+            )
+        popup.ids.apply_btn.bind(
+            on_press=lambda x: self.save_edited_command(
+                popup.ids.command_text.text,
+                popup.ids.response_text.text
+            )
+        )
+        popup.open()
+
+    def save_edited_command(self, command, response):
+        self.custom_commands[command.decode('utf8')] = [response.decode('utf8')]
+        save_custom_commands(self.custom_commands)
+
+    def remove_command(self, command, item):
+        self.custom_commands.pop(command, None)
+        save_custom_commands(self.custom_commands)
+        self.included_keys.remove(command)
+        self.ids.cc_list.remove_widget(item)
+        Clock.schedule_once(self.update_commands_list_size, .1)
 
     def add_command(self):
-        pass
-
-    def remove_command(self, command):
         pass
 
 

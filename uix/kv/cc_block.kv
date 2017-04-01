@@ -1,5 +1,4 @@
 <CustomCommandBlock>:
-    id: command
     cols: 1
     size_hint_y: None
     height: self.minimum_height
@@ -11,21 +10,22 @@
         background_color: 0, .2, .4, 1
         size_hint_y: None
         height: self.texture_size[1]*2.3
-        on_release: root.parent.parent.parent.parent.open_edit_popup(self.text)
+        on_release:
+            root.parent.parent.parent.parent.open_edit_popup(self.text, self.parent)
 
 
 <EditCommandPopup>:
     size_hint_y: None
-    height: content_gl.height*1.3
-    auto_dismiss: False
+    height: content.height*1.3
     title: 'Настройка команды'
+    pos_hint: {'center_y':.6}
 
     GridLayout:
-        id: content_gl
+        id: content
         cols: 1
         size_hint_y: None
         height: self.minimum_height
-        spacing: dp(5)
+        spacing: dp(6)
 
         GridLayout:
             rows: 2
@@ -33,29 +33,34 @@
             height: self.minimum_height
             spacing: dp(5)
 
-            TextInput
+            LowerTextInput:
                 id: command_text
                 size_hint_y: None
                 height: self.font_size*6
                 hint_text: 'Команда'.decode('utf8')
-            TextInput
+            TextInput:
                 id: response_text
                 size_hint_y: None
                 height: self.font_size*6
                 hint_text: 'Ответ'.decode('utf8')
         GridLayout:
-            cols: 2
+            cols: 3
             size_hint_y: None
             height: self.minimum_height
             spacing: dp(5)
 
             Button:
+                id: apply_btn
                 text: 'Применить'
-                size_hint_y: None
-                height: self.texture_size[1]*2.3
-                on_release: root.save_edited_command(command_text.text, response_text.text)
+                on_release: root.dismiss()
+            Button:
+                id: delete_command_btn
+                text: '      X      '
+                font_size: '16sp'
+                background_color: 1, 0, 0, .6
+                size_hint: None, None
+                size: self.texture_size[0], self.texture_size[1]*2.3
+                on_release: root.dismiss()
             Button:
                 text: 'Отмена'
-                size_hint_y: None
-                height: self.texture_size[1]*2.3
                 on_release: root.dismiss()
