@@ -50,8 +50,8 @@
         on_release: root.twofa_auth()
 
 
-<LoginScreen>:
-    name: 'login_screen'
+<AuthScreen>:
+    name: 'auth_screen'
 
     Head:
         text: 'Авторизация ВК'
@@ -99,8 +99,8 @@
         on_release: root.parent.show_home_screen()
 
 
-<HomeScreen>:
-    name: 'home_screen'
+<MainScreen>:
+    name: 'main_screen'
     BoxLayout:
         orientation: 'vertical'
         ActionBar:

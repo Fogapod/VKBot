@@ -8,13 +8,20 @@ import json
 
 from kivy import platform
 
+from plyer import notification
+from libs.toast import toast
+
 
 __all__ = (
     'PATH',
     'DATA_PATH',
     'parse_input',
     'load_custom_commands',
-    'save_custom_commands'
+    'save_custom_commands',
+    'statusbar_notification',
+    'bot_launched_notification',
+    'bot_stopped_notification',
+    'toast_notification'
     )
 
 PATH = '/sdcard/VKBot/' if platform == 'android' else ''
@@ -38,6 +45,18 @@ def parse_input(string, replace_vkurl=True, replace_url=True):
 	)
 
 	return new_string
+
+def statusbar_notification(title='VKBot', message=''):
+    notification.notify(title=title, message=message)
+
+def bot_launched_notification():
+    statusbar_notification(u'Бот запущен')
+
+def bot_stopped_notification():
+    statusbar_notification(u'Бот остановлен')
+
+def toast_notification(text, length_long=False):
+    toast(text, length_long=length_long)
 
 def load_custom_commands():
     if not os.path.exists(PATH +  'presets.txt'):
