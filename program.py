@@ -43,7 +43,6 @@ class VKBotApp(App):
 
         for directory in directories:
             for file in os.listdir(directory):
-                print file
                 if re.match('.*\.kv$', file):
                     Builder.load_file(directory + file)
                 else:
