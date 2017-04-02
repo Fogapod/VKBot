@@ -1,6 +1,8 @@
 #-*- coding:utf-8 -*-
 
 
+from functools import partial
+
 from kivy.uix.screenmanager import Screen, ScreenManager, FadeTransition
 from kivy.clock import mainthread, Clock
 from kivy.app import App
@@ -128,56 +130,93 @@ class CustomCommandsScreen(Screen):
         super(CustomCommandsScreen, self).__init__(**kwargs)
         self.included_keys = []
 
+    def on_enter(self):
+        self.custom_commands = load_custom_commands()
+        for key in sorted(self.custom_commands.keys()):
+            if key not in self.included_keys and len(self.custom_commands[key]) == 1:
+                self.add_command(key, self.custom_commands[key])
+
     def leave(self):
         self.parent.show_home_screen()
 
-    def on_enter(self):
-        self.custom_commands = load_custom_commands()
-        
-        for key in sorted(self.custom_commands.keys()):
-            if key not in self.included_keys and len(self.custom_commands[key]) == 1:
-                block = CustomCommandBlock(command=key)
-                self.ids.cc_list.add_widget(block)
-                self.included_keys.append(key)
-        Clock.schedule_once(self.update_commands_list_size, .1)
-
-    def update_commands_list_size(self, delay):
-        self.ids.cc_list.size_hint_y = None
-        self.ids.cc_list.height = self.ids.cc_list.minimum_height
-
-    def open_edit_popup(self, command, item):
+    def open_edit_popup(self, command='', response='', list_item=None, _=None):
         popup = EditCommandPopup(
             command_text=command,
-            response_text=self.custom_commands[command][0],
-            item=item
+            response_text=response,
+            list_item=list_item
             )
         popup.ids.delete_command_btn.bind(
-            on_press=lambda x: self.remove_command(
-                popup.ids.command_text.text.decode('utf8'),
-                item
+            on_release=lambda x: self.remove_command(
+                list_item.command,
+                list_item,
+                popup
                 )
             )
         popup.ids.apply_btn.bind(
-            on_press=lambda x: self.save_edited_command(
+            on_release=lambda x: self.save_edited_command(
                 popup.ids.command_text.text,
-                popup.ids.response_text.text
+                popup.ids.response_text.text,
+                popup.list_item,
+                popup
             )
         )
         popup.open()
 
-    def save_edited_command(self, command, response):
-        self.custom_commands[command.decode('utf8')] = [response.decode('utf8')]
-        save_custom_commands(self.custom_commands)
+    def save_edited_command(self, command, response, list_item, popup):
+        if popup.ids.command_text.text and popup.ids.response_text.text:
+            if not list_item and not command in self.included_keys:
+                self.custom_commands[command] = [response]
+                self.add_command(command, response)
+            else:
+                if list_item.ids.command_btn.text != command:
+                    self.custom_commands.pop(list_item.ids.command_btn.text.encode('utf8').decode('utf8'))
+                    self.included_keys.remove(list_item.ids.command_btn.text.encode('utf8').decode('utf8'))
+                    self.included_keys.append(command)
+                    list_item.ids.command_btn.text = command
+                    list_item.command = command
 
-    def remove_command(self, command, item):
-        self.custom_commands.pop(command, None)
-        save_custom_commands(self.custom_commands)
-        self.included_keys.remove(command)
-        self.ids.cc_list.remove_widget(item)
+                list_item.response = response
+                list_item.ids.command_btn.funbind(
+                        'on_release', list_item.ids.command_btn.callback
+                    )
+                new_callback = partial(self.open_edit_popup, list_item.command, list_item.response, list_item)
+                list_item.ids.command_btn.callback = new_callback
+                list_item.ids.command_btn.fbind(
+                        'on_release', list_item.ids.command_btn.callback
+                    )
+                self.custom_commands[command] = [response]
+            save_custom_commands(self.custom_commands)
+            popup.dismiss()
+
+    def remove_command(self, command, list_item, popup):
+        if popup.ids.command_text.text and popup.ids.response_text.text:
+            self.custom_commands.pop(command, None)
+            save_custom_commands(self.custom_commands)
+            self.included_keys.remove(command)
+            self.ids.cc_list.remove_widget(list_item)
+            Clock.schedule_once(self.update_commands_list_size, .1)
+            popup.dismiss()
+
+    def add_command(self, command, response):
+        block = CustomCommandBlock(command=command, response=self.custom_commands[command][0])
+        callback = partial(self.open_edit_popup, block.command, block.response, block)
+        block.ids.command_btn.callback = callback
+        block.ids.command_btn.fbind('on_release', block.ids.command_btn.callback)
+        self.ids.cc_list.add_widget(block)
+        self.included_keys.append(command)
         Clock.schedule_once(self.update_commands_list_size, .1)
 
-    def add_command(self):
-        pass
+    def sort_blocks(self):
+        for widget in sorted(self.ids.cc_list.children):
+            if widget.is_custom_command_block:
+                self.ids.cc_list.remove_widget(widget)
+                self.included_keys.remove(widget.command)
+
+        self.on_enter()
+
+    def update_commands_list_size(self, delay):
+        self.ids.cc_list.size_hint_y = None
+        self.ids.cc_list.height = self.ids.cc_list.minimum_height
 
 
 class Root(ScreenManager):

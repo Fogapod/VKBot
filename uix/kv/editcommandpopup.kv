@@ -39,7 +39,6 @@
             Button:
                 id: apply_btn
                 text: 'Применить'
-                on_release: root.dismiss()
             Button:
                 id: delete_command_btn
                 text: '      X      '
@@ -47,7 +46,6 @@
                 background_color: 1, 0, 0, .6
                 size_hint: None, None
                 size: self.texture_size[0], self.texture_size[1]*2.3
-                on_release: root.dismiss()
             Button:
                 text: 'Отмена'
                 on_release: root.dismiss()
