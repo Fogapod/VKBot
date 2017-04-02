@@ -50,7 +50,7 @@ class AuthScreen(Screen):
 class TwoFAKeyEnterScreen(Screen):
     def twofa_auth(self):
         if self.ids.twofa_textinput.text:
-            login_screen_widget = self.parent.get_screen('login_screen')
+            login_screen_widget = self.parent.get_screen('auth_screen')
             if login_screen_widget.log_in(twofa_key=self.ids.twofa_textinput.text):
                 self.parent.show_home_screen()
             else:
