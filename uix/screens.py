@@ -34,7 +34,7 @@ class AuthScreen(Screen):
                 self.ids.pass_input.text = ''
                 if twofa_key:
                     return True
-                self.parent.show_home_screen()
+                self.parent.show_main_screen()
             elif error:
                 if 'code is needed' in error:
                     self.parent.show_twofa_screen()
@@ -52,7 +52,7 @@ class TwoFAKeyEnterScreen(Screen):
         if self.ids.twofa_textinput.text:
             login_screen_widget = self.parent.get_screen('auth_screen')
             if login_screen_widget.log_in(twofa_key=self.ids.twofa_textinput.text):
-                self.parent.show_home_screen()
+                self.parent.show_main_screen()
             else:
                 toast_notification(u'Неправильный код подтверждения')
             self.ids.twofa_textinput.text = ''
@@ -141,7 +141,7 @@ class CustomCommandsScreen(Screen):
                     self.add_command(key, self.custom_commands[key])
 
     def leave(self, delay=None):
-        self.parent.show_home_screen()
+        self.parent.show_main_screen()
 
     def open_edit_popup(self, command='', response='', list_item=None, _=None):
         popup = EditCommandPopup(
@@ -239,7 +239,7 @@ class Root(ScreenManager):
             self.add_widget(TwoFAKeyEnterScreen())
         self.current = 'twofa_screen'
 
-    def show_home_screen(self):
+    def show_main_screen(self):
         if not 'main_screen' in self.screen_names:
             self.add_widget(MainScreen())
         self.current = 'main_screen'
