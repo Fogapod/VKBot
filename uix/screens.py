@@ -132,11 +132,15 @@ class CustomCommandsScreen(Screen):
 
     def on_enter(self):
         self.custom_commands = load_custom_commands()
-        for key in sorted(self.custom_commands.keys()):
-            if key not in self.included_keys and len(self.custom_commands[key]) == 1:
-                self.add_command(key, self.custom_commands[key])
+        if not self.custom_commands:
+            toast_notification(u'Повреждён файл пользовательских команд')
+            Clock.schedule_once(lambda x: self.leave(), .1)
+        else:
+            for key in sorted(self.custom_commands.keys()):
+                if key not in self.included_keys and len(self.custom_commands[key]) == 1:
+                    self.add_command(key, self.custom_commands[key])
 
-    def leave(self):
+    def leave(self, delay=None):
         self.parent.show_home_screen()
 
     def open_edit_popup(self, command='', response='', list_item=None, _=None):
@@ -154,8 +158,8 @@ class CustomCommandsScreen(Screen):
             )
         popup.ids.apply_btn.bind(
             on_release=lambda x: self.save_edited_command(
-                popup.ids.command_text.text,
-                popup.ids.response_text.text,
+                popup.ids.command_text.text.decode('utf8'),
+                popup.ids.response_text.text.decode('utf8'),
                 popup.list_item,
                 popup
             )
@@ -168,9 +172,10 @@ class CustomCommandsScreen(Screen):
                 self.custom_commands[command] = [response]
                 self.add_command(command, response)
             else:
-                if list_item.ids.command_btn.text != command:
-                    self.custom_commands.pop(list_item.ids.command_btn.text.encode('utf8').decode('utf8'))
-                    self.included_keys.remove(list_item.ids.command_btn.text.encode('utf8').decode('utf8'))
+                item_command = list_item.command
+                if item_command != command:
+                    self.custom_commands.pop(item_command)
+                    self.included_keys.remove(item_command)
                     self.included_keys.append(command)
                     list_item.ids.command_btn.text = command
                     list_item.command = command
