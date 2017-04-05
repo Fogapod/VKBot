@@ -82,6 +82,7 @@ def save_custom_commands(content):
         try:
             p.write(json.dumps(content, sort_keys=True, indent=0, ensure_ascii=False).encode('utf8'))
         except (UnicodeEncodeError, UnicodeDecodeError):
+            print('Error saving custom commands file. Reverting')
             p.truncate(0)
             p.write(json.dumps(last_content, sort_keys=True, indent=0, ensure_ascii=False).encode('utf8'))
             p.close()
