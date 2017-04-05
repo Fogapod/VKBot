@@ -176,13 +176,13 @@ class CustomCommandsScreen(Screen):
                     list_item.command = command
 
                 list_item.response = response
-                list_item.ids.command_btn.funbind(
-                        'on_release', list_item.ids.command_btn.callback
+                list_item.ids.command_btn.unbind(
+                        on_release=list_item.ids.command_btn.callback
                     )
                 new_callback = partial(self.open_edit_popup, list_item.command, list_item.response, list_item)
                 list_item.ids.command_btn.callback = new_callback
-                list_item.ids.command_btn.fbind(
-                        'on_release', list_item.ids.command_btn.callback
+                list_item.ids.command_btn.bind(
+                        on_release=list_item.ids.command_btn.callback
                     )
                 self.custom_commands[command] = [response]
             save_custom_commands(self.custom_commands)
@@ -201,7 +201,7 @@ class CustomCommandsScreen(Screen):
         block = CustomCommandBlock(command=command, response=self.custom_commands[command][0])
         callback = partial(self.open_edit_popup, block.command, block.response, block)
         block.ids.command_btn.callback = callback
-        block.ids.command_btn.fbind('on_release', block.ids.command_btn.callback)
+        block.ids.command_btn.bind(on_release=block.ids.command_btn.callback)
         self.ids.cc_list.add_widget(block)
         self.included_keys.append(command)
         Clock.schedule_once(self.update_commands_list_size, .1)
