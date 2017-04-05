@@ -31,10 +31,10 @@ class VKBotApp(App):
         else:
             self.root.show_main_screen()
 
-            self.on_config_change(
-                    self.config, 'General', 'use_custom_commands',
-                    self.config.getdefault('General', 'use_custom_commands', 'False')
-                ) # URGLY # TODO
+        self.on_config_change(
+                self.config, 'General', 'use_custom_commands',
+                self.config.getdefault('General', 'use_custom_commands', 'False')
+            ) # URGLY # TODO
 
         return self.root
 
