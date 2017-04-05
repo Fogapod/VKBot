@@ -115,6 +115,9 @@ class VKBotApp(App):
             if key == 'use_custom_commands':
                 self.root.current_screen.ids.open_cc_screen_btn.disabled = value != 'True'
 
+    def get_captcha_key(captcha_url):
+        return None
+
     def on_pause(self):
         return True
 

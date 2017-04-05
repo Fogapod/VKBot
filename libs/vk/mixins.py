@@ -1,4 +1,6 @@
-# coding=utf8
+# coding: utf8
+
+from kivy.app import App
 
 import logging
 
@@ -185,5 +187,8 @@ class AuthMixin(object):
 
     def get_auth_check_code(self):
         if self.key:
-            return self.key # raw_input('key:')
+            return self.key
         raise VkAuthError('Auth check code is needed')
+
+    def get_captcha_key(self, captcha_url):
+        App.get_running_app.get_captcha_key(captcha_url)
