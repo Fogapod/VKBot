@@ -29,7 +29,7 @@ class VKBotApp(App):
         if not  self.session.authorization()[0]:
             self.root.show_auth_screen()
         else:
-            self.root.show_home_screen()
+            self.root.show_main_screen()
 
             self.on_config_change(
                     self.config, 'General', 'use_custom_commands',
