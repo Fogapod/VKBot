@@ -9,4 +9,4 @@ class EditCommandPopup(Popup):
 
         self.list_item = kwargs['list_item']
         if not self.list_item:
-        	self.ids.delete_command_btn.disabled = True
+            self.ids.delete_command_btn.disabled = True
