@@ -32,6 +32,10 @@ class AuthScreen(Screen):
                                 )
             if authorized:
                 self.ids.pass_input.text = ''
+                App.get_running_app().on_config_change(
+                    self.config, 'General', 'use_custom_commands',
+                    self.config.getdefault('General', 'use_custom_commands', 'False')
+                ) # URGLY # TODO
                 if twofa_key:
                     return True
                 self.parent.show_main_screen()
