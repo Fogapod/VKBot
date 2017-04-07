@@ -149,6 +149,7 @@ class CustomCommandsScreen(Screen):
 
     def open_edit_popup(self, command='', response='', list_item=None, _=None):
         popup = EditCommandPopup(
+            title=u'Настройка команды {}'.format(command) if command else 'Добавление новой команды',
             command_text=command,
             response_text=response,
             list_item=list_item
@@ -171,7 +172,9 @@ class CustomCommandsScreen(Screen):
         popup.open()
 
     def save_edited_command(self, command, response, list_item, popup):
-        if popup.ids.command_text.text and popup.ids.response_text.text:
+        if not (popup.ids.command_text.text and popup.ids.response_text.text):
+            toast_notification(u'Поля с командой и ответом не могут быть пустыми')
+        else:
             if not list_item and not command in self.included_keys:
                 self.custom_commands[command] = [response]
                 self.add_command(command, response)
