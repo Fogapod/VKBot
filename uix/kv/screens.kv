@@ -35,19 +35,44 @@
 <TwoFAKeyEnterScreen>:
     name: 'twofa_screen'
     
-    Head:
-        text: 'Код для двухфакторной авторизации'
-        pos_hint: {'center_x':.5}
-        pos: self.pos[0], twofa_textinput.pos[1]+twofa_textinput.height*1.4
-    TI:
-        id: twofa_textinput
-        size_hint_x: .65
-        pos_hint: {'center_x':.5, 'center_y':.7}
-    Apply:
-        text: 'Подтвердить'
-        pos_hint: {'center_x':.5}
-        pos: self.pos[0], twofa_textinput.pos[1]-twofa_textinput.height*1.5
-        on_release: root.twofa_auth()
+    GridLayout:
+        rows: 3
+        spacing: dp(6)
+        size_hint: .7, None
+        size: self.minimum_size
+        pos_hint: {'center_x':.5,'center_y':.75}
+        
+        Label:
+            text: 'Код для двухфакторной авторизации'
+            color: 0, .2, .4, 1
+            font_size: '20sp'
+            padding_y: dp(5)
+            size_hint: None, None
+            size: self.texture_size
+
+        TextInput:
+            id: twofa_textinput
+            size_hint_y: None
+            font_size: '18sp'
+            height: self.minimum_height
+            multiline: False
+
+        GridLayout:
+            cols: 3
+            size_hint_y: None
+            size: self.minimum_size
+
+            Label:
+            Button:
+                text: 'Подтвердить'
+                font_size: '16sp'
+                padding_y: dp(10)
+                background_normal: ''
+                background_color: 0, .2, .4, 1
+                size_hint: 1.3, None
+                height: self.texture_size[1]
+                on_release: root.twofa_auth()
+            Label:
 
 
 <AuthScreen>:
@@ -93,7 +118,7 @@
 
             Label:
                 id: show_pass_label
-                text: 'Показать пароль'
+                text: 'Показать пароль:'
                 color: 0, .2, .4, 1
                 font_size: '16sp'
                 padding_y: dp(3)
@@ -132,7 +157,7 @@
         size_hint: None, None
         size: self.texture_size[0]*2.3, self.texture_size[1]*2.3
         pos_hint: {'center_x':.5}
-        pos: self.pos[0], root.height*.05
+        pos: self.pos[0], root.height*.05        
         on_release: root.parent.show_main_screen()
         disabled: False
 
