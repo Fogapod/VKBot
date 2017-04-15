@@ -16,7 +16,7 @@
 
 <Apply@Button>:
     text: 'Принять'
-    font_size: '15sp'
+    font_size: '16sp'
     background_normal: ''
     background_color: 0, .2, .4, 1
     size_hint: None, None
@@ -53,50 +53,88 @@
 <AuthScreen>:
     name: 'auth_screen'
 
-    Head:
-        text: 'Авторизация ВК'
-        pos_hint: {'center_x':.5}
-        pos: self.pos[0], login.pos[1]+login.height*1.4
+    GridLayout:
+        rows: 5
+        spacing: dp(3)
+        size_hint_y: None
+        height: self.minimum_height
+        pos_hint: {'center_x':.6,'center_y':.75}
 
-    TI:
-        hint_text: 'Логин'.decode('utf-8') #KIVY BUG
-        id: login
-        size_hint_x: .65
-        pos_hint: {'center_x':.5,'center_y':.7}
+        Label:
+            text: 'Авторизация ВК'
+            color: 0, .2, .4, 1
+            font_size: '20sp'
+            padding_y: dp(5)
+            size_hint: None, None
+            size: self.texture_size
 
-    TI:
-        hint_text: 'Пароль'.decode('utf-8') #KIVY BUG
-        id: pass_input
-        size_hint_x: .65
-        pos: login.pos[0], login.pos[1]-login.height*1.1
-        password: show_pass.active == False
+        TextInput:
+            hint_text: 'Логин'.decode('utf-8') #KIVY BUG
+            id: login
+            size_hint_y: None
+            font_size: '18sp'
+            height: self.minimum_height
+            multiline: False
 
-    CheckBox:
-        id: show_pass
-        size_hint: None, None
-        size: login.width*.15, login.height*.8
-        pos: login.pos[0]-self.width*.35, pass_input.pos[1]-login.height*1.1
+        TextInput:
+            hint_text: 'Пароль'.decode('utf-8') #KIVY BUG
+            id: pass_input
+            size_hint_y: None
+            font_size: '18sp'
+            height: self.minimum_height
+            multiline: False
+            password: show_pass.active == False
 
-    LB:
-        text: 'Показать пароль'
-        size: self.texture_size[0], show_pass.height
-        pos: show_pass.pos[0]+show_pass.width, show_pass.pos[1]
+        GridLayout:
+            cols: 2
+            padding: dp(6)
+            size_hint_y: None
+            size: self.minimum_size
 
-    Apply:
-        text: 'Войти'
-        id: enter
-        pos_hint: {'center_x':.5}
-        pos: self.pos[0], show_pass.pos[1]-login.height*1.4
-        on_release: root.log_in()
+            Label:
+                id: show_pass_label
+                text: 'Показать пароль'
+                color: 0, .2, .4, 1
+                font_size: '16sp'
+                padding_y: dp(3)
+                size_hint: None, None
+                size: self.texture_size
 
-    Apply:
-        text: 'Пропустить'
+            CheckBox:
+                id: show_pass
+                size_hint: None, None
+                height: show_pass_label.height
+
+        GridLayout:
+            cols: 3
+            size_hint_y: None
+            size: self.minimum_size
+
+            Label:
+            Button:
+                id: enter
+                text: 'Войти'
+                font_size: '16sp'
+                padding_y: dp(10)
+                background_normal: ''
+                background_color: 0, .2, .4, 1
+                size_hint: 1.3, None
+                height: self.texture_size[1]
+                on_release: root.log_in()
+            Label:
+
+    Button:
         id: pass_auth
-        disabled: False
-        pos_hint: {'center_x':.5}
+        text: 'Пропустить'
+        font_size: '16sp'
+        background_normal: ''
         background_color: 0, .2, .4, .5
+        size_hint: None, None
+        size: self.texture_size[0]*2.3, self.texture_size[1]*2.3
+        pos_hint: {'center_x':.5}
         pos: self.pos[0], root.height*.05
         on_release: root.parent.show_main_screen()
+        disabled: False
 
 
 <MainScreen>:
