@@ -81,8 +81,8 @@
     GridLayout:
         rows: 5
         spacing: dp(3)
-        size_hint: .7, None
-        height: self.minimum_height
+        size_hint: None, None
+        size: self.minimum_size
         pos_hint: {'center_x':.5,'center_y':.75}
 
         Label:
@@ -96,21 +96,24 @@
         TextInput:
             hint_text: 'Логин'.decode('utf-8') #KIVY BUG
             id: login
-            size_hint_y: None
+            size_hint: None, None
             font_size: '18sp'
             height: self.minimum_height
+            width: gridlayout.width
             multiline: False
 
         TextInput:
             hint_text: 'Пароль'.decode('utf-8') #KIVY BUG
             id: pass_input
-            size_hint_y: None
+            size_hint: None, None
             font_size: '18sp'
             height: self.minimum_height
+            width: gridlayout.width
             multiline: False
             password: show_pass.active == False
 
         GridLayout:
+            id: gridlayout
             cols: 2
             padding: dp(6)
             size_hint_y: None
