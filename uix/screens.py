@@ -159,8 +159,8 @@ class CustomCommandsScreen(Screen):
             )
         popup.ids.apply_btn.bind(
             on_release=lambda x: self.save_edited_command(
-                popup.ids.command_text.text.decode('utf8'),
-                popup.ids.response_text.text.decode('utf8'),
+                popup.ids.command_text.text,
+                popup.ids.response_text.text,
                 popup.list_item,
                 popup
             )
@@ -168,6 +168,15 @@ class CustomCommandsScreen(Screen):
         popup.open()
 
     def save_edited_command(self, command, response, list_item, popup):
+        try:
+            command = command.decode('utf8')
+        except UnicodeEncodeError:
+            pass
+        try:
+            response = response.decode('utf8')
+        except UnicodeEncodeError:
+            pass
+
         if not (popup.ids.command_text.text and popup.ids.response_text.text):
             toast_notification(u'Поля с командой и ответом не могут быть пустыми')
         else:
