@@ -2,11 +2,19 @@
     cols: 1
     size_hint_y: None
     height: self.minimum_height
+    __safe_id: [dropdown.__self__]
 
     Button:
-        id: command_btn
+        id: dropdown_btn
+        text: 'команда'
         font_size: '15sp'
         background_normal: ''
         background_color: 0, .2, .4, 1
         size_hint_y: None
         height: self.texture_size[1]*2.3
+        
+    DropDown:
+        #required_spacing: dp(3)
+
+        id: dropdown
+        on_parent: self.dismiss()
