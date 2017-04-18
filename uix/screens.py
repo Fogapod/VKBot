@@ -125,6 +125,7 @@ class MainScreen(Screen):
             if self.session.runtime_error:
                 toast_notification(self.session.runtime_error, length_long=True)
 
+
 class CustomCommandsScreen(Screen):
     def __init__(self, **kwargs):
         super(CustomCommandsScreen, self).__init__(**kwargs)
@@ -230,7 +231,7 @@ class CustomCommandsScreen(Screen):
                         text=response,
                         font_size='15sp',
                         background_normal='',
-                        background_color=(0, .4, .4, 1),
+                        background_color=(.24, .69, .55, 1),
                         size_hint_y=None
                     )
                     command_button.bind(height=command_button.texture_size[1]*2.3)
@@ -255,7 +256,7 @@ class CustomCommandsScreen(Screen):
                         text=block.ids.dropdown_btn.response,
                         font_size='15sp',
                         background_normal='',
-                        background_color=(0, .4, .4, 1),
+                        background_color=(.24, .69, .55, 1),
                         size_hint_y=None
                     )
                     old_command_button.bind(height=old_command_button.texture_size[1]*2.3)
@@ -283,7 +284,7 @@ class CustomCommandsScreen(Screen):
                         text=response,
                         font_size='15sp',
                         background_normal='',
-                        background_color=(0, .4, .4, 1),
+                        background_color=(.24, .69, .55, 1),
                         size_hint_y=None
                     )
                     command_button.bind(height=command_button.texture_size[1]*2.3)
@@ -350,7 +351,7 @@ class CustomCommandsScreen(Screen):
                     text=response[i],
                     font_size='15sp',
                     background_normal='',
-                    background_color=(0, .4, .4, 1),
+                    background_color=(.24, .69, .55, 1),
                     size_hint_y=None
                 )
                 command_button.bind(height=command_button.texture_size[1]*2.3)
