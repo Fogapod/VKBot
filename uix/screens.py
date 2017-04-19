@@ -274,7 +274,7 @@ class CustomCommandsScreen(Screen):
                     )
                     old_command_button.callback = callback
                     old_command_button.bind(on_release=old_command_button.callback)
-
+                    
                     block.ids.dropdown.add_widget(old_command_button)"""
                     dropdown_callback = lambda x: block.ids.dropdown.open(block.ids.dropdown_btn)
                     block.ids.dropdown_btn.callback = dropdown_callback
@@ -302,6 +302,7 @@ class CustomCommandsScreen(Screen):
                     
                     block.responses.append(response)
                     block.ids.dropdown.add_widget(command_button)
+
             save_custom_commands(self.custom_commands)
             popup.dismiss()
 
@@ -343,7 +344,7 @@ class CustomCommandsScreen(Screen):
 
     def add_command(self, command, response):
         block = CustomCommandBlock(command=command, response=self.custom_commands[command])
-        #block.ids.dropdown.container.bind(spacing=block.ids.dropdown.required_spacing)
+        # block.ids.dropdown.container.bind(spacing=block.ids.dropdown.required_spacing)
         
         for i, item in enumerate(response):
             if len(response) > 1:
@@ -359,7 +360,7 @@ class CustomCommandsScreen(Screen):
                 command_button = block.ids.dropdown_btn
 
             command_button.command = command
-            command_button.response = response[i].encode('utf8')
+            command_button.response = response[i]
             callback = partial(
                 self.open_edit_popup,
                 command_button.command,
@@ -382,14 +383,14 @@ class CustomCommandsScreen(Screen):
             block.ids.dropdown_btn.bind(on_release=block.ids.dropdown_btn.callback)
         self.ids.cc_list.add_widget(block)
         self.included_keys.append(command)
+
         Clock.schedule_once(self.update_commands_list_size, .1)
 
     def sort_blocks(self):
         for widget in sorted(self.ids.cc_list.children):
-            if widget.is_custom_command_block:
-                self.ids.cc_list.remove_widget(widget)
-                for command in widget.commands:
-                    self.included_keys.remove(command)
+            self.ids.cc_list.remove_widget(widget)
+            for command in widget.commands:
+                self.included_keys.remove(command)
 
         self.on_enter()
 
