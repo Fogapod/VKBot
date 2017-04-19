@@ -26,7 +26,7 @@ class VKBotApp(App):
 
         self.root = Root()
 
-        if not  self.session.authorization()[0]:
+        if not self.session.authorization()[0]:
             self.root.show_auth_screen()
         else:
             self.root.show_main_screen()
