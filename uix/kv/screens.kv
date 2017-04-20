@@ -167,8 +167,10 @@
 
 <MainScreen>:
     name: 'main_screen'
+
     BoxLayout:
         orientation: 'vertical'
+        
         ActionBar:
             id: actionbar
             ActionView:
@@ -191,9 +193,13 @@
             loop: True
 
             FloatLayout:
-                Apply:
+                Button:
                     id: main_btn
-                    size_hint_x: .5
+                    font_size: '16sp'
+                    background_normal: ''
+                    background_color: 0, .2, .4, 1
+                    size_hint: None, None
+                    size: self.texture_size[0]*2.3, self.texture_size[1]*2.3
                     pos_hint: {'center_x':.5}
                     pos_hint_y: None
                     pos: self.pos[0], actionbar.pos[1]-actionbar.height*1.5
@@ -214,10 +220,10 @@
 
             FloatLayout:
                 Apply:
-                    text: 'Взломать Пентагон'
+                    text: 'Мануал'
                     size_hint_x: .5
                     pos_hint: {'center_x':.5, 'center_y':.5}
-                    on_press: self.text = 'В разработке'
+                    on_release: root.show_manual()
 
 
 <CustomCommandsScreen>:
@@ -233,6 +239,8 @@
                 id: cc_list
                 cols: 1
                 spacing: dp(2)
+                size_hint_y: None
+                height: self.minimum_size[1]
 
         GridLayout:
             cols: 3
@@ -245,10 +253,10 @@
                 Button:
                     text: 'Добавить'
                     size_hint_x: None
-                    width: self.texture_size[0]
+                    width: self.texture_size[0] + dp(5)
                     on_release: root.open_edit_popup()
 
-                Label:
+                Widget:
             Button:
                 text: 'Вернуться'
                 size_hint_y: None
@@ -257,9 +265,9 @@
             GridLayout:
                 cols: 2
 
-                Label:
+                Widget:
                 Button:
                     text: 'Сортировка'
                     size_hint_x: None
-                    width: self.texture_size[0] + dp(3)
+                    width: self.texture_size[0] + dp(5)
                     on_release: root.sort_blocks()
