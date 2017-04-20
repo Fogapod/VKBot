@@ -4,11 +4,10 @@
 from functools import partial
 
 from kivy.uix.screenmanager import Screen, ScreenManager, FadeTransition
-from kivy.uix.button import Button
 from kivy.clock import mainthread, Clock
 from kivy.app import App
 
-from uix.customcommandblock import CustomCommandBlock
+from uix.customcommandblock import CustomCommandBlock, CommandButton
 from uix.editcommandpopup import EditCommandPopup
 
 from bot.utils import toast_notification, bot_launched_notification, \
@@ -67,6 +66,9 @@ class MainScreen(Screen):
         self.launch_bot_text = 'Включить бота'
         self.stop_bot_text = 'Выключить бота'
         self.ids.main_btn.text = self.launch_bot_text
+
+    def show_manual():
+        pass
 
     @mainthread
     def on_main_btn_press(self):
@@ -151,7 +153,7 @@ class CustomCommandsScreen(Screen):
                 command_block=None, *args
                 ):
         popup = EditCommandPopup(
-            title=u'Настройка команды «{}»'.format(command) if command else 'Добавление новой команды',
+            title=u'Настройка команды «{}»'.format(command) if command else 'Настройка новой команды',
             command_text=command,
             response_text=response,
             command_button=command_button,
@@ -194,8 +196,8 @@ class CustomCommandsScreen(Screen):
             toast_notification(u'Поля с командой и ответом не могут быть пустыми')
         else:
             if not command_button and not command in self.included_keys:
-                self.custom_commands[command] = [response]
                 self.add_command(command, response)
+                self.custom_commands[command] = [response]
             elif command_button:
                 button_command = command_button.command
                 if button_command != command:
@@ -227,12 +229,10 @@ class CustomCommandsScreen(Screen):
                         break
 
                 if len(block.responses) > 1:
-                    command_button = Button(
+                    command_button = CommandButton(
                         text=response,
                         font_size='15sp',
-                        background_normal='',
-                        background_color=(.24, .69, .55, 1),
-                        size_hint_y=None
+                        
                     )
                     command_button.bind(height=command_button.texture_size[1]*2.3)
                     command_button.command = command
@@ -252,13 +252,7 @@ class CustomCommandsScreen(Screen):
                 else:
                     block.ids.dropdown_btn.unbind(on_release=block.ids.dropdown_btn.callback)
                     del block.ids.dropdown_btn.callback
-                    """old_command_button = Button(
-                        text=block.ids.dropdown_btn.response,
-                        font_size='15sp',
-                        background_normal='',
-                        background_color=(.24, .69, .55, 1),
-                        size_hint_y=None
-                    )
+                    """old_command_button = CommandButton(text=block.ids.dropdown_btn.response)
                     old_command_button.bind(height=old_command_button.texture_size[1]*2.3)
                     old_command_button.command = block.ids.dropdown_btn.command
                     old_command_button.response = block.ids.dropdown_btn.response"""
@@ -280,12 +274,8 @@ class CustomCommandsScreen(Screen):
                     block.ids.dropdown_btn.callback = dropdown_callback
                     block.ids.dropdown_btn.bind(on_release=block.ids.dropdown_btn.callback)
 
-                    command_button = Button(
-                        text=response,
-                        font_size='15sp',
-                        background_normal='',
-                        background_color=(.24, .69, .55, 1),
-                        size_hint_y=None
+                    command_button = CommandButton(
+                        text=response
                     )
                     command_button.bind(height=command_button.texture_size[1]*2.3)
                     command_button.command = command
@@ -307,54 +297,46 @@ class CustomCommandsScreen(Screen):
             popup.dismiss()
 
     def remove_command(self, command, response, command_button, block, popup):
-        if popup.ids.command_text.text and popup.ids.response_text.text:
-            if len(block.responses) == 1:
-                self.custom_commands.pop(command, None)
-                self.included_keys.remove(command)
-                self.ids.cc_list.remove_widget(block)
-                Clock.schedule_once(self.update_commands_list_size, .1)
-            elif len(block.responses) == 2:
-                self.custom_commands[command].remove(response)
-                block.ids.dropdown_btn.unbind(on_release=block.ids.dropdown_btn.callback)
+        if len(block.responses) == 1:
+            self.custom_commands.pop(command, None)
+            self.included_keys.remove(command)
+            self.ids.cc_list.remove_widget(block)
+        elif len(block.responses) == 2:
+            self.custom_commands[command].remove(response)
+            block.ids.dropdown_btn.unbind(on_release=block.ids.dropdown_btn.callback)
 
-                block.ids.dropdown.remove_widget(command_button)
+            block.ids.dropdown.remove_widget(command_button)
                 
-                command_button = block.ids.dropdown_btn
-                command_button.command = command
-                command_button.response = block.ids.dropdown.container.children[0].response # last child
-                callback = partial(
-                    self.open_edit_popup,
-                    command_button.command,
-                    command_button.response,
-                    command_button,
-                    block
-                )
-                command_button.callback = callback
-                command_button.bind(on_release=command_button.callback)
-                block.responses.remove(response)
-                block.ids.dropdown.dismiss()
-            else:
-                self.custom_commands[command].remove(response)
-                block.ids.dropdown.remove_widget(command_button)
-                block.ids.dropdown.dismiss()
-                block.responses.remove(response)
+            command_button = block.ids.dropdown_btn
+            command_button.command = command
+            command_button.response = block.ids.dropdown.container.children[0].response # last child
+            callback = partial(
+                self.open_edit_popup,
+                command_button.command,
+                command_button.response,
+                command_button,
+                block
+            )
+            command_button.callback = callback
+            command_button.bind(on_release=command_button.callback)
+            block.responses.remove(response)
+            block.ids.dropdown.dismiss()
+        else:
+            self.custom_commands[command].remove(response)
+            block.ids.dropdown.remove_widget(command_button)
+            block.ids.dropdown.dismiss()
+            block.responses.remove(response)
 
-            save_custom_commands(self.custom_commands)
-            popup.dismiss()
+        save_custom_commands(self.custom_commands)
+        popup.dismiss()
 
     def add_command(self, command, response):
-        block = CustomCommandBlock(command=command, response=self.custom_commands[command])
-        # block.ids.dropdown.container.bind(spacing=block.ids.dropdown.required_spacing)
+        block = CustomCommandBlock(command=command, response=response)
+        block.ids.dropdown.container.spacing = block.ids.dropdown.required_spacing
         
         for i, item in enumerate(response):
             if len(response) > 1:
-                command_button = Button(
-                    text=response[i],
-                    font_size='15sp',
-                    background_normal='',
-                    background_color=(.24, .69, .55, 1),
-                    size_hint_y=None
-                )
+                command_button = CommandButton(text=response[i])
                 command_button.bind(height=command_button.texture_size[1]*2.3)
             else:
                 command_button = block.ids.dropdown_btn
@@ -384,8 +366,6 @@ class CustomCommandsScreen(Screen):
         self.ids.cc_list.add_widget(block)
         self.included_keys.append(command)
 
-        Clock.schedule_once(self.update_commands_list_size, .1)
-
     def sort_blocks(self):
         for widget in sorted(self.ids.cc_list.children):
             self.ids.cc_list.remove_widget(widget)
@@ -393,10 +373,6 @@ class CustomCommandsScreen(Screen):
                 self.included_keys.remove(command)
 
         self.on_enter()
-
-    def update_commands_list_size(self, delay):
-        self.ids.cc_list.size_hint_y = None
-        self.ids.cc_list.height = self.ids.cc_list.minimum_height
 
 
 class Root(ScreenManager):
