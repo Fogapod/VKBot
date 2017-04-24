@@ -337,7 +337,6 @@ class CustomCommandsScreen(Screen):
         for i, item in enumerate(response):
             if len(response) > 1:
                 command_button = CommandButton(text=response[i])
-                command_button.bind(height=command_button.texture_size[1]*2.3)
             else:
                 command_button = block.ids.dropdown_btn
 
