@@ -16,10 +16,10 @@ source.dir = .
 source.include_exts = py,jpg,kv
 
 # (list) List of inclusions using pattern matching
-#source.include_patterns = assets/*,images/*.png
+# source.include_patterns = assets/*,images/*.png
 
 # (list) Source files to exclude (let empty to not exclude anything)
-#source.exclude_exts = spec,ini,log,pyc,pyx,pyo,txt
+# source.exclude_exts = spec,ini,log,pyc,pyx,pyo,txt
 
 # (list) List of directory to exclude (let empty to not exclude anything)
 source.exclude_dirs = .buildozer,bin
@@ -28,7 +28,7 @@ source.exclude_dirs = .buildozer,bin
 # source.exclude_patterns =
 
 # (str) Application versioning (method 1)
-#version = 0.1
+# version = 0.1
 
 # (str) Application versioning (method 2)
 version.regex = __version__ = ['"](.*)['"]
@@ -36,25 +36,25 @@ version.filename = %(source.dir)s/bot/core.py
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy
-requirements = kivy,requests,openssl,android,git+http://github.com/Fogapod/plyer.git
+requirements = kivy,requests,openssl,git+http://github.com/Fogapod/plyer.git
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
 # requirements.source.kivy = ../../kivy
 
 # (list) Garden requirements
-#garden_requirements =
+# garden_requirements =
 
 # (str) Presplash of the application
-#presplash.filename = %(source.dir)s/data/presplash.png
+# presplash.filename = %(source.dir)s/data/presplash.png
 
 # (str) Icon of the application
-#icon.filename = %(source.dir)s/data/icon.png
+# icon.filename = %(source.dir)s/data/icon.png
 
 # (str) Supported orientation (one of landscape, portrait or all)
 orientation = portrait
 # (list) List of service to declare
-#services = NAME:ENTRYPOINT_TO_PY,NAME2:ENTRYPOINT2_TO_PY
+# services = NAME:ENTRYPOINT_TO_PY,NAME2:ENTRYPOINT2_TO_PY
 
 #
 # OSX Specific
@@ -68,7 +68,7 @@ orientation = portrait
 #
 
 # (bool) Indicate if the application should be fullscreen or not
-fullscreen = 1
+fullscreen = 0
 
 # (list) Permissions
 android.permissions = INTERNET
@@ -77,31 +77,31 @@ android.permissions = INTERNET
 android.api = 15
 
 # (int) Minimum API required
-#android.minapi = 8
+# android.minapi = 8
 
 # (int) Android SDK version to use
 android.sdk = 24
 
 # (str) Android NDK version to use
-#android.ndk = 9c
+# android.ndk = 9c
 
 # (bool) Use --private data storage (True) or --dir public storage (False)
-#android.private_storage = True
+# android.private_storage = True
 
 # (str) Android NDK directory (if empty, it will be automatically downloaded.)
-#android.ndk_path =
+# android.ndk_path =
 
 # (str) Android SDK directory (if empty, it will be automatically downloaded.)
-#android.sdk_path =
+# android.sdk_path =
 
 # (str) ANT directory (if empty, it will be automatically downloaded.)
-#android.ant_path =
+# android.ant_path =
 
 # (str) python-for-android git clone directory (if empty, it will be automatically cloned from github)
-#android.p4a_dir =
+# android.p4a_dir =
 
 # (list) python-for-android whitelist
-#android.p4a_whitelist =
+# android.p4a_whitelist =
 
 # (bool) If True, then skip trying to update the Android sdk
 # This can be useful to avoid excess Internet downloads or save time
@@ -109,68 +109,68 @@ android.sdk = 24
 # android.skip_update = False
 
 # (str) Android entry point, default is ok for Kivy-based app
-#android.entrypoint = org.renpy.android.PythonActivity
+# android.entrypoint = org.renpy.android.PythonActivity
 
 # (list) List of Java .jar files to add to the libs so that pyjnius can access
 # their classes. Don't add jars that you do not need, since extra jars can slow
 # down the build process. Allows wildcards matching, for example:
 # OUYA-ODK/libs/*.jar
-#android.add_jars = foo.jar,bar.jar,path/to/more/*.jar
+# android.add_jars = foo.jar,bar.jar,path/to/more/*.jar
 
 # (list) List of Java files to add to the android project (can be java or a
 # directory containing the files)
-#android.add_src =
+# android.add_src =
 
 # (str) python-for-android branch to use, if not master, useful to try
 # not yet merged features.
-#android.branch = master
+# android.branch = master
 
 # (str) OUYA Console category. Should be one of GAME or APP
 # If you leave this blank, OUYA support will not be enabled
-#android.ouya.category = GAME
+# android.ouya.category = GAME
 
 # (str) Filename of OUYA Console icon. It must be a 732x412 png image.
-#android.ouya.icon.filename = %(source.dir)s/data/ouya_icon.png
+# android.ouya.icon.filename = %(source.dir)s/data/ouya_icon.png
 
 # (str) XML file to include as an intent filters in <activity> tag
-#android.manifest.intent_filters =
+# android.manifest.intent_filters =
 
 # (list) Android additionnal libraries to copy into libs/armeabi
-#android.add_libs_armeabi = libs/android/*.so
-#android.add_libs_armeabi_v7a = libs/android-v7/*.so
-#android.add_libs_x86 = libs/android-x86/*.so
-#android.add_libs_mips = libs/android-mips/*.so
+# android.add_libs_armeabi = libs/android/*.so
+# android.add_libs_armeabi_v7a = libs/android-v7/*.so
+# android.add_libs_x86 = libs/android-x86/*.so
+# android.add_libs_mips = libs/android-mips/*.so
 
 # (bool) Indicate whether the screen should stay on
 # Don't forget to add the WAKE_LOCK permission if you set this to True
-#android.wakelock = False
+# android.wakelock = False
 
 # (list) Android application meta-data to set (key=value format)
-#android.meta_data =
+# android.meta_data =
 
 # (list) Android library project to add (will be added in the
 # project.properties automatically.)
-#android.library_references =
+# android.library_references =
 
 # (str) Android logcat filters to use
-#android.logcat_filters = *:S python:D
+# android.logcat_filters = *:S python:D
 
 # (bool) Copy library instead of making a libpymodules.so
-#android.copy_libs = 1
+# android.copy_libs = 1
 
 #
 # iOS specific
 #
 
 # (str) Path to a custom kivy-ios folder
-#ios.kivy_ios_dir = ../kivy-ios
+# ios.kivy_ios_dir = ../kivy-ios
 
 # (str) Name of the certificate to use for signing the debug version
 # Get a list of available identities: buildozer ios list_identities
-#ios.codesign.debug = "iPhone Developer: <lastname> <firstname> (<hexstring>)"
+# ios.codesign.debug = "iPhone Developer: <lastname> <firstname> (<hexstring>)"
 
 # (str) Name of the certificate to use for signing the release version
-#ios.codesign.release = %(ios.codesign.debug)s
+# ios.codesign.release = %(ios.codesign.debug)s
 
 
 [buildozer]

@@ -229,12 +229,7 @@ class CustomCommandsScreen(Screen):
                         break
 
                 if len(block.responses) > 1:
-                    command_button = CommandButton(
-                        text=response,
-                        font_size='15sp',
-                        
-                    )
-                    command_button.bind(height=command_button.texture_size[1]*2.3)
+                    command_button = CommandButton(text=response)
                     command_button.command = command
                     command_button.response = response
                     callback = partial(
@@ -253,7 +248,6 @@ class CustomCommandsScreen(Screen):
                     block.ids.dropdown_btn.unbind(on_release=block.ids.dropdown_btn.callback)
                     del block.ids.dropdown_btn.callback
                     """old_command_button = CommandButton(text=block.ids.dropdown_btn.response)
-                    old_command_button.bind(height=old_command_button.texture_size[1]*2.3)
                     old_command_button.command = block.ids.dropdown_btn.command
                     old_command_button.response = block.ids.dropdown_btn.response"""
                     del block.ids.dropdown_btn.command
@@ -277,7 +271,6 @@ class CustomCommandsScreen(Screen):
                     command_button = CommandButton(
                         text=response
                     )
-                    command_button.bind(height=command_button.texture_size[1]*2.3)
                     command_button.command = command
                     command_button.response = response
                     callback = partial(
