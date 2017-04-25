@@ -335,6 +335,9 @@ class CustomCommandsScreen(Screen):
         save_custom_commands(self.custom_commands)
         popup.dismiss()
 
+    def create_command(self, command, response, popup):
+        pass
+
     def add_command(self, command, response):
         block = CustomCommandBlock(command=command, response=response)
         block.ids.dropdown.container.spacing = block.ids.dropdown.required_spacing
