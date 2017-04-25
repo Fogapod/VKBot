@@ -50,8 +50,7 @@ class VKBotApp(App):
 
     def get_application_config(self):
         return super(VKBotApp, self).get_application_config(
-            '{}.%(appname)s.ini'.format(DATA_PATH))
-            # FIXME: реальный путь конфига для андроида - /sdcard/.(appname).ini
+            '{}.%(appname)s.ini'.format(PATH))
 
     def build_config(self, config):
         config.setdefaults('General', 
