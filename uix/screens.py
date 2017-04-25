@@ -365,10 +365,17 @@ class CustomCommandsScreen(Screen):
             toast_notification(u'Поля с командой и ответом не могут быть пустыми')
 
         else:
-            # TODO команды нет в списке
-            # TODO ответа для команлы нет в списке
+            if command not in self.included_keys:
+                self.custom_commands[command] = [response]
+                self.add_command(command, response)
+            
+            elif len(self.custom_commands[command]) == 1:
                 # TODO для команды есть один ответ
+                pass
+            else:
                 # TODO для команды есть 2 и более ответов
+                pass
+            save_custom_commands(self.custom_commands)
             popup.dismiss()
 
     def add_command(self, command, response):
@@ -408,9 +415,9 @@ class CustomCommandsScreen(Screen):
 
     def sort_blocks(self):
         for widget in sorted(self.ids.cc_list.children):
-            self.ids.cc_list.remove_widget(widget)
             for command in widget.commands:
                 self.included_keys.remove(command)
+            self.ids.cc_list.remove_widget(widget)
 
         self.on_enter()
 
