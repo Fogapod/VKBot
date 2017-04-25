@@ -16,6 +16,8 @@ from bot.utils import toast_notification, bot_launched_notification, \
 
 class AuthScreen(Screen):
     def __init__(self, **kwargs):
+        self.show_password_text = 'Показать пароль'
+        self.hide_password_text = 'Скрыть пароль'
         super(AuthScreen, self).__init__(**kwargs)
         self.session = App.get_running_app().session
         
@@ -23,15 +25,15 @@ class AuthScreen(Screen):
         self.ids.pass_auth.disabled = not self.session.authorized
 
     def log_in(self, twofa_key=''):
-        login = self.ids.login.text
-        password = self.ids.pass_input.text
+        login = self.ids.login_textinput.text
+        password = self.ids.pass_textinput.text
 
         if login and password:
             authorized, error = self.session.authorization(
                                 login=login, password=password, key=twofa_key
                                 )
             if authorized:
-                self.ids.pass_input.text = ''
+                self.ids.pass_textinput.text = ''
                 if twofa_key:
                     return True
                 self.parent.show_main_screen()
@@ -44,8 +46,15 @@ class AuthScreen(Screen):
                 else:
                     toast_notification(error, length_long=True)
                     return
-        self.ids.pass_input.text = ''
+        self.ids.pass_textinput.text = ''
 
+    def update_pass_input_status(self, button):
+        if button.text == self.hide_password_text:
+            self.ids.pass_textinput.password = True
+            button.text = self.show_password_text
+        else:
+            self.ids.pass_textinput.password = False
+            button.text = self.hide_password_text
 
 class TwoFAKeyEnterScreen(Screen):
     def twofa_auth(self):
@@ -67,7 +76,10 @@ class MainScreen(Screen):
         self.stop_bot_text = 'Выключить бота'
         self.ids.main_btn.text = self.launch_bot_text
 
-    def show_manual():
+    def show_manual(self):
+        pass
+
+    def on_enter(self):
         pass
 
     @mainthread

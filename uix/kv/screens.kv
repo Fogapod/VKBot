@@ -95,7 +95,7 @@
 
         TextInput:
             hint_text: 'Логин'.decode('utf-8') #KIVY BUG
-            id: login
+            id: login_textinput
             size_hint: None, None
             font_size: '18sp'
             height: self.minimum_height
@@ -104,34 +104,23 @@
 
         TextInput:
             hint_text: 'Пароль'.decode('utf-8') #KIVY BUG
-            id: pass_input
+            id: pass_textinput
             size_hint: None, None
             font_size: '18sp'
             height: self.minimum_height
             width: self.height*10
             multiline: False
-            password: show_pass.active == False
 
-        GridLayout:
-            id: gridlayout
-            cols: 2
-            padding: dp(6)
+        Button:
+            id: show_pass_label
+            text: root.hide_password_text
+            background_color: 0, 0, 0, 0
+            color: 0, .2, .4, 1
+            font_size: '16sp'
+            padding_y: dp(3)
             size_hint_y: None
-            size: self.minimum_size
-
-            Label:
-                id: show_pass_label
-                text: 'Показать пароль:'
-                color: 0, .2, .4, 1
-                font_size: '16sp'
-                padding_y: dp(3)
-                size_hint: None, None
-                size: self.texture_size
-
-            CheckBox:
-                id: show_pass
-                size_hint: None, None
-                height: show_pass_label.height
+            height: self.texture_size[1]
+            on_press: root.update_pass_input_status(self)
 
         GridLayout:
             cols: 3
