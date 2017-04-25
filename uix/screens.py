@@ -369,12 +369,33 @@ class CustomCommandsScreen(Screen):
                 self.custom_commands[command] = [response]
                 self.add_command(command, response)
             
-            elif len(self.custom_commands[command]) == 1:
-                # TODO для команды есть один ответ
-                pass
             else:
-                # TODO для команды есть 2 и более ответов
-                pass
+                for child in self.ids.cc_list.children:
+                    if command in child.commands:
+                        block = child
+                        break
+
+                if len(self.custom_commands[command]) == 1:
+                    # TODO переназначить кнопку в выпадающую
+                    pass
+
+                command_button = CommandButton(text=response)
+                command_button.command = command
+                command_button.response = response
+                callback = partial(
+                    self.open_edit_popup,
+                    command_button.command,
+                    command_button.response,
+                    command_button,
+                    block
+                )
+                command_button.callback = callback
+                command_button.bind(on_release=command_button.callback)
+
+                block.ids.dropdown.add_widget(command_button)
+                block.responses.append(response)
+                self.custom_commands[command].append(response)
+
             save_custom_commands(self.custom_commands)
             popup.dismiss()
 
