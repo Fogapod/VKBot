@@ -336,6 +336,12 @@ class CustomCommandsScreen(Screen):
         popup.dismiss()
 
     def create_command(self, command, response, popup):
+        # TODO поля команды и ответа пусты
+        # TODO команды нет в списке
+        # TODO ответа для команлы нет в списке
+            # TODO для команды есть один ответ
+            # TODO для команды есть 2 и более ответов
+        # TODO в списке есть команда и ответ
         pass
 
     def add_command(self, command, response):
