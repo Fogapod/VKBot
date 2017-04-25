@@ -6,8 +6,8 @@ import traceback
 import os
 
 from program import VKBotApp
-from bot.utils import PATH
-from bot.utils import DATA_PATH
+from bot.utils import PATH, DATA_PATH
+
 
 def main():
     try:
