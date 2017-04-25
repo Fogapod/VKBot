@@ -160,12 +160,11 @@ class CustomCommandsScreen(Screen):
         self.parent.show_main_screen()
 
     def open_edit_popup(
-                self, command='', response='',
-                command_button=None,
-                command_block=None, *args
+                self, command, response,
+                command_button, command_block, *args
                 ):
         popup = EditCommandPopup(
-            title=u'Настройка команды «{}»'.format(command) if command else 'Настройка новой команды',
+            title=u'Настройка команды «{}»'.format(command),
             command_text=command,
             response_text=response,
             command_button=command_button,
@@ -186,6 +185,23 @@ class CustomCommandsScreen(Screen):
                 popup.ids.response_text.text,
                 popup.command_button,
                 popup.command_block,
+                popup
+            )
+        )
+        popup.open()
+
+    def open_new_command_popup(self):
+        popup = EditCommandPopup(
+            title='Настройка новой команды',
+            command_text='',
+            response_text='',
+            command_button=None,
+            command_block=None
+        )
+        popup.ids.apply_btn.bind(
+            on_release=lambda x: self.create_command(
+                popup.ids.command_text.text,
+                popup.ids.response_text.text,
                 popup
             )
         )
@@ -336,13 +352,24 @@ class CustomCommandsScreen(Screen):
         popup.dismiss()
 
     def create_command(self, command, response, popup):
-        # TODO поля команды и ответа пусты
-        # TODO команды нет в списке
-        # TODO ответа для команлы нет в списке
-            # TODO для команды есть один ответ
-            # TODO для команды есть 2 и более ответов
-        # TODO в списке есть команда и ответ
-        pass
+        try:
+            command = command.decode('utf8')
+        except UnicodeEncodeError:
+            pass
+        try:
+            response = response.decode('utf8')
+        except UnicodeEncodeError:
+            pass
+
+        if not (popup.ids.command_text.text and popup.ids.response_text.text):
+            toast_notification(u'Поля с командой и ответом не могут быть пустыми')
+
+        else:
+            # TODO команды нет в списке
+            # TODO ответа для команлы нет в списке
+                # TODO для команды есть один ответ
+                # TODO для команды есть 2 и более ответов
+            popup.dismiss()
 
     def add_command(self, command, response):
         block = CustomCommandBlock(command=command, response=response)
