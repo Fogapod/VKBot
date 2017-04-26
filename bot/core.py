@@ -27,6 +27,8 @@ __help__ = '''
 (/calculate ... |/посчитай ... ) =
 *Проверять, простое ли число
 (/prime ... |/простое ... ) %
+*Определять достоверность информации
+(/инфа ... |/chance ... )
 *Учить учить ответы
 (/learn command:response |/выучи команда:ответ ) +
 *Забывать ответы
@@ -102,7 +104,7 @@ class Bot(object):
         return result
 
     def prime(self, cmd):
-        words =cmd.words
+        words = cmd.words
         argument_required = self._is_argument_missing(words)
         if argument_required:
             return argument_required
@@ -130,6 +132,14 @@ class Bot(object):
         else:
             result = 'Дано неверное или слишком большое значение'
         return result
+
+    def chance(self, cmd):
+        words = cmd.words
+        argument_required = self._is_argument_missing(words)
+        if argument_required:
+            return argument_required
+
+        return 'Вероятность ' + str(random.randrange(102)) + '%'
 
     def learn(self, cmd, custom_commands, protect=True):
         if protect:
@@ -399,6 +409,9 @@ class LongPollSession(Bot):
 
                         elif re.match(u'(^простое)|(^prime)|%$', command.words[0].lower()):
                             response_text = self.prime(command)
+
+                        elif re.match(u'(^инфа)|(^chance)$', command.words[0].lower()):
+                            response_text = self.chance(command)
 
                         elif re.match(u'(^выучи)|(^learn)|\+$', command.words[0].lower()):
                             self.custom_commands, response_text = self.learn(
