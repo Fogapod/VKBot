@@ -175,6 +175,13 @@ def set_status(**kwargs):
 
 
 @error_catcher
+def get_user_name(**kwargs):
+    uid = kwargs['user_id']
+    name_case = kwargs.get('name_case', 'nom')
+    response = api.users.get(user_ids=uid, name_case=name_case)[0]
+    return response['first_name'] + u' ' + response['last_name']
+
+@error_catcher
 def track_visitor():
     api.stats.trackVisitor()
     return True
