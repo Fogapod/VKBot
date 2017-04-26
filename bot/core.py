@@ -28,7 +28,9 @@ __help__ = '''
 *Проверять, простое ли число
 (/prime ... |/простое ... ) %
 *Определять достоверность информации
-(/инфа ... |/chance ... )
+(/chance ... |/инфа ... )
+*Выбирать участника беседы
+(/who ... |/кто ... )
 *Учить ответы
 (/learn command:response |/выучи команда:ответ ) +
 *Забывать ответы
@@ -134,12 +136,26 @@ class Bot(object):
         return result
 
     def chance(self, cmd):
-        words = cmd.words
-        argument_required = self._is_argument_missing(words)
+        argument_required = self._is_argument_missing(cmd.words)
         if argument_required:
             return argument_required
 
         return 'Вероятность ' + str(random.randrange(102)) + '%'
+
+    def who(self, cmd):
+        argument_required = self._is_argument_missing(cmd.words)
+        if argument_required:
+            return argument_required
+
+        if not cmd.from_chat:
+            return 'Данная команда работает только в беседе'
+        elif len(cmd.chat_users) < 2:
+            return 'Для корректной работы команды в беседе должно находиться больше одного человека'
+        else:
+            user_id = random.choice(cmd.chat_users)
+            user_name, error = vkr.get_user_name(user_id=user_id, name_case='acc')
+            if user_name:
+                return u'Я выбираю [id' + str(user_id) + u'|' + user_name + u']'
 
     def learn(self, cmd, custom_commands, protect=True):
         if protect:
@@ -270,6 +286,7 @@ class Command():
         self.from_chat = True
         self.msg_from = None, None
         self.chat_user = None
+        self.chat_users = []
         self.out = False
 
     def load(self, message):
@@ -294,7 +311,7 @@ class Command():
             self.msg_from = message['chat_id'], None
             self.chat_user = message['user_id']
             self.forward_msg = message['id']
-
+            self.chat_users = message['chat_active']
         else:
             self.msg_from = None, message['user_id']
             self.forward_msg = None
@@ -412,6 +429,9 @@ class LongPollSession(Bot):
 
                         elif re.match(u'(^инфа)|(^chance)$', command.words[0].lower()):
                             response_text = self.chance(command)
+
+                        elif re.match(u'(^кто)|(^who)$', command.words[0].lower()):
+                            response_text = self.who(command)
 
                         elif re.match(u'(^выучи)|(^learn)|\+$', command.words[0].lower()):
                             self.custom_commands, response_text = self.learn(
