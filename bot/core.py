@@ -155,7 +155,7 @@ class Bot(object):
             user_id = random.choice(cmd.chat_users)
             user_name, error = vkr.get_user_name(user_id=user_id, name_case='acc')
             if user_name:
-                return u'Я выбираю [id' + str(user_id) + u'|' + user_name + u']'
+                return u'Я выбираю [id{0}|{1}]'.format(str(user_id), user_name)
 
     def learn(self, cmd, custom_commands, protect=True):
         if protect:
