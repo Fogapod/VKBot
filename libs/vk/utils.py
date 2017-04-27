@@ -1,3 +1,6 @@
+#-*-coding:utf-8-*-
+
+
 import re
 import logging
 from collections import Iterable
