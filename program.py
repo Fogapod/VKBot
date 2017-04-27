@@ -31,11 +31,6 @@ class VKBotApp(App):
         else:
             self.root.show_main_screen()
 
-            self.on_config_change(
-                    self.config, 'General', 'use_custom_commands',
-                    self.config.getdefault('General', 'use_custom_commands', 'False')
-                ) # URGLY # TODO
-
         return self.root
 
     def load_kv_files(self):
@@ -107,11 +102,6 @@ class VKBotApp(App):
             }
         ]''' % PATH
         )
-
-    def on_config_change(self, config, section, key, value):
-        if config is self.config:
-            if key == 'use_custom_commands':
-                self.root.current_screen.ids.open_cc_screen_btn.disabled = value != 'True'
 
     def get_captcha_key(captcha_url):
         return None
