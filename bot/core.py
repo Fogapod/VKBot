@@ -467,7 +467,7 @@ class LongPollSession(Bot):
                         elif command.words[0].lower() == 'raise':
                             response_text = self._raise_debug_exception(command)
 
-                        elif self.use_custom_commands and self.custom_commands:
+                        elif self.use_custom_commands and self.custom_commands is not None:
                             response_text, attachments = self.custom_command(
                         	            command,
                         	            self.custom_commands
@@ -475,7 +475,7 @@ class LongPollSession(Bot):
                             if not (response_text or attachments):
                                 response_text = 'Неизвестная команда. Вы можете использовать /help для получения списка команд.'
 
-                    elif self.use_custom_commands and self.custom_commands:
+                    elif self.use_custom_commands and self.custom_commands is not None:
                         response_text, attachments = self.custom_command(
                         	        command,
                         	        self.custom_commands
