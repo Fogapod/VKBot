@@ -150,8 +150,6 @@ class CustomCommandsScreen(Screen):
     def on_enter(self):
         self.custom_commands = load_custom_commands()
         if not self.custom_commands and type(self.custom_commands) is not dict:
-            print self.custom_commands is dict
-            print self.custom_commands is {}
             toast_notification(u'Повреждён файл пользовательских команд')
             Clock.schedule_once(self.leave, .1)
         else:
