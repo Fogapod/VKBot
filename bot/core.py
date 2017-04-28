@@ -512,7 +512,7 @@ class LongPollSession(Bot):
             except Exception as e:
                 if not 'traceback' in globals():
                     import traceback
-                self.runtime_error = traceback.format_exc()
+                self.runtime_error = traceback.format_exc().decode('unicode-escape')
                 self.run_bot = False
 
         self.running = False

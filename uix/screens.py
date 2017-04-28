@@ -138,7 +138,7 @@ class MainScreen(Screen):
 
             if self.session.runtime_error:
                 error = self.session.runtime_error
-                error = error[error.index('Exception: '):].decode('unicode-escape')
+                error = error[error.index('Exception: '):]
                 toast_notification(error, length_long=True)
 
 
