@@ -137,7 +137,9 @@ class MainScreen(Screen):
             bot_stopped_notification()
 
             if self.session.runtime_error:
-                toast_notification(self.session.runtime_error, length_long=True)
+                error = self.session.runtime_error
+                error = error[error.index('Exception: '):].decode('unicode-escape')
+                toast_notification(error, length_long=True)
 
 
 class CustomCommandsScreen(Screen):
@@ -147,9 +149,11 @@ class CustomCommandsScreen(Screen):
 
     def on_enter(self):
         self.custom_commands = load_custom_commands()
-        if not self.custom_commands:
+        if not self.custom_commands and type(self.custom_commands) is not dict:
+            print self.custom_commands is dict
+            print self.custom_commands is {}
             toast_notification(u'Повреждён файл пользовательских команд')
-            Clock.schedule_once(lambda x: self.leave(), .1)
+            Clock.schedule_once(self.leave, .1)
         else:
             for key in sorted(self.custom_commands.keys()):
                 self.custom_commands[key] = sorted(self.custom_commands[key])
@@ -292,7 +296,7 @@ class CustomCommandsScreen(Screen):
                     old_command_button.bind(on_release=old_command_button.callback)
                     
                     block.ids.dropdown.add_widget(old_command_button)"""
-                    dropdown_callback = lambda x: block.ids.dropdown.open(block.ids.dropdown_btn)
+                    dropdown_callback = block.ids.dropdown.open
                     block.ids.dropdown_btn.callback = dropdown_callback
                     block.ids.dropdown_btn.bind(on_release=block.ids.dropdown_btn.callback)
 
@@ -428,7 +432,7 @@ class CustomCommandsScreen(Screen):
 
         block.ids.dropdown_btn.text = command
         if len(response) > 1:
-            callback = lambda x: block.ids.dropdown.open(block.ids.dropdown_btn)
+            callback = block.ids.dropdown.open
             block.ids.dropdown_btn.callback = callback
             block.ids.dropdown_btn.bind(on_release=block.ids.dropdown_btn.callback)
         self.ids.cc_list.add_widget(block)
