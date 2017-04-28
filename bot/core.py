@@ -283,7 +283,9 @@ class Command():
         self.is_command = False
         self.mark_msg = True
         self.parsed_text = ''
-        self.from_chat = True
+        self.from_user = False
+        self.from_chat = False
+        self.from_group = False
         self.msg_from = None, None
         self.chat_user = None
         self.chat_users = []
@@ -305,7 +307,12 @@ class Command():
                 self.mark_msg = False
 
         self.parsed_text = ' '.join(self.words)
-        self.from_chat = message['title'] != u' ... '
+        if 'chat_id' in message.keys():
+            self.from_chat = True
+        elif message['title'] != u' ... ':
+            self.from_group = True
+        else:
+            self.from_user = True
 
         if self.from_chat:
             self.msg_from = message['chat_id'], None
@@ -460,7 +467,7 @@ class LongPollSession(Bot):
                         elif command.words[0].lower() == 'raise':
                             response_text = self._raise_debug_exception(command)
 
-                        elif self.use_custom_commands:
+                        elif self.use_custom_commands and self.custom_commands:
                             response_text, attachments = self.custom_command(
                         	            command,
                         	            self.custom_commands
@@ -468,7 +475,7 @@ class LongPollSession(Bot):
                             if not (response_text or attachments):
                                 response_text = 'Неизвестная команда. Вы можете использовать /help для получения списка команд.'
 
-                    elif self.use_custom_commands:
+                    elif self.use_custom_commands and self.custom_commands:
                         response_text, attachments = self.custom_command(
                         	        command,
                         	        self.custom_commands
@@ -478,8 +485,8 @@ class LongPollSession(Bot):
                         continue
 
                     if not self.activated:
-                        response_text = response_text.decode('utf8').encode('utf8')\
-                            + '\n\nБот не активирован. По вопросам активации просьба обратиться к автору: %s' % __author__
+                        response_text +=\
+                            u'\n\nБот не активирован. По вопросам активации просьба обратиться к автору: %s' % __author__
 
                     if command.mark_msg:
                         response_text += "'"
@@ -503,10 +510,9 @@ class LongPollSession(Bot):
                     self.reply_count += 1
 
             except Exception as e:
-                try:
-                    self.runtime_error = str(e)
-                except UnicodeEncodeError:
-                    self.runtime_error = unicode(e)
+                if not 'traceback' in globals():
+                    import traceback
+                self.runtime_error = traceback.format_exc()
                 self.run_bot = False
 
         self.running = False
