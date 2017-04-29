@@ -60,13 +60,13 @@ def toast_notification(text, length_long=False):
 
 def load_custom_commands():
     if not os.path.exists(PATH +  'presets.txt'):
-        with open(PATH + 'presets.txt', 'w') as p:
-            p.write('{\n\n}')
+        with open(PATH + 'presets.txt', 'w') as f:
+            f.write('{\n\n}')
         return {}
     else:    
-        with open(PATH + 'presets.txt', 'r') as p:
+        with open(PATH + 'presets.txt', 'r') as f:
             try:
-                content = json.load(p)
+                content = json.load(f)
             except ValueError:
                 return False
 
@@ -77,13 +77,30 @@ def load_custom_commands():
 
 def save_custom_commands(content):
     last_content = load_custom_commands()
-    with open(PATH + 'presets.txt', 'w') as p:
+    with open(PATH + 'presets.txt', 'w') as f:
         try:
-            p.write(json.dumps(content, sort_keys=True, indent=0, ensure_ascii=False).encode('utf8'))
+            f.write(json.dumps(content, sort_keys=True, indent=0, ensure_ascii=False).encode('utf8'))
         except (UnicodeEncodeError, UnicodeDecodeError):
             print('Error saving custom commands file. Reverting')
-            p.truncate(0)
-            p.write(json.dumps(last_content, sort_keys=True, indent=0, ensure_ascii=False).encode('utf8'))
-            p.close()
+            f.truncate(0)
+            f.write(json.dumps(last_content, sort_keys=True, indent=0, ensure_ascii=False).encode('utf8'))
+            f.close()
             return False
+    return True
+
+def load_blacklist():
+    blacklist = []
+    if not os.path.exists(PATH +  'blacklist.txt'):
+        with open(PATH + 'blacklist.txt', 'w') as f:
+            pass
+    else:    
+        with open(PATH + 'blacklist.txt', 'r') as f:
+            for line in f.readlines():
+                if line:
+                    blacklist.append(line)
+    return blacklist
+
+def save_blacklist(blacklist):
+    with open(PATH + 'blacklist.txt', 'w') as f:
+        f.write('\n'.join(blacklist))
     return True
