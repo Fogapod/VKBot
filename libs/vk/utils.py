@@ -1,6 +1,3 @@
-#-*-coding:utf-8-*-
-
-
 import re
 import logging
 from collections import Iterable
@@ -77,8 +74,6 @@ def get_form_action(html):
 class LoggingSession(requests.Session):
     def request(self, method, url, **kwargs):
         logger.debug('Request: %s %s, params=%r, data=%r', method, url, kwargs.get('params'), kwargs.get('data'))
-        response = super(LoggingSession, self).request(method, url, verify=False, **kwargs)
-        # FIXME запросы авторизации перестали проходить, ссылаясь на небезопасное соединение
-        # установлен флаг veryfy=False, возможен перехват паролей
+        response = super(LoggingSession, self).request(method, url, **kwargs)
         logger.debug('Response: %s %s', response.status_code, response.url)
         return response
