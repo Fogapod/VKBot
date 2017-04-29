@@ -138,8 +138,11 @@ class MainScreen(Screen):
 
             if self.session.runtime_error:
                 error = self.session.runtime_error
-                error = error[error.index('Exception: '):]
-                toast_notification(error, length_long=True)
+                try:
+                    error = error[error.index('Exception: '):]
+                    toast_notification(error, length_long=True)
+                except:
+                    raise Exception(error)
 
 
 class CustomCommandsScreen(Screen):
