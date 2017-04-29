@@ -191,8 +191,8 @@ class CustomCommandsScreen(Screen):
                 popup.command_button,
                 popup.command_block,
                 popup
+                )
             )
-        )
         popup.open()
 
     def open_new_command_popup(self):
@@ -202,14 +202,14 @@ class CustomCommandsScreen(Screen):
             response_text='',
             command_button=None,
             command_block=None
-        )
+            )
         popup.ids.apply_btn.bind(
             on_release=lambda x: self.create_command(
                 popup.ids.command_text.text,
                 popup.ids.response_text.text,
                 popup
+                )
             )
-        )
         popup.open()
 
     def save_edited_command(
@@ -227,100 +227,58 @@ class CustomCommandsScreen(Screen):
 
         if not (popup.ids.command_text.text and popup.ids.response_text.text):
             toast_notification(u'Поля с командой и ответом не могут быть пустыми')
-        else:
-            if not command_button and not command in self.included_keys:
-                self.add_command(command, response)
-                self.custom_commands[command] = [response]
-            elif command_button:
-                button_command = command_button.command
-                if button_command != command:
-                    self.custom_commands.pop(button_command)
-                    self.included_keys.remove(button_command)
-                    self.included_keys.append(command)
-                    command_button.text = command
-                    command_button.command = command
-                    block.commands.remove(button_command)
-                    block.commands.append(command)
+            return
 
-                command_button.response = response
-                command_button.unbind(on_release=command_button.callback)
-                callback = partial(
-                    self.open_edit_popup,
-                    command_button.command,
-                    command_button.response,
-                    command_button,
-                    block
-                )
-                command_button.callback = callback
-                command_button.bind(on_release=command_button.callback)
-                self.custom_commands[command] = [response]
+        button_command = command_button.command
+        if button_command != command:
+            if command in self.included_keys:
+                toast_notification(u'Такая команда уже есть')
+                return
+            self.custom_commands.pop(button_command)
+            self.included_keys.remove(button_command)
+            self.included_keys.append(command)
+            command_button.command = command
+            block.commands.remove(button_command)
+            block.commands.append(command)
+            if len(block.responses) > 1:
+                block.ids.dropdown_btn.text = command
+                for button in block.dropdown.container.children:
+                    button.command = command
+                    button.unbind(on_release=button.callback)
+                    callback = partial(
+                        self.open_edit_popup,
+                        button.command,
+                        button.response,
+                        button,
+                        block
+                        )
+                    button.callback = callback
+                    button.bind(on_release=button.callback)
+                command_button.text = response
             else:
-                self.custom_commands[command].append(response)
-                for child in self.ids.cc_list.children:
-                    if command in child.commands:
-                        block = child
-                        break
+                command_button.text = command
 
-                if len(block.responses) > 1:
-                    command_button = CommandButton(text=response)
-                    command_button.command = command
-                    command_button.response = response
-                    callback = partial(
-                        self.open_edit_popup,
-                        command_button.command,
-                        command_button.response,
-                        command_button,
-                        block
-                    )
-                    command_button.callback = callback
-                    command_button.bind(on_release=command_button.callback)
+        else:
+            command_button.response = response
+            command_button.unbind(on_release=command_button.callback)
+            callback = partial(
+                self.open_edit_popup,
+                command_button.command,
+                command_button.response,
+                command_button,
+                block
+                )
+            command_button.callback = callback
+            command_button.bind(on_release=command_button.callback)
+        self.custom_commands[command] = []
+        for response in block.responses:
+            self.custom_commands[command].append(response)
+        # self.custom_commands[command] = responses
+        # will cause
+        # self.custom_commands[command] is responses
 
-                    block.dropdown.add_widget(command_button)
-                    block.responses.append(response)
-                else:
-                    block.ids.dropdown_btn.unbind(on_release=block.ids.dropdown_btn.callback)
-                    del block.ids.dropdown_btn.callback
-                    """old_command_button = CommandButton(text=block.ids.dropdown_btn.response)
-                    old_command_button.command = block.ids.dropdown_btn.command
-                    old_command_button.response = block.ids.dropdown_btn.response"""
-                    del block.ids.dropdown_btn.command
-                    del block.ids.dropdown_btn.response
-
-                    """callback = partial(
-                        self.open_edit_popup,
-                        old_command_button.command,
-                        old_command_button.response,
-                        old_command_button,
-                        block
-                    )
-                    old_command_button.callback = callback
-                    old_command_button.bind(on_release=old_command_button.callback)
-                    
-                    block.dropdown.add_widget(old_command_button)"""
-                    dropdown_callback = block.dropdown.open
-                    block.ids.dropdown_btn.callback = dropdown_callback
-                    block.ids.dropdown_btn.bind(on_release=block.ids.dropdown_btn.callback)
-
-                    command_button = CommandButton(
-                        text=response
-                    )
-                    command_button.command = command
-                    command_button.response = response
-                    callback = partial(
-                        self.open_edit_popup,
-                        command_button.command,
-                        command_button.response,
-                        command_button,
-                        block
-                    )
-                    command_button.callback = callback
-                    command_button.bind(on_release=command_button.callback)
-                    
-                    block.responses.append(response)
-                    block.dropdown.add_widget(command_button)
-
-            save_custom_commands(self.custom_commands)
-            popup.dismiss()
+        save_custom_commands(self.custom_commands)
+        popup.dismiss()
 
     def remove_command(self, command, response, command_button, block, popup):
         if len(block.responses) == 1:
@@ -328,30 +286,31 @@ class CustomCommandsScreen(Screen):
             self.included_keys.remove(command)
             self.ids.cc_list.remove_widget(block)
         elif len(block.responses) == 2:
-            self.custom_commands[command].remove(response)
             block.ids.dropdown_btn.unbind(on_release=block.ids.dropdown_btn.callback)
-
             block.dropdown.remove_widget(command_button)
                 
             command_button = block.ids.dropdown_btn
             command_button.command = command
             command_button.response = block.dropdown.container.children[0].response # last child
+            block.dropdown.remove_widget(block.dropdown.container.children[0])
+
             callback = partial(
                 self.open_edit_popup,
                 command_button.command,
                 command_button.response,
                 command_button,
                 block
-            )
+                )
             command_button.callback = callback
             command_button.bind(on_release=command_button.callback)
             block.responses.remove(response)
+            self.custom_commands[command].remove(response)
             block.dropdown.dismiss()
         else:
             self.custom_commands[command].remove(response)
             block.dropdown.remove_widget(command_button)
-            block.dropdown.dismiss()
             block.responses.remove(response)
+            block.dropdown.dismiss()
 
         save_custom_commands(self.custom_commands)
         popup.dismiss()
@@ -392,7 +351,7 @@ class CustomCommandsScreen(Screen):
                         old_command_button.response,
                         old_command_button,
                         block
-                    )
+                        )
                     old_command_button.callback = callback
                     old_command_button.bind(on_release=old_command_button.callback)
 
@@ -412,7 +371,7 @@ class CustomCommandsScreen(Screen):
                     command_button.response,
                     command_button,
                     block
-                )
+                    )
                 command_button.callback = callback
                 command_button.bind(on_release=command_button.callback)
 
@@ -441,7 +400,7 @@ class CustomCommandsScreen(Screen):
                 command_button.response,
                 command_button,
                 block
-            )
+                )
             command_button.callback = callback
             command_button.bind(on_release=command_button.callback)
 
