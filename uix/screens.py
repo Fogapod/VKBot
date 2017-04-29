@@ -7,7 +7,7 @@ from kivy.uix.screenmanager import Screen, ScreenManager, FadeTransition
 from kivy.clock import mainthread, Clock
 from kivy.app import App
 
-from uix.customcommandblock import CustomCommandBlock, CommandButton
+from uix.customcommandblock import CustomCommandBlock, ListDropDown, CommandButton
 from uix.editcommandpopup import EditCommandPopup
 
 from bot.utils import toast_notification, bot_launched_notification, \
@@ -275,7 +275,7 @@ class CustomCommandsScreen(Screen):
                     command_button.callback = callback
                     command_button.bind(on_release=command_button.callback)
 
-                    block.ids.dropdown.add_widget(command_button)
+                    block.dropdown.add_widget(command_button)
                     block.responses.append(response)
                 else:
                     block.ids.dropdown_btn.unbind(on_release=block.ids.dropdown_btn.callback)
@@ -296,8 +296,8 @@ class CustomCommandsScreen(Screen):
                     old_command_button.callback = callback
                     old_command_button.bind(on_release=old_command_button.callback)
                     
-                    block.ids.dropdown.add_widget(old_command_button)"""
-                    dropdown_callback = block.ids.dropdown.open
+                    block.dropdown.add_widget(old_command_button)"""
+                    dropdown_callback = block.dropdown.open
                     block.ids.dropdown_btn.callback = dropdown_callback
                     block.ids.dropdown_btn.bind(on_release=block.ids.dropdown_btn.callback)
 
@@ -317,7 +317,7 @@ class CustomCommandsScreen(Screen):
                     command_button.bind(on_release=command_button.callback)
                     
                     block.responses.append(response)
-                    block.ids.dropdown.add_widget(command_button)
+                    block.dropdown.add_widget(command_button)
 
             save_custom_commands(self.custom_commands)
             popup.dismiss()
@@ -331,11 +331,11 @@ class CustomCommandsScreen(Screen):
             self.custom_commands[command].remove(response)
             block.ids.dropdown_btn.unbind(on_release=block.ids.dropdown_btn.callback)
 
-            block.ids.dropdown.remove_widget(command_button)
+            block.dropdown.remove_widget(command_button)
                 
             command_button = block.ids.dropdown_btn
             command_button.command = command
-            command_button.response = block.ids.dropdown.container.children[0].response # last child
+            command_button.response = block.dropdown.container.children[0].response # last child
             callback = partial(
                 self.open_edit_popup,
                 command_button.command,
@@ -346,11 +346,11 @@ class CustomCommandsScreen(Screen):
             command_button.callback = callback
             command_button.bind(on_release=command_button.callback)
             block.responses.remove(response)
-            block.ids.dropdown.dismiss()
+            block.dropdown.dismiss()
         else:
             self.custom_commands[command].remove(response)
-            block.ids.dropdown.remove_widget(command_button)
-            block.ids.dropdown.dismiss()
+            block.dropdown.remove_widget(command_button)
+            block.dropdown.dismiss()
             block.responses.remove(response)
 
         save_custom_commands(self.custom_commands)
@@ -373,7 +373,6 @@ class CustomCommandsScreen(Screen):
             if command not in self.included_keys:
                 self.custom_commands[command] = [response]
                 self.add_command(command, response)
-            
             else:
                 for child in self.ids.cc_list.children:
                     if command in child.commands:
@@ -397,7 +396,7 @@ class CustomCommandsScreen(Screen):
                 command_button.callback = callback
                 command_button.bind(on_release=command_button.callback)
 
-                block.ids.dropdown.add_widget(command_button)
+                block.dropdown.add_widget(command_button)
                 block.responses.append(response)
                 self.custom_commands[command].append(response)
 
@@ -405,8 +404,8 @@ class CustomCommandsScreen(Screen):
             popup.dismiss()
 
     def add_command(self, command, response):
-        block = CustomCommandBlock(command=command, response=response)
-        block.ids.dropdown.container.spacing = block.ids.dropdown.required_spacing
+        dropdown = ListDropDown()
+        block = CustomCommandBlock(dropdown=dropdown)
         
         for i, item in enumerate(response):
             if len(response) > 1:
@@ -427,13 +426,13 @@ class CustomCommandsScreen(Screen):
             command_button.bind(on_release=command_button.callback)
 
             if len(response) > 1:
-                block.ids.dropdown.add_widget(command_button)
+                block.dropdown.add_widget(command_button)
             block.responses.append(item)
         block.commands.append(command)
 
         block.ids.dropdown_btn.text = command
         if len(response) > 1:
-            callback = block.ids.dropdown.open
+            callback = block.dropdown.open
             block.ids.dropdown_btn.callback = callback
             block.ids.dropdown_btn.bind(on_release=block.ids.dropdown_btn.callback)
         self.ids.cc_list.add_widget(block)

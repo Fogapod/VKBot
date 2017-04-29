@@ -2,19 +2,16 @@
     cols: 1
     size_hint_y: None
     height: self.minimum_height
-    
-    __safe_id: [dropdown.__self__]
 
     CommandButton:
         id: dropdown_btn
         text: 'команда'
         background_color: 0, .2, .4, 1
-        
-    DropDown:
-        id: dropdown
-        required_spacing: dp(2)
 
-        on_parent: self.dismiss()
+
+<ListDropDown>:
+    id: dropdown
+    required_spacing: dp(2)
 
 
 <CommandButton>:
