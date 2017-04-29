@@ -9,7 +9,7 @@ import random
 from threading import Thread
 
 from utils import PATH, DATA_PATH, load_custom_commands,\
-save_custom_commands
+save_custom_commands, load_blacklist, save_blacklist
 
 import vkrequests as vkr
 
@@ -47,7 +47,49 @@ __help__ = '''
 )
 
 
-class Bot(object):
+class Bot():
+    def blacklist(self, cmd, blacklist):
+        if not cmd.out:
+            return 'Отказано в доступе', blacklist
+        if len(cmd.words) == 1:
+            chat_id = cmd.msg_from[0] if cmd.msg_from[0] else cmd.msg_from[1]
+            chat_id = str(chat_id)
+            if chat_id in blacklist:
+                return 'Данный id уже находится в чёрном списке', blacklist
+            else:
+                blacklist.append(chat_id)
+                save_blacklist(blacklist)
+                return 'id {} добавлен в чёрный список'.format(chat_id), blacklist
+        else:
+            if cmd.words[1] == '-':
+                if len(cmd.words) == 2:
+                    chat_id = cmd.msg_from[0] if cmd.msg_from[0] else cmd.msg_from[1]
+                else:
+                    if re.match('^\d+$', cmd.words[2]):
+                        chat_id = cmd.words[2]
+                    else:
+                        return 'Неправильно указан id', blacklist
+                chat_id = str(chat_id)
+                if chat_id not in blacklist:
+                    return 'В чёрном списке нет данного id', blacklist
+                else:
+                    blacklist.remove(chat_id)
+                    save_blacklist(blacklist)
+                    return 'id {} удалён из чёрного спика'.format(chat_id), blacklist
+            else:
+                if re.match('\d+', cmd.words[1]):
+                    chat_id = cmd.words[1]
+                    chat_id = str(chat_id)
+                    if chat_id in blacklist:
+                        return 'Данный id уже находится в чёрном списке', blacklist
+                    else:
+                        blacklist.append(chat_id)
+                        save_blacklist(blacklist)
+                    return 'id {} добавлен в чёрный список'.format(chat_id), blacklist
+                else:
+                    return 'Неправильно указан id', blacklist
+            print 123
+
     def help(self):
         return __help__
 
@@ -391,6 +433,8 @@ class LongPollSession(Bot):
         else:
             self.custom_commands = None
 
+        self.black_list = load_blacklist()
+
         SELF_ID = vkr.get_self_id()[0]
         command = Command(SELF_ID)
 
@@ -420,7 +464,10 @@ class LongPollSession(Bot):
                     if not command.text or command.text == last_response_text:
                         continue
 
-                    if command.is_command:
+                    if command.is_command and re.match(u'^blacklist$', command.words[0].lower()):
+                        response_text, self.black_list = self.blacklist(command, self.black_list)
+
+                    if command.is_command and str(command.msg_from[0]) not in self.black_list and str(command.msg_from[1]) not in self.black_list:
                         if re.match(u'(^help)|(^помощь)|(^info)|(^инфо)|(^информация)|^\?$',\
                             command.words[0].lower()):
                             response_text = self.help()
@@ -468,14 +515,16 @@ class LongPollSession(Bot):
                             response_text = self._raise_debug_exception(command)
 
                         elif self.use_custom_commands and self.custom_commands is not None:
-                            response_text, attachments = self.custom_command(
+                            command_response, attachments = self.custom_command(
                         	            command,
                         	            self.custom_commands
                         	            )
+                            if command_response:
+                                response_text = command_response
                             if not (response_text or attachments):
                                 response_text = 'Неизвестная команда. Вы можете использовать /help для получения списка команд.'
 
-                    elif self.use_custom_commands and self.custom_commands is not None:
+                    elif self.use_custom_commands and self.custom_commands is not None and str(command.msg_from[0]) not in self.black_list and str(command.msg_from[1]) not in self.black_list:
                         response_text, attachments = self.custom_command(
                         	        command,
                         	        self.custom_commands
