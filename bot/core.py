@@ -17,7 +17,7 @@ __version__ = '0.0.6'
 AUTHOR_VK_ID = 180850898
 __author__ = 'Eugene Ershov - https://vk.com/id%d' % AUTHOR_VK_ID
 
-__help__ = '''
+__help__ = u'''
 Версия: {v}
 
 Я умею:
@@ -50,16 +50,16 @@ __help__ = '''
 class Bot():
     def blacklist(self, cmd, blacklist):
         if not cmd.out:
-            return 'Отказано в доступе', blacklist
+            return u'Отказано в доступе', blacklist
         if len(cmd.words) == 1:
             chat_id = cmd.msg_from[0] if cmd.msg_from[0] else cmd.msg_from[1]
             chat_id = str(chat_id)
             if chat_id in blacklist:
-                return 'Данный id уже находится в чёрном списке', blacklist
+                return u'Данный id уже находится в чёрном списке', blacklist
             else:
                 blacklist.append(chat_id)
                 save_blacklist(blacklist)
-                return 'id {} добавлен в чёрный список'.format(chat_id), blacklist
+                return u'id {} добавлен в чёрный список'.format(chat_id), blacklist
         else:
             if cmd.words[1] == '-':
                 if len(cmd.words) == 2:
@@ -68,26 +68,26 @@ class Bot():
                     if re.match('^\d+$', cmd.words[2]):
                         chat_id = cmd.words[2]
                     else:
-                        return 'Неправильно указан id', blacklist
+                        return u'Неправильно указан id', blacklist
                 chat_id = str(chat_id)
                 if chat_id not in blacklist:
-                    return 'В чёрном списке нет данного id', blacklist
+                    return u'В чёрном списке нет данного id', blacklist
                 else:
                     blacklist.remove(chat_id)
                     save_blacklist(blacklist)
-                    return 'id {} удалён из чёрного спика'.format(chat_id), blacklist
+                    return u'id {} удалён из чёрного спика'.format(chat_id), blacklist
             else:
                 if re.match('\d+', cmd.words[1]):
                     chat_id = cmd.words[1]
                     chat_id = str(chat_id)
                     if chat_id in blacklist:
-                        return 'Данный id уже находится в чёрном списке', blacklist
+                        return u'Данный id уже находится в чёрном списке', blacklist
                     else:
                         blacklist.append(chat_id)
                         save_blacklist(blacklist)
-                    return 'id {} добавлен в чёрный список'.format(chat_id), blacklist
+                    return u'id {} добавлен в чёрный список'.format(chat_id), blacklist
                 else:
-                    return 'Неправильно указан id', blacklist
+                    return u'Неправильно указан id', blacklist
             print 123
 
     def help(self):
@@ -134,17 +134,17 @@ class Bot():
             try:
                 result = str(eval(words))
             except SyntaxError:
-                result = 'Ошибка [0]'
+                result = u'Ошибка [0]'
             except NameError:
-                result = 'Ошибка [1]'
+                result = u'Ошибка [1]'
             except AttributeError:
-                result = 'Ошибка [2]'        
+                result = u'Ошибка [2]'        
             except ZeroDivisionError:
-                result = 'Деление на 0'
+                result = u'Деление на 0'
             except OverflowError:
-                result = 'Слишком большой результат'
+                result = u'Слишком большой результат'
         else:
-            result = 'Не математическая операция'
+            result = u'Не математическая операция'
         return result
 
     def prime(self, cmd):
@@ -170,11 +170,11 @@ class Bot():
                             
             if input_number != 0:
                 is_prime = True if (luc_number - 1) % input_number == 0 else False
-                result = 'Является простым числом' if is_prime else 'Не является простым числом'
+                result = u'Является простым числом' if is_prime else u'Не является простым числом'
             else:
-                result = '0 не является простым числом'
+                result = u'0 не является простым числом'
         else:
-            result = 'Дано неверное или слишком большое значение'
+            result = u'Дано неверное или слишком большое значение'
         return result
 
     def chance(self, cmd):
@@ -182,7 +182,7 @@ class Bot():
         if argument_required:
             return argument_required
 
-        return 'Вероятность ' + str(random.randrange(102)) + '%'
+        return u'Вероятность ' + str(random.randrange(102)) + '%'
 
     def who(self, cmd):
         argument_required = self._is_argument_missing(cmd.words)
@@ -190,9 +190,9 @@ class Bot():
             return argument_required
 
         if not cmd.from_chat:
-            return 'Данная команда работает только в беседе'
+            return u'Данная команда работает только в беседе'
         elif len(cmd.chat_users) < 2:
-            return 'Для корректной работы команды в беседе должно находиться больше одного человека'
+            return u'Для корректной работы команды в беседе должно находиться больше одного человека'
         else:
             user_id = random.choice(cmd.chat_users)
             user_name, error = vkr.get_user_name(user_id=user_id, name_case='acc')
@@ -202,7 +202,7 @@ class Bot():
     def learn(self, cmd, custom_commands, protect=True):
         if protect:
             if not cmd.out:
-                return custom_commands, 'Отказано в доступе'
+                return custom_commands, u'Отказано в доступе'
 
         response_text = u'Команда выучена.\nТеперь на «{}» я буду отвечать «{}»'
         words = cmd.words
@@ -217,10 +217,10 @@ class Bot():
         if argument_required:
             response_text = argument_required
         elif len(text) <2 or not (command and response):
-            response_text = 'Неправильный синтаксис команды' 
+            response_text = u'Неправильный синтаксис команды' 
         elif command.lower() in custom_commands.keys() and response\
                 in custom_commands[command.lower()]:
-            response_text = 'Я уже знаю такой ответ'
+            response_text = u'Я уже знаю такой ответ'
         elif command in custom_commands.keys():
             custom_commands[command.lower()].append(response)
             response_text = response_text.format(command.lower(), response)
@@ -234,9 +234,9 @@ class Bot():
     def forgot(self, cmd, custom_commands, protect=True):
         if protect:
             if not cmd.out:
-                return custom_commands, 'Отказано в доступе'
+                return custom_commands, u'Отказано в доступе'
 
-        response_text = 'Команда забыта'
+        response_text = u'Команда забыта'
         words = cmd.words
         argument_required = self._is_argument_missing(words)
         if argument_required:
@@ -263,7 +263,7 @@ class Bot():
                                 )
             else:
                 custom_commands[command.lower()].remove(response)
-                response_text = 'Ключ для команды забыт'
+                response_text = u'Ключ для команды забыт'
 
         if not response and not custom_commands.pop(command.lower(), None):
             response_text = u'Я не знаю такой команды ({})'.format(command)
@@ -282,37 +282,37 @@ class Bot():
                     response = custom_commands[command.lower()]
                     response = random.choice(response)
                 else:
-                    response = 'Ошибка. Нет указанного ключа'
+                    response = u'Ошибка. Нет указанного ключа'
 
             if response.startswith('attach='):
                 attachments = response[7:]
                 if re.match('.*/((photo)|(video)|(audio)|(doc)|(wall)|(market))(\d+_\d+(_\d+)?)$', attachments):
                     attachments = attachments.split('/')[-1] # URGLY # FIXME
                 else:
-                    response_text = 'Не могу показать вложение. Неправильная ссылка'
+                    response_text = u'Не могу показать вложение. Неправильная ссылка'
             else:
                 response_text = response
         return response_text, attachments
 
     def activate_bot(self, cmd, activated):
         if activated:
-            return 'Бот уже активирован', True
+            return u'Бот уже активирован', True
         elif cmd.from_chat and cmd.chat_user == AUTHOR_VK_ID:
-            return 'Активация прошла успешно', True
+            return u'Активация прошла успешно', True
         else:
-            return 'Отказано в доступе', False
+            return u'Отказано в доступе', False
 
     def deactivate_bot(self, cmd, activated):
         if cmd.from_chat and cmd.chat_user == AUTHOR_VK_ID:
-            return 'Деактивация прошла успешно', False
+            return u'Деактивация прошла успешно', False
         elif activated:
-            return 'Отказано в доступе', True
+            return u'Отказано в доступе', True
         else:
-            return 'Отказано в доступе', False
+            return u'Отказано в доступе', False
 
     def _is_argument_missing(self, words):
         if len(words) == 1:
-            return 'Команду необходимо использовать с аргументом'
+            return u'Команду необходимо использовать с аргументом'
         else:
             return False
 
@@ -522,7 +522,7 @@ class LongPollSession(Bot):
                             if command_response:
                                 response_text = command_response
                             if not (response_text or attachments):
-                                response_text = 'Неизвестная команда. Вы можете использовать /help для получения списка команд.'
+                                response_text = u'Неизвестная команда. Вы можете использовать /help для получения списка команд.'
 
                     elif self.use_custom_commands and self.custom_commands is not None and str(command.msg_from[0]) not in self.black_list and str(command.msg_from[1]) not in self.black_list:
                         response_text, attachments = self.custom_command(
