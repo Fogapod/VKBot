@@ -93,7 +93,6 @@ class Bot():
                     return u'id {} добавлен в чёрный список'.format(chat_id), blacklist
                 else:
                     return u'Неправильно указан id', blacklist
-            print 123
 
     def help(self):
         return __help__
