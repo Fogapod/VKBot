@@ -22,6 +22,12 @@ def error_catcher(request):
                 time.sleep(0.33)
                 return do_request(*args, **kwargs) # TODO: add counter
 
+            
+            elif '[errno 1]_ssl.c:503' in error:
+                print 'Sertificate verify failed. Trying unsafe request'
+                vk.api.Session.need_verify_request_sert = False
+                return do_request(*args, **kwargs)
+
             elif 'connection' in error:
                 print 'Check your connection'
 
@@ -29,7 +35,7 @@ def error_catcher(request):
                 print 'Incorrect password'
             
             elif 'invalid access_token' in error:
-                print 'invalid access_token'
+                print 'Invalid access_token'
 
             elif 'captcha' in error:
                 print 'Capthca'

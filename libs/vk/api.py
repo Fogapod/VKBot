@@ -26,6 +26,8 @@ class Session(object):
         self.access_token = access_token
         self.access_token_is_needed = False
 
+        self.need_verify_request_sert = True
+
         self.requests_session = LoggingSession()
         self.requests_session.headers['Accept'] = 'application/json'
         self.requests_session.headers['Content-Type'] = 'application/x-www-form-urlencoded'
@@ -112,7 +114,9 @@ class Session(object):
             method_args['captcha_sid'] = captcha_response['sid']
             method_args['captcha_key'] = captcha_response['key']
         timeout = request._api._timeout
-        response = self.requests_session.post(url, method_args, timeout=timeout)
+        verify = self.need_verify_request_sert
+        response = self.requests_session.post(url, method_args, timeout=timeout, verify=verify)
+        self.need_verify_request_sert = True
         return response
 
     def get_captcha_key(self, captcha_image_url):
