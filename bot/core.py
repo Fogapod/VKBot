@@ -53,6 +53,8 @@ class Bot():
             return u'Отказано в доступе', blacklist
         if len(cmd.words) == 1:
             chat_id = cmd.msg_from[0] if cmd.msg_from[0] else cmd.msg_from[1]
+            if cmd.from_chat:
+                chat_id += 2000000000
             chat_id = str(chat_id)
             if chat_id in blacklist:
                 return u'Данный id уже находится в чёрном списке', blacklist
@@ -69,6 +71,9 @@ class Bot():
                         chat_id = cmd.words[2]
                     else:
                         return u'Неправильно указан id', blacklist
+                if cmd.from_chat and chat_id < 2000000000:
+                    chat_id = int(chat_id)
+                    chat_id += 2000000000
                 chat_id = str(chat_id)
                 if chat_id not in blacklist:
                     return u'В чёрном списке нет данного id', blacklist
@@ -464,10 +469,15 @@ class LongPollSession(Bot):
                     if not command.text or command.text == last_response_text:
                         continue
 
+                    blacklisted = False
                     if command.is_command and re.match(u'^blacklist$', command.words[0].lower()):
                         response_text, self.black_list = self.blacklist(command, self.black_list)
+                    elif command.msg_from[0] and str(command.msg_from[0] + 2000000000) in self.black_list:
+                        blacklisted = True
+                    elif str(command.msg_from[1]) in self.black_list:
+                        blacklisted = True
 
-                    if command.is_command and str(command.msg_from[0]) not in self.black_list and str(command.msg_from[1]) not in self.black_list:
+                    if command.is_command and not blacklisted:
                         if re.match(u'(^help)|(^помощь)|(^info)|(^инфо)|(^информация)|^\?$',\
                             command.words[0].lower()):
                             response_text = self.help()
@@ -561,7 +571,10 @@ class LongPollSession(Bot):
             except Exception as e:
                 if not 'traceback' in globals():
                     import traceback
-                self.runtime_error = traceback.format_exc().decode('unicode-escape')
+                try:
+                    self.runtime_error = traceback.format_exc().decode('unicode-escape')
+                except UnicodeDecodeError:
+                    self.runtime_error = traceback.format_exc()
                 self.run_bot = False
 
         self.running = False
