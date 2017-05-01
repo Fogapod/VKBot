@@ -22,11 +22,13 @@ def error_catcher(request):
                 time.sleep(0.33)
                 return do_request(*args, **kwargs) # TODO: add counter
 
-            
             elif '[errno 1]_ssl.c:503' in error:
-                print 'Sertificate verify failed. Trying unsafe request'
-                vk.api.Session.need_verify_request_sert = False
-                return do_request(*args, **kwargs)
+                if request.__name__ == '_create_session':
+                    print 'Sertificate verify failed. Trying unsafe request'
+                    vk.api.Session.need_verify_request_sert = False
+                    return do_request(*args, **kwargs)
+                else:
+                    print 'Sertificate verify failed.'
 
             elif 'connection' in error:
                 print 'Check your connection'
