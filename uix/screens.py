@@ -4,6 +4,7 @@
 from functools import partial
 
 from kivy.uix.screenmanager import Screen, ScreenManager, FadeTransition
+from kivy.uix.modalview import ModalView
 from kivy.clock import mainthread, Clock
 from kivy.app import App
 
@@ -20,6 +21,7 @@ class AuthScreen(Screen):
         self.hide_password_text = 'Скрыть пароль'
         super(AuthScreen, self).__init__(**kwargs)
         self.session = App.get_running_app().session
+        self.twofa_popup = TwoFAKeyEnterPopup(self)
         
     def on_enter(self):
         self.ids.pass_auth.disabled = not self.session.authorized
@@ -34,12 +36,12 @@ class AuthScreen(Screen):
                                 )
             if authorized:
                 self.ids.pass_textinput.text = ''
+                self.parent.show_main_screen()
                 if twofa_key:
                     return True
-                self.parent.show_main_screen()
             elif error:
                 if 'code is needed' in error:
-                    self.parent.show_twofa_screen()
+                    self.twofa_popup.open()
                     return
                 elif 'incorrect password' in error:
                     toast_notification(u'Неправильный логин или пароль')
@@ -56,15 +58,17 @@ class AuthScreen(Screen):
             self.ids.pass_textinput.password = False
             button.text = self.hide_password_text
 
-class TwoFAKeyEnterScreen(Screen):
-    def twofa_auth(self):
-        if self.ids.twofa_textinput.text:
-            login_screen_widget = self.parent.get_screen('auth_screen')
-            if login_screen_widget.log_in(twofa_key=self.ids.twofa_textinput.text):
-                self.parent.show_main_screen()
-            else:
-                toast_notification(u'Неправильный код подтверждения')
-            self.ids.twofa_textinput.text = ''
+
+class TwoFAKeyEnterPopup(ModalView):
+    def __init__(self, auth_screen, **kwargs):
+        super(TwoFAKeyEnterPopup, self).__init__(**kwargs)
+        self.auth_screen = auth_screen
+
+    def twofa_auth(self, code):
+        if code:
+            if self.auth_screen.log_in(twofa_key=code):
+                self.dismiss()
+            self.ids.textinput.text = ''
 
 
 class MainScreen(Screen):
@@ -435,11 +439,6 @@ class Root(ScreenManager):
         if not 'auth_screen' in self.screen_names:
             self.add_widget(AuthScreen())
         self.current = 'auth_screen'
-
-    def show_twofa_screen(self):
-        if not 'twofa_screen' in self.screen_names:
-            self.add_widget(TwoFAKeyEnterScreen())
-        self.current = 'twofa_screen'
 
     def show_main_screen(self):
         if not 'main_screen' in self.screen_names:
