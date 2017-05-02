@@ -21,6 +21,7 @@ class VKBotApp(App):
     settings_cls = SettingsWithNoMenu
 
     def build(self):
+        self.title = 'VKBot'
         self.session = LongPollSession()
         self.load_kv_files()
 
