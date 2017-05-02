@@ -242,8 +242,7 @@ class CustomCommandsScreen(Screen):
             self.included_keys.remove(button_command)
             self.included_keys.append(command)
             command_button.command = command
-            block.commands.remove(button_command)
-            block.commands.append(command)
+            block.command = command
             if len(block.responses) > 1:
                 block.ids.dropdown_btn.text = command
                 for button in block.dropdown.container.children:
@@ -262,8 +261,11 @@ class CustomCommandsScreen(Screen):
             else:
                 command_button.text = command
 
-        else:
+        if response != command_button.response:
+            block.responses.remove(command_button.response)
             command_button.response = response
+            command_button.text = response
+            block.responses.append(response)
             command_button.unbind(on_release=command_button.callback)
             callback = partial(
                 self.open_edit_popup,
@@ -338,7 +340,7 @@ class CustomCommandsScreen(Screen):
             self.add_command(command, response)
         else:
             for child in self.ids.cc_list.children:
-                if command in child.commands:
+                if command == child.command:
                     block = child
                     break
 
@@ -411,7 +413,7 @@ class CustomCommandsScreen(Screen):
             if len(response) > 1:
                 block.dropdown.add_widget(command_button)
             block.responses.append(item)
-        block.commands.append(command)
+        block.command = command
 
         block.ids.dropdown_btn.text = command
         if len(response) > 1:
@@ -423,8 +425,7 @@ class CustomCommandsScreen(Screen):
 
     def sort_blocks(self):
         for widget in sorted(self.ids.cc_list.children):
-            for command in widget.commands:
-                self.included_keys.remove(command)
+            self.included_keys.remove(widget.command)
             self.ids.cc_list.remove_widget(widget)
 
         self.on_enter()
