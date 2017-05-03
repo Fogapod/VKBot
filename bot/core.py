@@ -142,7 +142,9 @@ class Bot():
             except NameError:
                 result = u'Ошибка [1]'
             except AttributeError:
-                result = u'Ошибка [2]'        
+                result = u'Ошибка [2]'
+            except TypeError:
+                result = u'Ошибка [3]'
             except ZeroDivisionError:
                 result = u'Деление на 0'
             except OverflowError:
