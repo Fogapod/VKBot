@@ -21,10 +21,10 @@ class AuthScreen(Screen):
         self.hide_password_text = 'Скрыть пароль'
         super(AuthScreen, self).__init__(**kwargs)
         self.session = App.get_running_app().session
-        self.twofa_popup = TwoFAKeyEnterPopup(self)
         
     def on_enter(self):
         self.ids.pass_auth.disabled = not self.session.authorized
+        self.twofa_popup = TwoFAKeyEnterPopup(self)
 
     def log_in(self, twofa_key=''):
         login = self.ids.login_textinput.text
