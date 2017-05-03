@@ -13,7 +13,7 @@ save_custom_commands, load_blacklist, save_blacklist
 
 import vkrequests as vkr
 
-__version__ = '0.0.6'
+__version__ = '0.0.7'
 AUTHOR_VK_ID = 180850898
 __author__ = 'Eugene Ershov - https://vk.com/id%d' % AUTHOR_VK_ID
 
