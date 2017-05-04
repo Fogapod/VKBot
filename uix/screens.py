@@ -77,7 +77,7 @@ class TwoFAKeyEnterPopup(ModalView):
 class MainScreen(Screen):
     def __init__(self, **kwargs):
         super(MainScreen, self).__init__(**kwargs)
-        #self.bot_check_event = Clock.schedule_interval(self.check_if_bot_active, 1)
+        self.bot_check_event = Clock.schedule_interval(self.check_if_bot_active, 1)
         self.session = App.get_running_app().session
         self.launch_bot_text = 'Включить бота'
         self.stop_bot_text = 'Выключить бота'
@@ -115,7 +115,7 @@ class MainScreen(Screen):
                 protect_custom_commands=protect_custom_commands == 'True'
                 )
         else:
-            session.load_launch_params( activated=self.activation_status == 'True',
+            self.session.load_launch_params( activated=self.activation_status == 'True',
                                         use_custom_commands=use_custom_commands == 'True',
                                         protect_custom_commands=protect_custom_commands == 'True')
             self.session.launch_bot()
@@ -124,7 +124,7 @@ class MainScreen(Screen):
         self.ids.main_btn.text = self.stop_bot_text
 
     def stop_bot(self, config):
-        if platform != 'android':
+        if platform == 'android':
             if self.service.running:
                 self.service.stop()
         else:
