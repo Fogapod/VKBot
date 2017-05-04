@@ -115,11 +115,10 @@ class MainScreen(Screen):
                 protect_custom_commands=protect_custom_commands == 'True'
                 )
         else:
-            self.session.launch_bot(
-                activated=self.activation_status == 'True',
-                use_custom_commands=use_custom_commands == 'True',
-                protect_custom_commands=protect_custom_commands == 'True'
-                )
+            session.load_launch_params( activated=self.activation_status == 'True',
+                                        use_custom_commands=use_custom_commands == 'True',
+                                        protect_custom_commands=protect_custom_commands == 'True')
+            self.session.launch_bot()
             self.bot_check_event()
 
         self.ids.main_btn.text = self.stop_bot_text
