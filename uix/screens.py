@@ -1,18 +1,20 @@
 #-*- coding:utf-8 -*-
 
 
+import time
 from functools import partial
 
 from kivy.uix.screenmanager import Screen, ScreenManager, FadeTransition
 from kivy.uix.modalview import ModalView
 from kivy.clock import mainthread, Clock
 from kivy.app import App
+from kivy import platform
 
 from uix.customcommandblock import CustomCommandBlock, ListDropDown, CommandButton
 from uix.editcommandpopup import EditCommandPopup
 
-from bot.utils import toast_notification, bot_launched_notification, \
-    bot_stopped_notification, load_custom_commands, save_custom_commands
+from bot.utils import toast_notification, load_custom_commands, \
+    save_custom_commands
 
 
 class AuthScreen(Screen):
@@ -21,6 +23,7 @@ class AuthScreen(Screen):
         self.hide_password_text = 'Скрыть пароль'
         super(AuthScreen, self).__init__(**kwargs)
         self.session = App.get_running_app().session
+        self.twofa_popup = TwoFAKeyEnterPopup(self)
         
     def on_enter(self):
         self.ids.pass_auth.disabled = not self.session.authorized
@@ -74,11 +77,17 @@ class TwoFAKeyEnterPopup(ModalView):
 class MainScreen(Screen):
     def __init__(self, **kwargs):
         super(MainScreen, self).__init__(**kwargs)
-        self.bot_check_event = Clock.schedule_interval(self.check_if_bot_active, 1)
+        #self.bot_check_event = Clock.schedule_interval(self.check_if_bot_active, 1)
         self.session = App.get_running_app().session
         self.launch_bot_text = 'Включить бота'
         self.stop_bot_text = 'Выключить бота'
         self.ids.main_btn.text = self.launch_bot_text
+        if platform == 'android':
+            from bot.oscclient import OSCClient
+            self.service = OSCClient(self)
+            time.sleep(1)
+            if self.service.running:
+                self.ids.main_btn.text = self.stop_bot_text
 
     def show_manual(self):
         pass
@@ -99,46 +108,52 @@ class MainScreen(Screen):
         self.activation_status = config.getdefault('General', 'bot_activated', 'False')
         use_custom_commands = config.getdefault('General', 'use_custom_commands', 'False')
         protect_custom_commands = config.getdefault('General', 'protect_cc', "True")
-
-        while not self.session.launch_bot(
-                    activated=self.activation_status == 'True',
-                    use_custom_commands=use_custom_commands == 'True',
-                    protect_custom_commands=protect_custom_commands == 'True'
-                ):
-            continue
+        if platform == 'android':
+            self.service.start(
+                activated=self.activation_status == 'True',
+                use_custom_commands=use_custom_commands == 'True',
+                protect_custom_commands=protect_custom_commands == 'True'
+                )
+        else:
+            self.session.launch_bot(
+                activated=self.activation_status == 'True',
+                use_custom_commands=use_custom_commands == 'True',
+                protect_custom_commands=protect_custom_commands == 'True'
+                )
+            self.bot_check_event()
 
         self.ids.main_btn.text = self.stop_bot_text
-        self.bot_check_event()
-        bot_launched_notification()
 
     def stop_bot(self, config):
-        self.bot_check_event.cancel()
-        bot_stopped = False
+        if platform != 'android':
+            if self.service.running:
+                self.service.stop()
+        else:
+            self.bot_check_event.cancel()
+            bot_stopped = False
 
-        while not bot_stopped:
-            bot_stopped, new_activation_status = self.session.stop_bot()
+            while not bot_stopped:
+                bot_stopped, new_activation_status = self.session.stop_bot()
 
-        if new_activation_status != self.activation_status:
-            config.set('General', 'bot_activated', str(new_activation_status))
-            config.write()
+            if new_activation_status != self.activation_status:
+                config.set('General', 'bot_activated', str(new_activation_status))
+                config.write()
 
         self.ids.main_btn.text = self.launch_bot_text
-        bot_stopped_notification()
 
-    def update_answers_count(self):
-        self.ids.answers_count_lb.text = 'Ответов: {}'.format(self.session.reply_count)
+    def update_answers_count(self, new_answers_count):
+        self.ids.answers_count_lb.text = 'Ответов: {}'.format(new_answers_count)
 
     def logout(self):
         self.session.authorization(logout=True)
         self.parent.show_auth_screen()
     
     def check_if_bot_active(self, tick):
-        self.update_answers_count()
+        self.update_answers_count(self.session.reply_count)
         if self.ids.main_btn.text == self.stop_bot_text and\
                 not self.session.running:
             self.bot_check_event.cancel()
             self.ids.main_btn.text = self.launch_bot_text
-            bot_stopped_notification()
 
             if self.session.runtime_error:
                 error = self.session.runtime_error
