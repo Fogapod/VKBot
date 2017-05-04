@@ -36,7 +36,7 @@ version.filename = %(source.dir)s/bot/core.py
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy
-requirements = openssl,requests,git+http://github.com/Fogapod/plyer.git,kivy==master,android
+requirements = openssl,requests,kivy==master,android
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
