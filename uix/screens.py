@@ -78,6 +78,7 @@ class MainScreen(Screen):
     def __init__(self, **kwargs):
         super(MainScreen, self).__init__(**kwargs)
         self.bot_check_event = Clock.schedule_interval(self.check_if_bot_active, 1)
+        self.bot_check_event.cancel()
         self.session = App.get_running_app().session
         self.launch_bot_text = 'Включить бота'
         self.stop_bot_text = 'Выключить бота'
