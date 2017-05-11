@@ -279,8 +279,8 @@ class Bot():
 
     def custom_command(self, cmd, custom_commands):
         response_text, attachments = '', []
-        if custom_commands and cmd.parsed_text.lower() in custom_commands.keys():
-            response = random.choice(custom_commands[cmd.parsed_text.lower()])
+        if custom_commands and cmd.joined_text.lower() in custom_commands.keys():
+            response = random.choice(custom_commands[cmd.joined_text.lower()])
 
             if response.startswith('self='):
                 command = '_' + response[5:]
@@ -330,7 +330,7 @@ class Command():
         self.words = ['']
         self.is_command = False
         self.mark_msg = True
-        self.parsed_text = ''
+        self.joined_text = ''
         self.from_user = False
         self.from_chat = False
         self.from_group = False
@@ -354,7 +354,7 @@ class Command():
                 self.words[0] = self.words[0][1:]
                 self.mark_msg = False
 
-        self.parsed_text = ' '.join(self.words)
+        self.joined_text = ' '.join(self.words)
         if 'chat_id' in message.keys():
             self.from_chat = True
         elif message['title'] != u' ... ':
@@ -387,10 +387,10 @@ class LongPollSession(Bot):
         self.runtime_error = None
         self.reply_count = 0
 
-    def authorization(self, login= '', password= '', key='', logout=False):
-        token_path = DATA_PATH + 'token.txt'
+    def authorization(self, login= '', password= '', token='', key='', logout=False, token_path=''):
+        if not token_path:
+            token_path = DATA_PATH + 'token.txt'
         authorized = False
-        token = None
         error = None
         if logout:
             open(token_path, 'w').close()
@@ -398,24 +398,27 @@ class LongPollSession(Bot):
             return authorized, error
 
         if not (login and password):
-            try:
-                with open(token_path, 'r') as token_file:
-                    lines = token_file.readlines()
-                    if lines:
-                        token = lines[0][:-1]
-            except:
-                token = None
-                open(token_path, 'w').close()
-
             if token:
                 response, error = vkr.log_in(token=token)
                 if response and not error:
                     authorized = True
-                    if error:
-                        if 'connection' in error:
-                            pass
-                        elif 'invalid access_token' in error:
-                            open(token_path, 'w').close()
+            else:
+                try:
+                    with open(token_path, 'r') as token_file:
+                        lines = token_file.readlines()
+                        if lines:
+                            token = lines[0][:-1]
+                except:
+                    token = None
+                    open(token_path, 'w').close()
+
+                if token:
+                    response, error = vkr.log_in(token=token)
+                    if response and not error:
+                        authorized = True
+                        if error:
+                            if 'invalid access_token' in error:
+                                open(token_path, 'w').close()
         else:
             new_token, error = vkr.log_in(login=login, password=password, key=key)
             if new_token and not error:
@@ -432,38 +435,48 @@ class LongPollSession(Bot):
         return authorized, error
 
     def _process_updates(self):
-        if not self.authorized: return
+        try:
+            if not self.authorized: raise Exception('Not authorized')
 
-        if self.use_custom_commands:
-            self.custom_commands = load_custom_commands()
-        else:
-            self.custom_commands = None
+            if self.use_custom_commands:
+                self.custom_commands = load_custom_commands()
+            else:
+                self.custom_commands = None
 
-        self.black_list = load_blacklist()
+            self.black_list = load_blacklist()
 
-        SELF_ID = vkr.get_self_id()[0]
-        command = Command(SELF_ID)
+            SELF_ID = vkr.get_self_id()[0]
+            command = Command(SELF_ID)
 
-        mlpd = vkr.get_message_long_poll_data()[0]
-        last_response_text = ''
-        response_text = ''
-        attachments = []
-        self.runtime_error = None
-        self.running = True
+            mlpd = vkr.get_message_long_poll_data()[0]
+            last_response_text = ''
+            response_text = ''
+            attachments = []
+            self.runtime_error = None
+            self.running = True
 
-        print('@LAUNCHED')
-        while self.run_bot:
-            try:
+            print('@LAUNCHED')
+            while self.run_bot:
+            
                 time.sleep(1)
-                response = vkr.get_message_updates(ts=mlpd['ts'],pts=mlpd['pts'])[0]
-                print(response)
-                if response and response[0]:
-                    updates = response[0]
-                    mlpd['pts'] = response[1]
-                    messages = response[2]
-                else:
+                updates, error = vkr.get_message_updates(ts=mlpd['ts'],pts=mlpd['pts'])
+                
+                if updates:
+                    history = updates[0]
+                    mlpd['pts'] = updates[1]
+                    messages = updates[2]
+                elif 'connection' in error:
+                    error = None
                     time.sleep(1)
                     continue
+                else:
+                    raise Exception(error)
+
+                response_str = str(updates)
+                if u'emoji' in messages.keys():
+                    print(response_str)
+                else:
+                    print(response_str.decode('unicode-escape').encode('utf8'))
 
                 for message in messages['items']:
                     command.load(message)
@@ -513,7 +526,7 @@ class LongPollSession(Bot):
                                 )
                             
                         elif re.match(u'(^stop)|(^выйти)|(^exit)|(^стоп)|(^terminate)|(^завершить)|(^close)|^!$',\
-                    	     command.words[0].lower()):
+                             command.words[0].lower()):
                             response_text = self._stop_bot_from_message(command)
 
                         elif command.words[0].lower() == 'activate':
@@ -525,21 +538,22 @@ class LongPollSession(Bot):
                         elif command.words[0].lower() == 'raise':
                             response_text = self._raise_debug_exception(command)
 
-                        elif self.use_custom_commands and self.custom_commands is not None:
-                            command_response, attachments = self.custom_command(
-                        	            command,
-                        	            self.custom_commands
-                        	            )
-                            if command_response:
-                                response_text = command_response
-                            if not (response_text or attachments):
-                                response_text = u'Неизвестная команда. Вы можете использовать /help для получения списка команд.'
+                        else:
+                            response_text = u'Неизвестная команда. Вы можете использовать /help для получения списка команд.'
+                            if self.use_custom_commands:
+                                custom_response, attachments = self.custom_command(
+                                                                    command,
+                                                                    self.custom_commands
+                                                                    )
 
-                    elif self.use_custom_commands and self.custom_commands is not None and str(command.msg_from[0]) not in self.black_list and str(command.msg_from[1]) not in self.black_list:
-                        response_text, attachments = self.custom_command(
-                        	        command,
-                        	        self.custom_commands
-                        	        )
+                    elif self.use_custom_commands and self.custom_commands is not None and not blacklisted:
+                        custom_response, attachments = self.custom_command(
+                            command,
+                            self.custom_commands
+                            )
+
+                    if custom_response:
+                            response_text = custom_response
 
                     if not (response_text or attachments):
                         continue
@@ -554,14 +568,14 @@ class LongPollSession(Bot):
                     chat_id, user_id = command.msg_from
                     message_to_resend = command.forward_msg
 
-                    msg_id, request_error = vkr.send_message(
-                            text = response_text,
-                            uid = user_id,
-                            gid = chat_id,
-                            forward = message_to_resend,
-                            attachments = attachments
-                            )
-                    if request_error:
+                    msg_id, error = vkr.send_message(
+                                        text = response_text,
+                                        uid = user_id,
+                                        gid = chat_id,
+                                        forward = message_to_resend,
+                                        attachments = attachments
+                                        )
+                    if error:
                         raise Exception(error)
 
                     last_response_text = response_text
@@ -569,33 +583,30 @@ class LongPollSession(Bot):
                     attachments = []
                     self.reply_count += 1
 
-            except Exception as e:
-                if not 'traceback' in globals():
-                    import traceback
-                try:
-                    self.runtime_error = traceback.format_exc().decode('unicode-escape')
-                except UnicodeDecodeError:
-                    self.runtime_error = traceback.format_exc()
-                self.run_bot = False
+        except:
+            if not 'traceback' in globals():
+                import traceback
+            tb = traceback.format_exc()
+            try:
+                self.runtime_error = tb.decode('unicode-escape')
+            except UnicodeDecodeError:
+                self.runtime_error = tb
+            self.run_bot = False
 
         self.running = False
         self.reply_count = 0
         print('@STOPPED')
 
-    def launch_bot(
-    	        self, activated=False,
-    	        use_custom_commands=False,
-    	        protect_custom_commands=True
-    	        ):
-        self.activated = activated
-        self.use_custom_commands = use_custom_commands
-        self.protect_custom_commands = protect_custom_commands
+    def launch_bot(self):
         self.run_bot = True
 
         self.update_processing = Thread(target=self._process_updates)
         self.update_processing.start()
 
-        while not self.running: continue
+        while not self.running:
+            time.sleep(0.1)
+            if self.runtime_error:
+                raise Exception(self.runtime_error)
         return True
 
     def stop_bot(self):
@@ -605,12 +616,20 @@ class LongPollSession(Bot):
         self.update_processing = None
         return True, self.activated
 
+    def load_launch_params(self,
+                            activated=False,
+                            use_custom_commands=False,
+                            protect_custom_commands=True):
+        self.activated = activated
+        self.use_custom_commands = use_custom_commands
+        self.protect_custom_commands = protect_custom_commands
+
     def _stop_bot_from_message(self, command):
         if command.out:
             self.run_bot = False
-            return 'Завершаю работу'
+            return u'Завершаю работу'
         else:
-            return 'Отказано в доступе'
+            return u'Отказано в доступе'
 
     def _raise_debug_exception(self, command):
         if command.out:
@@ -622,7 +641,7 @@ class LongPollSession(Bot):
                 exception_text = ' '.join(words)
             raise Exception(exception_text)
         else:
-            return 'Отказано в доступе'
+            return u'Отказано в доступе'
 
 
 if __name__ == '__main__':

@@ -17,6 +17,7 @@ from bot.core import LongPollSession
 
 
 class VKBotApp(App):
+    title = 'VKBot'
     use_kivy_settings = False
     settings_cls = SettingsWithNoMenu
 
@@ -112,7 +113,6 @@ class VKBotApp(App):
     def on_stop(self):
         if self.session.running:
             while not self.session.stop_bot(): continue
-            bot_stopped_notification()
 
 
 if __name__ == '__main__':
