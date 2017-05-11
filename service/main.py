@@ -12,7 +12,8 @@ parent_path += '\\' if platform == 'win' else '/'
 os.sys.path.append(parent_path)
 
 import bot.utils
-bot.utils.PATH = parent_path + bot.utils.PATH
+if platform != 'android':
+    bot.utils.PATH = parent_path + bot.utils.PATH
 bot.utils.DATA_PATH = parent_path + bot.utils.DATA_PATH
 
 from bot.core import LongPollSession
