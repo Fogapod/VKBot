@@ -1,6 +1,8 @@
 # coding:utf8
 
 
+import time
+
 from kivy.lib import osc
 from kivy.clock import Clock
 from kivy import platform
@@ -11,9 +13,8 @@ if platform == 'android':
 
 class OSCClient():
     def __init__(self, mainscreen):
-        self.bot_launch_params = None
-        self.running = False
-        self.run_trigger = False
+        if platform == 'android':
+            self.androidservice = AndroidService('VKBot', 'Бот работает')
         self.mainscreen = mainscreen
         self.osc = osc
         self.osc.init()
@@ -26,43 +27,44 @@ class OSCClient():
         self.read_event = Clock.schedule_interval(lambda *x: self.osc.readQueue(oscid), 0)
         self.ping()
         self.answers_count = '0'
+        self.started = False
 
     def start(self, **kwargs):
         self.bot_launch_params = kwargs
         if platform == 'android':
-            androidservice = AndroidService('VKBot', 'Бот работает')
-            androidservice.start('Сервис запущен')
-        self.run_trigger = True
+            self.androidservice.start('Сервис запущен')
 
     def stop(self):
-        self.osc.sendMsg('/stop', [], port=3000)
-        self.run_trigger = False
+        if platform == 'android':
+            self.androidservice.stop()
+        else:
+            self.osc.sendMsg('/exit', [], port=3000)
+        self.started = False
 
     def ping(self):
         self.osc.sendMsg('/ping', [], port=3000)
+    
+    def send_launch_params(self, *args):
+        self.osc.sendMsg('/launch_params', [str(self.bot_launch_params), ], port=3000)
 
     def on_response(self, message, *args, **kwargs):
         print message
 
     def pong(self, message, *args):
-        self.on_response(message)
-        self.running = True
+        # self.on_response(message)
         self.mainscreen.ids.main_btn.text = self.mainscreen.stop_bot_text
 
     def read_status(self, message, *args):
-        self.on_response(message)
+        # self.on_response(message)
         status = message[2]
         if status == 'connected':
-            self.osc.sendMsg('/launch_params', [str(self.bot_launch_params), ], port=3000)
-        elif status == 'authorized':
-            if self.run_trigger:
-                self.osc.sendMsg('/start', [], port=3000)
+            self.send_launch_params()
+        elif status == 'got params':
+            self.mainscreen.ids.main_btn.text = self.mainscreen.stop_bot_text
         elif status == 'listening':
-            self.running = True
-        elif status == 'not listening':
-            self.running = False
+            pass
         elif status == 'exiting':
-            self.running = False
+            self.mainscreen.stop_bot(None)
 
     def set_answers_count(self, message, *args):
         # self.on_response(message)
@@ -71,5 +73,6 @@ class OSCClient():
             self.mainscreen.update_answers_count(self.answers_count)
 
     def return_error(self, message, *args):
-        self.on_response(message)
+        # self.on_response(message)
         error = message[2]
+        # self.mainscreen.show_bot_error(error)

@@ -118,7 +118,7 @@ class Bot():
         else:
             del words[0]
         words = ''.join(words).lower()
-        if not re.match(u'[^\d+\-*/:().,^√πe]', words) or re.match('(sqrt\(\d+\))|(pi)', words):
+        if not re.match(u'[^\d+\-*/:().,^√πe]', words) or re.match('(sqrt\(.+\))|(pi)', words):
             words = ' ' + words + ' '
             words = re.sub(u'(sqrt)|√', 'math.sqrt', words)
             words = re.sub(u'(pi)|π', 'math.pi', words)
@@ -357,8 +357,9 @@ class Command():
         self.joined_text = ' '.join(self.words)
         if 'chat_id' in message.keys():
             self.from_chat = True
-        elif message['title'] != u' ... ':
+        elif int(message['user_id']) < 1:
             self.from_group = True
+            self.mark_msg = False
         else:
             self.from_user = True
 
@@ -386,6 +387,9 @@ class LongPollSession(Bot):
         self.running = False
         self.runtime_error = None
         self.reply_count = 0
+        self.custom_commands = None
+        self.use_custom_commands = False
+        self.protect_custom_commands = True
 
     def authorization(self, login= '', password= '', token='', key='', logout=False, token_path=''):
         if not token_path:
@@ -436,12 +440,7 @@ class LongPollSession(Bot):
 
     def _process_updates(self):
         try:
-            if not self.authorized: raise Exception('Not authorized')
-
-            if self.use_custom_commands:
-                self.custom_commands = load_custom_commands()
-            else:
-                self.custom_commands = None
+            if not self.authorized: raise Exception('Not authorized')               
 
             self.black_list = load_blacklist()
 
@@ -451,14 +450,13 @@ class LongPollSession(Bot):
             mlpd = vkr.get_message_long_poll_data()[0]
             last_response_text = ''
             response_text = ''
+            custom_response = ''
             attachments = []
             self.runtime_error = None
             self.running = True
 
             print('@LAUNCHED')
             while self.run_bot:
-            
-                time.sleep(1)
                 updates, error = vkr.get_message_updates(ts=mlpd['ts'],pts=mlpd['pts'])
                 
                 if updates:
@@ -473,10 +471,10 @@ class LongPollSession(Bot):
                     raise Exception(error)
 
                 response_str = str(updates)
-                if u'emoji' in messages.keys():
-                    print(response_str)
-                else:
-                    print(response_str.decode('unicode-escape').encode('utf8'))
+                # if u'emoji' in messages.keys():
+                #     print(response_str)
+                # else:
+                #     print(response_str.decode('unicode-escape').encode('utf8'))
 
                 for message in messages['items']:
                     command.load(message)
@@ -582,7 +580,7 @@ class LongPollSession(Bot):
                     response_text = ''
                     attachments = []
                     self.reply_count += 1
-
+            time.sleep(1)
         except:
             if not 'traceback' in globals():
                 import traceback
@@ -616,10 +614,13 @@ class LongPollSession(Bot):
         self.update_processing = None
         return True, self.activated
 
-    def load_launch_params(self,
-                            activated=False,
-                            use_custom_commands=False,
-                            protect_custom_commands=True):
+    def load_params(self,
+                    activated=False,
+                    use_custom_commands=False,
+                    protect_custom_commands=True):
+        if use_custom_commands:
+            self.custom_commands = load_custom_commands()
+
         self.activated = activated
         self.use_custom_commands = use_custom_commands
         self.protect_custom_commands = protect_custom_commands

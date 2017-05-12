@@ -81,14 +81,12 @@ class MainScreen(Screen):
         self.bot_check_event.cancel()
         self.session = App.get_running_app().session
         self.launch_bot_text = 'Включить бота'
+        self.launching_bot_text = 'Запуск (отменить)' 
         self.stop_bot_text = 'Выключить бота'
         self.ids.main_btn.text = self.launch_bot_text
         if platform == 'android':
             from bot.oscclient import OSCClient
             self.service = OSCClient(self)
-            time.sleep(1)
-            if self.service.running:
-                self.ids.main_btn.text = self.stop_bot_text
 
     def show_manual(self):
         pass
@@ -110,6 +108,7 @@ class MainScreen(Screen):
         use_custom_commands = config.getdefault('General', 'use_custom_commands', 'False')
         protect_custom_commands = config.getdefault('General', 'protect_cc', "True")
         if platform == 'android':
+            self.ids.main_btn.text = self.launching_bot_text
             self.service.start(
                 activated=self.activation_status == 'True',
                 use_custom_commands=use_custom_commands == 'True',
@@ -122,12 +121,11 @@ class MainScreen(Screen):
             self.session.launch_bot()
             self.bot_check_event()
 
-        self.ids.main_btn.text = self.stop_bot_text
+            self.ids.main_btn.text = self.stop_bot_text
 
     def stop_bot(self, config):
         if platform == 'android':
-            if self.service.running:
-                self.service.stop()
+            self.service.stop()
         else:
             self.bot_check_event.cancel()
             bot_stopped = False

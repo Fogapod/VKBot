@@ -5,6 +5,7 @@ from time import sleep
 import sys
 
 from kivy import platform
+from kivy.logger import Logger
 from kivy.lib import osc
 
 parent_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -32,36 +33,31 @@ def send_status(status):
 
 def send_error(error):
     osc.sendMsg('/error', [error, ], port=3002)
+    Logger.info(error)
 
 def send_answers_count():
     osc.sendMsg('/answers', [session.reply_count, ], port=3002)
 
 def set_launch_params(message, *args):
-    global session
+    global session, got_launch_params
     launch_params = eval(message[2])
     if launch_params:
-        session.load_launch_params(**launch_params)
+        session.load_params(**launch_params)
+        got_launch_params = True
 
-def start_bot(*args):
-    global session
-    session.launch_bot()
-
-def stop_bot(*args):
-    global session
-    session.stop_bot()
-
-def kill_session():
+def exit(*args):
     send_status('exiting')
-    sys.exit(0)
+    session.runtime_error = 1
+    sys.exit()
 
 
 if __name__ == '__main__':
+    got_launch_params = False
     osc.init()
     oscid = osc.listen(ipAddr='0.0.0.0', port=3000)
     osc.bind(oscid, ping, '/ping')
-    osc.bind(oscid, set_launch_params, '/launch_params')
-    osc.bind(oscid, start_bot, '/start')
-    osc.bind(oscid, stop_bot, '/stop')
+    osc.bind(oscid, set_launch_params, '/launch_params')    
+    osc.bind(oscid, exit, '/exit')    
 
     session = LongPollSession()
     send_status('connected')
@@ -69,30 +65,21 @@ if __name__ == '__main__':
 
     if error:
         send_error(error)
-        kill_session()
+        exit()
+    
+    while not got_launch_params:
+        osc.readQueue(oscid)
+        sleep(0.1)
 
+    send_status('got params')
+    session.launch_bot()
     while True:
-        try:
-            osc.readQueue(oscid)
-            while session.running:
-                send_status('listening')
-                sleep(1)
-                send_answers_count()
-                # if session.response:
-                    # send(session.response)
-                osc.readQueue(oscid)
-            send_status('not listening')
-            if session.runtime_error:
-                send_error(session.runtime_error)
-                kill_session()
-            else:
-                if session.authorized:
-                    send_status('authorized')
-                else:
-                    send_status('connected')
-            sleep(1)
-        except SystemExit:
+        osc.readQueue(oscid)
+        send_answers_count()
+        # if session.response:
+            # send_text(session.response)
+        if session.runtime_error:
+            send_error(session.runtime_error)
             break
-        except:
-            session.stop_bot()
-            kill_session()
+        sleep(1)
+    exit()
