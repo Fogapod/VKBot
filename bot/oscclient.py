@@ -3,6 +3,7 @@
 
 import time
 
+from kivy.app import App
 from kivy.lib import osc
 from kivy.clock import Clock
 from kivy import platform
@@ -23,7 +24,7 @@ class OSCClient():
         self.osc.bind(oscid, self.read_status, '/status')
         self.osc.bind(oscid, self.set_answers_count, '/answers')
         self.osc.bind(oscid, self.return_error, '/error')
-        self.osc.bind(oscid, self.on_response, '/text')
+        self.osc.bind(oscid, self.activation_changed, '/activation_changed')
         self.read_event = Clock.schedule_interval(lambda *x: self.osc.readQueue(oscid), 0)
         self.ping()
         self.answers_count = '0'
@@ -76,3 +77,10 @@ class OSCClient():
         # self.on_response(message)
         error = message[2]
         # self.mainscreen.show_bot_error(error)
+
+    def activation_changed(self, message, *args):
+        # self.on_response(message)
+        new_activation_status = message[2]
+        config = App.get_running_app().config
+        config.set('General', 'bot_activated', new_activation_status)
+        config.write()

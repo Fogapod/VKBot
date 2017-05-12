@@ -39,11 +39,11 @@ def send_answers_count():
     osc.sendMsg('/answers', [session.reply_count, ], port=3002)
 
 def set_launch_params(message, *args):
-    global session, got_launch_params
+    global session, got_launch_params, activated
+    got_launch_params = True
     launch_params = eval(message[2])
-    if launch_params:
-        session.load_params(**launch_params)
-        got_launch_params = True
+    activated = launch_params['activated']
+    session.load_params(**launch_params)
 
 def exit(*args):
     send_status('exiting')
@@ -53,6 +53,7 @@ def exit(*args):
 
 if __name__ == '__main__':
     got_launch_params = False
+    activated = False 
     osc.init()
     oscid = osc.listen(ipAddr='0.0.0.0', port=3000)
     osc.bind(oscid, ping, '/ping')
@@ -76,10 +77,13 @@ if __name__ == '__main__':
     while True:
         osc.readQueue(oscid)
         send_answers_count()
-        # if session.response:
-            # send_text(session.response)
+        if session.activated != activated:
+            activated = session.activated
+            osc.sendMsg('/activation_changed', [str(activated), ], port=3002)
         if session.runtime_error:
             send_error(session.runtime_error)
+            break
+        if not session.running:
             break
         sleep(1)
     exit()
