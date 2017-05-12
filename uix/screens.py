@@ -186,8 +186,12 @@ class CustomCommandsScreen(Screen):
                 self, command, response,
                 command_button, command_block, *args
                 ):
+        MAX_LEN = 30
+        title = command.replace('\n', ' ')
+        if len(command) > MAX_LEN:
+            title = command[:MAX_LEN] + '...'
         popup = EditCommandPopup(
-            title=u'Настройка команды «{}»'.format(command),
+            title=u'Настройка команды «{}»'.format(title),
             command_text=command,
             response_text=response,
             command_button=command_button,

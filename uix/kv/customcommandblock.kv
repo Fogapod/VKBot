@@ -15,8 +15,10 @@
 
 
 <CommandButton>:
-    font_size: '15sp'
     background_normal: ''
     background_color: .24, .69, .55, 1
+    halign: 'center'
     size_hint_y: None
-    height: self.texture_size[1]*2.3
+    padding_x: dp(30)
+    text_size: self.width, None
+    height: self.texture_size[1] + dp(20)
