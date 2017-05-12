@@ -489,7 +489,7 @@ class LongPollSession(Bot):
                     elif str(command.msg_from[1]) in self.black_list:
                         blacklisted = True
 
-                    if command.is_command and not blacklisted:
+                    if command.is_command and not blacklisted and not response_text:
                         if re.match(u'(^help)|(^помощь)|(^info)|(^инфо)|(^информация)|^\?$',\
                             command.words[0].lower()):
                             response_text = self.help()
