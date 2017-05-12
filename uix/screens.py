@@ -23,11 +23,9 @@ class AuthScreen(Screen):
         self.hide_password_text = 'Скрыть пароль'
         super(AuthScreen, self).__init__(**kwargs)
         self.session = App.get_running_app().session
-        self.twofa_popup = TwoFAKeyEnterPopup(self)
         
     def on_enter(self):
         self.ids.pass_auth.disabled = not self.session.authorized
-        self.twofa_popup = TwoFAKeyEnterPopup(self)
 
     def log_in(self, twofa_key=''):
         login = self.ids.login_textinput.text
@@ -44,6 +42,8 @@ class AuthScreen(Screen):
                     return True
             elif error:
                 if 'code is needed' in error:
+                    if not self.twofa_popup:
+                        self.twofa_popup = TwoFAKeyEnterPopup(self)
                     self.twofa_popup.open()
                     return
                 elif 'incorrect password' in error:
