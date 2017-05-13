@@ -579,6 +579,7 @@ class LongPollSession(Bot):
                     last_response_text = response_text
                     response_text = ''
                     attachments = []
+                    custom_response = ''
                     self.reply_count += 1
             time.sleep(1)
         except:
