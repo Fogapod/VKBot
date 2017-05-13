@@ -463,7 +463,7 @@ class LongPollSession(Bot):
                     history = updates[0]
                     mlpd['pts'] = updates[1]
                     messages = updates[2]
-                elif 'connection' in error:
+                elif 'connection' in error or 'too many request' in error:
                     error = None
                     time.sleep(1)
                     continue

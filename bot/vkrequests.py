@@ -19,8 +19,11 @@ def error_catcher(request):
 
             if 'too many requests' in error or 'timed out' in error:
                 print 'Too many requests/response time out'
-                time.sleep(0.33)
-                return do_request(*args, **kwargs) # TODO: add counter
+                if request.__name__ == 'get_message_updates':
+                    return False, error
+                else:
+                    time.sleep(0.33)
+                    return do_request(*args, **kwargs) # TODO: add counter
 
             elif '[errno 1]_ssl.c:503' in error:
                 if request.__name__ == '_create_session':
