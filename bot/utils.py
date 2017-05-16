@@ -42,7 +42,7 @@ def parse_input(string, replace_vkurl=True, replace_url=True):
 
 	return new_string
 
-def toast_notification(text, length_long=False):
+def toast_notification(text, length_long=True):
     toast(text, length_long=length_long)
 
 def load_custom_commands():

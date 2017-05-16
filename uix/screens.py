@@ -50,7 +50,7 @@ class AuthScreen(Screen):
                 elif 'incorrect password' in error:
                     toast_notification(u'Неправильный логин или пароль')
                 else:
-                    toast_notification(error, length_long=True)
+                    toast_notification(error)
                     return
         self.ids.pass_textinput.text = ''
 
@@ -160,7 +160,7 @@ class MainScreen(Screen):
                 error = self.session.runtime_error
                 try:
                     error = error[error.index('Exception: '):]
-                    toast_notification(error, length_long=True)
+                    toast_notification(error)
                 except:
                     raise Exception(error)
 
@@ -357,7 +357,7 @@ class CustomCommandsScreen(Screen):
 
         if command not in self.included_keys:
             self.custom_commands[command] = [response]
-            self.add_command(command, response)
+            self.add_command(command, [response])
         else:
             for child in self.ids.cc_list.children:
                 if command == child.command:
