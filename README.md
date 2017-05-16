@@ -12,5 +12,4 @@ align="center"/>
 
 # Использованы библиотеки и модули:
 * [vk](https://github.com/dimka665/vk)
-* [plyer](https://github.com/kivy/plyer)
 * [kivy-toaster](https://github.com/knappador/kivy-toaster)
