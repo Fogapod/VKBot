@@ -1,5 +1,4 @@
-#-*- coding: utf-8 -*-
-#qpy:kivy
+# coding:utf8
 
 
 import traceback
