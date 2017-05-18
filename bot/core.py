@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# coding:utf8
 
 
 import time
@@ -13,7 +13,7 @@ save_custom_commands, load_blacklist, save_blacklist
 
 import vkrequests as vkr
 
-__version__ = '0.0.8'
+__version__ = '0.0.9'
 AUTHOR_VK_ID = 180850898
 __author__ = 'Eugene Ershov - https://vk.com/id%d' % AUTHOR_VK_ID
 
