@@ -36,7 +36,7 @@ version.filename = %(source.dir)s/bot/core.py
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy
-requirements = openssl,requests,kivy==master,android
+requirements = openssl,requests,kivy,android
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -185,7 +185,7 @@ warn_on_root = 1
 # build_dir = ./.buildozer
 
 # (str) Path to build output (i.e. .apk, .ipa) storage
-# bin_dir = ./bin
+bin_dir = ./bin/android
 
 #    -----------------------------------------------------------------------------
 #    List as sections
