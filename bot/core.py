@@ -550,7 +550,7 @@ class LongPollSession(Bot):
                             self.custom_commands
                             )
 
-                    if custom_response:
+                    if custom_response or attachments:
                             response_text = custom_response
 
                     if not (response_text or attachments):
