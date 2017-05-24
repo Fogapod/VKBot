@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# coding:utf8
 
 
 import time
@@ -19,10 +19,10 @@ def error_catcher(request):
 
             if 'too many requests' in error or 'timed out' in error:
                 print 'Too many requests/response time out'
+                time.sleep(0.33)
                 if request.__name__ == 'get_message_updates':
                     return False, error
                 else:
-                    time.sleep(0.33)
                     return do_request(*args, **kwargs) # TODO: add counter
 
             elif '[errno 1]_ssl.c:503' in error:
@@ -86,8 +86,8 @@ def log_in(**kwargs):
 
 @error_catcher
 def _create_session(**kwargs):
-    scope = '70656' # messages, status, offline permissions
-    app_id = '5746984'
+    scope = '70660' # messages, status, photos, offline
+    app_id = '6045412'
 
     token = kwargs.get('token')
     key = str(kwargs.get('key'))
