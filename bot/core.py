@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# coding:utf8
 
 
 import time
@@ -292,7 +292,7 @@ class Bot():
 
             if response.startswith('attach='):
                 attachments = response[7:]
-                if re.match('.*/((photo)|(video)|(audio)|(doc)|(wall)|(market))(\d+_\d+(_\d+)?)$', attachments):
+                if re.match('.*/((photo)|(album)|(video)|(audio)|(doc)|(wall)|(market))(\d+_\d+(_\d+)?)$', attachments):
                     attachments = attachments.split('/')[-1] # URGLY # FIXME
                 else:
                     response_text = u'Не могу показать вложение. Неправильная ссылка'
@@ -581,7 +581,7 @@ class LongPollSession(Bot):
                     attachments = []
                     custom_response = ''
                     self.reply_count += 1
-            time.sleep(1)
+                time.sleep(1)
         except:
             if not 'traceback' in globals():
                 import traceback
