@@ -278,7 +278,9 @@ class Bot():
         return custom_commands, response_text
 
     def custom_command(self, cmd, custom_commands):
-        response_text, attachments = '', []
+        response_text = ''
+        attachments = []
+
         if custom_commands and cmd.joined_text.lower() in custom_commands.keys():
             response = random.choice(custom_commands[cmd.joined_text.lower()])
 
@@ -291,9 +293,23 @@ class Bot():
                     response = u'Ошибка. Нет указанного ключа'
 
             if response.startswith('attach='):
-                attachments = response[7:]
-                if re.match('.*/((photo)|(album)|(video)|(audio)|(doc)|(wall)|(market))(\d+_\d+(_\d+)?)$', attachments):
-                    attachments = attachments.split('/')[-1] # URGLY # FIXME
+                media_id = response[7:]
+                if re.match('.*/((photo)|(album)|(video)|(audio)|(doc)|(wall)|(market))(\d+_\d+(_\d+)?)$', media_id):
+                    if re.match('.*/album\d+_\d+', media_id):
+                        album_id = re.search('album\d+_(\d+)', media_id).group(1)
+                        album_len = vkr.get_album_size(album_id)[0]
+                        if album_len == 0:
+                            response_text = 'Пустой альбом. Невозможно выбрать фото'
+                            media_id = ''
+                        else:
+                            media_id = vkr.get_photo_id(
+                                            album_id=album_id,
+                                            offset=random.randrange(album_len)
+                                            )[0]
+                    else:
+                        media_id = media_id.split('/')[-1] # URGLY # FIXME
+                    if media_id:
+                        attachments.append(media_id)
                 else:
                     response_text = u'Не могу показать вложение. Неправильная ссылка'
             else:

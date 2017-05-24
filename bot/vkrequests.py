@@ -173,6 +173,21 @@ def get_message_updates(**kwargs):
 
 
 @error_catcher
+def get_album_size(*args):
+    album_id = args
+    return api.photos.get(count=0, album_id=album_id)['count']
+
+
+@error_catcher
+def get_photo_id(**kwargs):
+    album_id = kwargs['album_id']
+    offset = kwargs.get('offset', 0)
+    photo = api.photos.get(offset=offset, album_id=album_id)['items'][0]
+    media_id = 'photo' + str(photo['owner_id']) + '_' + str(photo['id'])
+    return media_id
+
+
+@error_catcher
 def get_status():
     response = api.status.get()
     return response
@@ -187,7 +202,7 @@ def set_status(**kwargs):
 
 @error_catcher
 def get_user_name(**kwargs):
-    uid = kwargs['user_id']
+    uid = kwargs.get('user_id')
     name_case = kwargs.get('name_case', 'nom')
     response = api.users.get(user_ids=uid, name_case=name_case)[0]
     return response['first_name'] + u' ' + response['last_name']
