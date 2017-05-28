@@ -279,6 +279,16 @@ class CustomCommandsScreen(Screen):
                     button.bind(on_release=button.callback)
                 command_button.text = response
             else:
+                command_button.unbind(on_release=command_button.callback)
+                callback = partial(
+                    self.open_edit_popup,
+                    command_button.command,
+                    command_button.response,
+                    command_button,
+                    block
+                    )
+                command_button.callback = callback
+                command_button.bind(on_release=command_button.callback)
                 command_button.text = command
 
         if response != command_button.response:
