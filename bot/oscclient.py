@@ -30,8 +30,7 @@ class OSCClient():
         self.answers_count = '0'
         self.started = False
 
-    def start(self, **kwargs):
-        self.bot_launch_params = kwargs
+    def start(self):
         if platform == 'android':
             self.androidservice.start('Сервис запущен')
 
@@ -44,9 +43,6 @@ class OSCClient():
 
     def ping(self):
         self.osc.sendMsg('/ping', [], port=3000)
-    
-    def send_launch_params(self, *args):
-        self.osc.sendMsg('/launch_params', [str(self.bot_launch_params), ], port=3000)
 
     def on_response(self, message, *args, **kwargs):
         print message
@@ -58,9 +54,7 @@ class OSCClient():
     def read_status(self, message, *args):
         # self.on_response(message)
         status = message[2]
-        if status == 'connected':
-            self.send_launch_params()
-        elif status == 'got params':
+        if status == 'got params':
             self.mainscreen.ids.main_btn.text = self.mainscreen.stop_bot_text
         elif status == 'listening':
             pass

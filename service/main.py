@@ -6,6 +6,7 @@ import sys
 
 from kivy import platform
 from kivy.logger import Logger
+from kivy.config import Config
 from kivy.lib import osc
 
 import logging
@@ -19,6 +20,8 @@ import bot.utils
 if platform != 'android':
     bot.utils.PATH = parent_path + bot.utils.PATH
 bot.utils.DATA_PATH = parent_path + bot.utils.DATA_PATH
+
+bot.utils.update_paths()
 
 from bot.core import LongPollSession
 
@@ -35,17 +38,12 @@ def send_status(status):
     osc.sendMsg('/status', [status, ], port=3002)
 
 def send_error(error):
-    error_text = str(error)
+    error_text = unicode(error)
     osc.sendMsg('/error', [error_text, ], port=3002)
     Logger.info(error_text)
 
 def send_answers_count():
     osc.sendMsg('/answers', [session.reply_count, ], port=3002)
-
-def set_launch_params(message, *args):
-    global launch_params, activated
-    launch_params = eval(message[2])
-    activated = launch_params['activated']
 
 def exit(*args):
     send_status('exiting')
@@ -54,11 +52,8 @@ def exit(*args):
 
 
 if __name__ == '__main__':
-    activated = False
-    launch_params = {}
     osc.init()
     oscid = osc.listen(ipAddr='0.0.0.0', port=3000)
-    osc.bind(oscid, set_launch_params, '/launch_params')
     send_status('connected')
 
     osc.bind(oscid, ping, '/ping')
@@ -70,13 +65,21 @@ if __name__ == '__main__':
     if error:
         send_error(error)
         exit()
-    
-    while not launch_params:
-        osc.readQueue(oscid)
-        sleep(0.1)
 
+    Config.read(bot.utils.PATH + '.vkbot.ini')
+    appials = Config.get('General', 'appeals')
+    activated = Config.get('General', 'bot_activated')
+    use_custom_commands = Config.get('General', 'use_custom_commands')
+    protect_custom_commands = Config.get('General', 'protect_cc')
+
+    
+    session.load_params(
+    	            appials,
+    	            activated=activated == 'True',
+                use_custom_commands=use_custom_commands == 'True',
+                protect_custom_commands=protect_custom_commands == 'True'
+                )
     send_status('got params')
-    session.load_params(**launch_params)
     session.launch_bot()
 
     while True:

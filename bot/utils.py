@@ -23,6 +23,10 @@ __all__ = (
 PATH = '/sdcard/VKBot/' if platform == 'android' else ''
 DATA_PATH = 'data/'
 
+TOKEN_FILE_PATH = DATA_PATH + 'token.txt'
+CUSTOM_COMMANDS_FILE_PATH = PATH + 'custom_commands.txt'
+BLACKLIST_FILE_PATH = PATH + 'blacklist.txt'
+
 
 def parse_input(string, replace_vkurl=True, replace_url=True):
 	new_string = string
@@ -45,13 +49,22 @@ def parse_input(string, replace_vkurl=True, replace_url=True):
 def toast_notification(text, length_long=True):
     toast(text, length_long=length_long)
 
+def update_paths():
+    global TOKEN_FILE_PATH
+    global CUSTOM_COMMANDS_FILE_PATH
+    global BLACKLIST_FILE_PATH
+
+    TOKEN_FILE_PATH = DATA_PATH + 'token.txt'
+    CUSTOM_COMMANDS_FILE_PATH = PATH + 'custom_commands.txt'
+    BLACKLIST_FILE_PATH = PATH + 'blacklist.txt'
+
 def load_custom_commands():
-    if not os.path.exists(PATH +  'presets.txt'):
-        with open(PATH + 'presets.txt', 'w') as f:
+    if not os.path.exists(CUSTOM_COMMANDS_FILE_PATH):
+        with open(CUSTOM_COMMANDS_FILE_PATH, 'w') as f:
             f.write('{\n\n}')
         return {}
     else:    
-        with open(PATH + 'presets.txt', 'r') as f:
+        with open(CUSTOM_COMMANDS_FILE_PATH, 'r') as f:
             try:
                 content = json.load(f)
             except ValueError:
@@ -64,7 +77,7 @@ def load_custom_commands():
 
 def save_custom_commands(content):
     last_content = load_custom_commands()
-    with open(PATH + 'presets.txt', 'w') as f:
+    with open(CUSTOM_COMMANDS_FILE_PATH, 'w') as f:
         try:
             f.write(json.dumps(content, sort_keys=True, indent=0, ensure_ascii=False).encode('utf8'))
         except (UnicodeEncodeError, UnicodeDecodeError):
@@ -77,17 +90,18 @@ def save_custom_commands(content):
 
 def load_blacklist():
     blacklist = []
-    if not os.path.exists(PATH +  'blacklist.txt'):
-        with open(PATH + 'blacklist.txt', 'w') as f:
+    if not os.path.exists(BLACKLIST_FILE_PATH):
+        with open(BLACKLIST_FILE_PATH, 'w') as f:
             pass
     else:    
-        with open(PATH + 'blacklist.txt', 'r') as f:
+        with open(BLACKLIST_FILE_PATH, 'r') as f:
             for line in f.readlines():
                 if line:
-                    blacklist.append(line)
+                    blacklist.append(line[:-1])
+
     return blacklist
 
 def save_blacklist(blacklist):
-    with open(PATH + 'blacklist.txt', 'w') as f:
+    with open(BLACKLIST_FILE_PATH, 'w') as f:
         f.write('\n'.join(blacklist))
     return True

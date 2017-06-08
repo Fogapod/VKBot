@@ -1,4 +1,4 @@
-#-*- coding:utf-8 -*-
+# coding:utf8
 
 
 import time
@@ -15,7 +15,7 @@ from uix.editcommandpopup import EditCommandPopup
 
 from bot.utils import toast_notification, load_custom_commands, \
     save_custom_commands
-
+from kivy.logger import Logger
 
 class AuthScreen(Screen):
     def __init__(self, **kwargs):
@@ -105,18 +105,17 @@ class MainScreen(Screen):
             self.stop_bot(config)
 
     def launch_bot(self, config):
-        self.activation_status = config.getdefault('General', 'bot_activated', 'False')
-        use_custom_commands = config.getdefault('General', 'use_custom_commands', 'False')
-        protect_custom_commands = config.getdefault('General', 'protect_cc', "True")
         if platform == 'android':
             self.ids.main_btn.text = self.launching_bot_text
-            self.service.start(
-                activated=self.activation_status == 'True',
-                use_custom_commands=use_custom_commands == 'True',
-                protect_custom_commands=protect_custom_commands == 'True'
-                )
+            self.service.start()
         else:
+            appials = Config.getdefault('General', 'appials', '/; бот, ')
+            self.activation_status = config.getdefault('General', 'bot_activated', 'False')
+            use_custom_commands = config.getdefault('General', 'use_custom_commands', 'False')
+            protect_custom_commands = config.getdefault('General', 'protect_cc', "True")
+
             self.session.load_params(
+            	       appials,
                     activated=self.activation_status == 'True',
                     use_custom_commands=use_custom_commands == 'True',
                     protect_custom_commands=protect_custom_commands == 'True'
@@ -171,13 +170,26 @@ class CustomCommandsScreen(Screen):
         self.included_keys = []
 
     def on_enter(self):
+        RESPONSE_OPTONS_COUNT = 5
+
         self.custom_commands = load_custom_commands()
         if not self.custom_commands and type(self.custom_commands) is not dict:
             toast_notification(u'Повреждён файл пользовательских команд')
             Clock.schedule_once(self.leave, .1)
         else:
             for key in sorted(self.custom_commands.keys()):
-                self.custom_commands[key] = sorted(self.custom_commands[key])
+                for item in sorted(self.custom_commands[key]):
+                    # FIXME do not work without sorted()
+                    if type(item) is not list or len(item) < RESPONSE_OPTONS_COUNT:
+                        self.custom_commands[key].remove(item)
+                        if type(item) is not list:
+                            item = [item]
+                        while len(item) < RESPONSE_OPTONS_COUNT:
+                            item.append(0)
+                        self.custom_commands[key].append(item)
+                        save_custom_commands(self.custom_commands)
+
+                self.custom_commands[key] = sorted(self.custom_commands[key], key=lambda x: x[0])
                 if key not in self.included_keys:
                     self.add_command(key, self.custom_commands[key])
 
@@ -185,17 +197,19 @@ class CustomCommandsScreen(Screen):
         self.parent.show_main_screen()
 
     def open_edit_popup(
-                self, command, response,
+                self, command, response, use_regex, force_unmark,
                 command_button, command_block, *args
                 ):
-        MAX_LEN = 30
+        MAX_TITLE_LEN = 30
         title = command.replace('\n', ' ')
-        if len(command) > MAX_LEN:
-            title = command[:MAX_LEN] + '...'
+        if len(command) > MAX_TITLE_LEN:
+            title = command[:MAX_TITLE_LEN] + '...'
         popup = EditCommandPopup(
             title=u'Настройка команды «{}»'.format(title),
             command_text=command,
             response_text=response,
+            use_regex=use_regex,
+            force_unmark=force_unmark,
             command_button=command_button,
             command_block=command_block
             )
@@ -324,7 +338,7 @@ class CustomCommandsScreen(Screen):
         elif len(block.responses) == 2:
             block.ids.dropdown_btn.unbind(on_release=block.ids.dropdown_btn.callback)
             block.dropdown.remove_widget(command_button)
-                
+
             command_button = block.ids.dropdown_btn
             command_button.command = command
             command_button.response = block.dropdown.container.children[0].response # last child
@@ -422,18 +436,22 @@ class CustomCommandsScreen(Screen):
         dropdown = ListDropDown()
         block = CustomCommandBlock(dropdown=dropdown)
         
-        for i, item in enumerate(response):
+        for item in response:
             if len(response) > 1:
-                command_button = CommandButton(text=response[i])
+                command_button = CommandButton(text=item[0])
             else:
                 command_button = block.ids.dropdown_btn
 
             command_button.command = command
-            command_button.response = response[i]
+            command_button.response = item[0]
+            command_button.use_regex = item[1]
+            command_button.force_unmark = item[2]
             callback = partial(
                 self.open_edit_popup,
                 command_button.command,
                 command_button.response,
+                command_button.use_regex,
+                command_button.force_unmark,
                 command_button,
                 block
                 )
@@ -455,6 +473,7 @@ class CustomCommandsScreen(Screen):
 
     def sort_blocks(self):
         for widget in sorted(self.ids.cc_list.children):
+            # FIXME do not work without sorted()
             self.included_keys.remove(widget.command)
             self.ids.cc_list.remove_widget(widget)
 

@@ -49,10 +49,11 @@ class VKBotApp(App):
     def build_config(self, config):
         config.setdefaults('General', 
                 {
-                    "show_bot_activity":"False",
-                    "bot_activated":"False",
-                    "use_custom_commands":"False",
-                    "protect_cc": "True"
+                    "show_bot_activity": "False",
+                    "appeals": u"/;Бот, ;бот, ",
+                    "use_custom_commands": "False",
+                    "protect_cc": "True",
+                    "bot_activated": "False"
                 }
             )
 
@@ -67,6 +68,13 @@ class VKBotApp(App):
             "key": "show_bot_activity",
             "values": ["False","True"],
             "disabled": 1
+            },
+            {
+            "type": "string",
+            "title": "Обращение к боту",
+            "desc": "Обращения, на которые бот будет отзываться. Обращения разделяются символом ;",
+            "section": "General",
+            "key": "appeals"
             },
             {
             "type": "title",
