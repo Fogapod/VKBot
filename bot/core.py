@@ -94,6 +94,10 @@ class Bot():
                 else:
                     return u'Неправильно указан id', blacklist
 
+    def pong(self, cmd):
+        cmd.forward_msg = None
+        return 'pong', cmd
+
     def help(self):
         return __help__
 
@@ -413,6 +417,7 @@ class Command():
 
         if self.text:
             self.words = self.text.split(' ')
+        self.lower_text = self.text.lower()
 
         self.message_id = message['id']
 
@@ -551,7 +556,10 @@ class LongPollSession(Bot):
                         blacklisted = True
 
                     if command.is_command and not blacklisted and not response_text:
-                        if re.match(u'(^help)|(^помощь)|(^info)|(^инфо)|(^информация)|^\?$',\
+                        if re.match('ping$', command.lower_text):
+                            response_text, command = self.pong(command)
+
+                        elif re.match(u'(^help)|(^помощь)|(^info)|(^инфо)|(^информация)|^\?$',\
                             command.words[0].lower()):
                             response_text = self.help()
 
