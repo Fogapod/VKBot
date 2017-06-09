@@ -559,50 +559,50 @@ class LongPollSession(Bot):
                         if re.match('ping$', command.lower_text):
                             response_text, command = self.pong(command)
 
-                        elif re.match(u'(^help)|(^помощь)|(^info)|(^инфо)|(^информация)|^\?$',\
-                            command.words[0].lower()):
+                        elif re.match(u'((help)|(помощь)|(info)|(инфо)|(^информация)|\?)$',\
+                                command.lower_text):
                             response_text = self.help()
 
-                        elif re.match(u'(^скажи)|(^say)$', command.words[0].lower()):
+                        elif re.match(u'((скажи)|(say))$', command.words[0].lower()):
                             response_text = self.say(command)
 
-                        elif re.match(u'(^посчитай)|(^calculate)|^=$', command.words[0].lower()):
+                        elif re.match(u'((посчитай)|(calculate)|=)$', command.words[0].lower()):
                             response_text = self.calculate(command)    
 
-                        elif re.match(u'(^простое)|(^prime)|%$', command.words[0].lower()):
+                        elif re.match(u'((простое)|(prime)|%)$', command.words[0].lower()):
                             response_text = self.prime(command)
 
-                        elif re.match(u'(^инфа)|(^chance)$', command.words[0].lower()):
+                        elif re.match(u'((инфа)|(chance))$', command.words[0].lower()):
                             response_text = self.chance(command)
 
-                        elif re.match(u'(^кто)|(^кого)|(^who)|(^whom)$', command.words[0].lower()):
+                        elif re.match(u'((кто)|(кого)|(who)|(whom))$', command.words[0].lower()):
                             response_text = self.who(command)
 
-                        elif re.match(u'(^выучи)|(^learn)|\+$', command.words[0].lower()):
+                        elif re.match(u'((выучи)|(learn)|\+)$', command.words[0].lower()):
                             self.custom_commands, response_text = self.learn(
                                 command,
                                 self.custom_commands,
                                 protect=self.protect_custom_commands
                                 )
 
-                        elif re.match(u'(^забудь)|(^forgot)|\-$', command.words[0].lower()):
+                        elif re.match(u'((забудь)|(forgot)|\-)$', command.words[0].lower()):
                             self.custom_commands, response_text = self.forgot(
                                 command,
                                 self.custom_commands,
                                 protect=self.protect_custom_commands
                                 )
                             
-                        elif re.match(u'(^stop)|(^выйти)|(^exit)|(^стоп)|(^terminate)|(^завершить)|(^close)|^!$',\
-                             command.words[0].lower()):
+                        elif re.match(u'((stop)|(выйти)|(exit)|(стоп)|\!)$',\
+                                command.lower_text):
                             response_text = self._stop_bot_from_message(command)
 
-                        elif command.words[0].lower() == 'activate':
+                        elif command.lower_text == 'activate':
                             response_text, self.activated = self.activate_bot(command, self.activated)
 
-                        elif command.words[0].lower() == 'deactivate':
+                        elif command.lower_text == 'deactivate':
                             response_text, self.activated = self.deactivate_bot(command, self.activated)
 
-                        elif command.words[0].lower() == 'raise':
+                        elif command.lower_text == 'raise':
                             response_text = self._raise_debug_exception(command)
 
                         else:
