@@ -97,7 +97,7 @@ def load_blacklist():
         with open(BLACKLIST_FILE_PATH, 'r') as f:
             for line in f.readlines():
                 if line:
-                    blacklist.append(line[:-1])
+                    blacklist.append(line.split()[0])
 
     return blacklist
 
