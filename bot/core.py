@@ -313,6 +313,13 @@ class Bot():
         if not response:
             return response_text, attachments, cmd
 
+        if choice[4] is 1: # works only with appeal
+            if not cmd.was_appeal:
+                return response_text, attachments, cmd
+        elif choice[4] is 2:
+            if cmd.was_appeal:
+                return response_text, attachments, cmd
+
         if choice[2] is 1: # remove «'»
             cmd.mark_msg = False
 
@@ -376,6 +383,7 @@ class Command():
         self.lower_text = u''
         self.words = [u'']
         self.is_command = False
+        self.was_appeal = False
         self.mark_msg = True
         self.from_user = False
         self.from_chat = False
@@ -398,6 +406,7 @@ class Command():
                 a for a in self.appeals if self.lower_text.startswith(a)
             )):]
             self.is_command = True
+            self.was_appeal = True
             if self.text.startswith('/'):
                 self.text = self.text[1:]
                 self.mark_msg = False
