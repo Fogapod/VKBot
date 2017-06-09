@@ -79,11 +79,11 @@ def save_custom_commands(content):
     last_content = load_custom_commands()
     with open(CUSTOM_COMMANDS_FILE_PATH, 'w') as f:
         try:
-            f.write(json.dumps(content, sort_keys=True, indent=0, ensure_ascii=False).encode('utf8'))
+            f.write(json.dumps(content, indent=0, ensure_ascii=False).encode('utf8'))
         except (UnicodeEncodeError, UnicodeDecodeError):
             print('Error saving custom commands file. Reverting')
             f.truncate(0)
-            f.write(json.dumps(last_content, sort_keys=True, indent=0, ensure_ascii=False).encode('utf8'))
+            f.write(json.dumps(last_content, indent=0, ensure_ascii=False).encode('utf8'))
             f.close()
             return False
     return True
