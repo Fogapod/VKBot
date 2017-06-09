@@ -170,7 +170,7 @@ class CustomCommandsScreen(Screen):
         self.included_keys = []
 
     def on_enter(self):
-        RESPONSE_OPTONS_COUNT = 5
+        RESPONSE_OPTONS_COUNT = 6
 
         self.custom_commands = load_custom_commands()
         if not self.custom_commands and type(self.custom_commands) is not dict:
@@ -198,6 +198,7 @@ class CustomCommandsScreen(Screen):
 
     def open_edit_popup(
                 self, command, response, use_regex, force_unmark,
+                force_forward, appeal_only, disable,
                 command_button, command_block, *args
                 ):
         MAX_TITLE_LEN = 30
@@ -210,6 +211,9 @@ class CustomCommandsScreen(Screen):
             response_text=response,
             use_regex=use_regex,
             force_unmark=force_unmark,
+            force_forward=force_forward,
+            appeal_only=appeal_only,
+            disable=disable,
             command_button=command_button,
             command_block=command_block
             )
@@ -446,12 +450,18 @@ class CustomCommandsScreen(Screen):
             command_button.response = item[0]
             command_button.use_regex = item[1]
             command_button.force_unmark = item[2]
+            command_button.force_forward = item[3]
+            command_button.appeal_only = item[4]
+            command_button.disable = item[5]
             callback = partial(
                 self.open_edit_popup,
                 command_button.command,
                 command_button.response,
                 command_button.use_regex,
                 command_button.force_unmark,
+                command_button.force_forward,
+                command_button.appeal_only,
+                command_button.disable,
                 command_button,
                 block
                 )
