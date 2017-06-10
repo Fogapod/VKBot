@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# coding:utf8
 
 
 import re
@@ -11,21 +11,24 @@ from kivy import platform
 from libs.toast import toast
 
 
-__all__ = (
-    'PATH',
-    'DATA_PATH',
-    'parse_input',
-    'load_custom_commands',
-    'save_custom_commands',
-    'toast_notification'
-    )
-
 PATH = '/sdcard/VKBot/' if platform == 'android' else ''
 DATA_PATH = 'data/'
 
-TOKEN_FILE_PATH = DATA_PATH + 'token.txt'
-CUSTOM_COMMANDS_FILE_PATH = PATH + 'custom_commands.txt'
-BLACKLIST_FILE_PATH = PATH + 'blacklist.txt'
+
+def update_paths():
+    global BOT_ERROR_FILE_PATH
+    global BOT_ERROR_FILE_PATH
+    global TOKEN_FILE_PATH
+    global CUSTOM_COMMANDS_FILE_PATH
+    global BLACKLIST_FILE_PATH
+
+    ERROR_FILE_PATH = PATH + 'error.log'
+    BOT_ERROR_FILE_PATH = PATH + 'bot_error.log'
+    TOKEN_FILE_PATH = DATA_PATH + 'token.txt'
+    CUSTOM_COMMANDS_FILE_PATH = PATH + 'custom_commands.txt'
+    BLACKLIST_FILE_PATH = PATH + 'blacklist.txt'
+
+update_paths()
 
 
 def parse_input(string, replace_vkurl=True, replace_url=True):
@@ -48,15 +51,6 @@ def parse_input(string, replace_vkurl=True, replace_url=True):
 
 def toast_notification(text, length_long=True):
     toast(text, length_long=length_long)
-
-def update_paths():
-    global TOKEN_FILE_PATH
-    global CUSTOM_COMMANDS_FILE_PATH
-    global BLACKLIST_FILE_PATH
-
-    TOKEN_FILE_PATH = DATA_PATH + 'token.txt'
-    CUSTOM_COMMANDS_FILE_PATH = PATH + 'custom_commands.txt'
-    BLACKLIST_FILE_PATH = PATH + 'blacklist.txt'
 
 def load_custom_commands():
     if not os.path.exists(CUSTOM_COMMANDS_FILE_PATH):
@@ -105,3 +99,9 @@ def save_blacklist(blacklist):
     with open(BLACKLIST_FILE_PATH, 'w') as f:
         f.write('\n'.join(blacklist))
     return True
+
+def save_error(error_text, from_bot=False):
+    if from_bot:
+        open(BOT_ERROR_FILE_PATH, 'w').write(error_text)
+    else:
+        open(ERROR_FILE_PATH, 'w').write(error_text)
