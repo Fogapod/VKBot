@@ -109,10 +109,10 @@ class MainScreen(Screen):
             self.ids.main_btn.text = self.launching_bot_text
             self.service.start()
         else:
-            appials = Config.getdefault('General', 'appials', '/; бот, ')
-            self.activation_status = config.getdefault('General', 'bot_activated', 'False')
-            use_custom_commands = config.getdefault('General', 'use_custom_commands', 'False')
-            protect_custom_commands = config.getdefault('General', 'protect_cc', "True")
+            appials = config.get('General', 'appeals')
+            self.activation_status = config.get('General', 'bot_activated')
+            use_custom_commands = config.get('General', 'use_custom_commands')
+            protect_custom_commands = config.get('General', 'protect_cc')
 
             self.session.load_params(
             	       appials,
