@@ -432,7 +432,6 @@ class Command():
             self.from_chat = True
         elif int(message['user_id']) < 1:
             self.from_group = True
-            self.mark_msg = False
         else:
             self.from_user = True
 
