@@ -693,7 +693,7 @@ class LongPollSession(Bot):
         if use_custom_commands:
             self.custom_commands = load_custom_commands()
 
-        appeals = appeals.split(';')
+        appeals = appeals.split(':')
         self.appeals = []
         for appeal in appeals:
             if appeal and not re.match('^\s+$', appeal):
