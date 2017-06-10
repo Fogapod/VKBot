@@ -2,7 +2,6 @@
 
 
 import os
-import re
 
 from kivy.app import App
 from kivy.lang import Builder
@@ -10,13 +9,11 @@ from kivy.uix.settings import SettingsWithNoMenu
 
 from uix.screens import Root
 
-from bot.utils import *
-
+from bot.utils import PATH, CUSTOM_COMMANDS_FILE_PATH
 from bot.core import LongPollSession
 
 
 class VKBotApp(App):
-    title = 'VKBot'
     use_kivy_settings = False
     settings_cls = SettingsWithNoMenu
 
@@ -38,7 +35,7 @@ class VKBotApp(App):
 
         for directory in directories:
             for file in os.listdir(directory):
-                if re.match('.*\.kv$', file):
+                if file.endswith('.kv'):
                     Builder.load_file(directory + file)
                 else:
                     continue
@@ -72,7 +69,7 @@ class VKBotApp(App):
             {
             "type": "string",
             "title": "Обращение к боту",
-            "desc": "Обращения, на которые бот будет отзываться. Обращения разделяются символом ;",
+            "desc": "Обращения, на которые бот будет отзываться. Обращения разделяются символом :",
             "section": "General",
             "key": "appeals"
             },
@@ -83,7 +80,7 @@ class VKBotApp(App):
             {
             "type": "bool",
             "title": "Использовать пользовательские команды",
-            "desc": "Пользовательские команды хранятся в файле %spresets.txt",
+            "desc": "Пользовательские команды хранятся в файле %s",
             "section": "General",
             "key": "use_custom_commands",
             "values": ["False","True"]
@@ -108,7 +105,7 @@ class VKBotApp(App):
             "values": ["False","True"],
             "disabled": 1
             }
-        ]''' % PATH
+        ]''' % CUSTOM_COMMANDS_FILE_PATH
         )
 
     def get_captcha_key(captcha_url):
@@ -119,7 +116,7 @@ class VKBotApp(App):
 
     def on_stop(self):
         if self.session.running:
-            while not self.session.stop_bot(): continue
+            self.session.stop_bot()
 
 
 if __name__ == '__main__':
