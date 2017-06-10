@@ -419,6 +419,8 @@ class Command():
             self.text = self.text[len(next(
                 a for a in self.appeals if self.lower_text.startswith(a)
             )):]
+            if self.text.startswith(' '):
+                self.text = self.text[1:]
             self.is_command = True
             self.was_appeal = True
             if self.text.startswith('/'):

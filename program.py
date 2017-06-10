@@ -50,7 +50,7 @@ class VKBotApp(App):
         config.setdefaults('General', 
                 {
                     "show_bot_activity": "False",
-                    "appeals": u"/:бот,:бот, ",
+                    "appeals": u"/:бот,",
                     "use_custom_commands": "False",
                     "protect_cc": "True",
                     "bot_activated": "False"
