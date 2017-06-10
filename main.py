@@ -5,7 +5,7 @@ import traceback
 import os
 
 from program import VKBotApp
-from bot.utils import PATH, DATA_PATH
+from bot.utils import PATH, DATA_PATH, save_error
 
 
 def main():
@@ -18,7 +18,7 @@ def main():
         VKBotApp().run()
     except Exception:
         error_text = traceback.format_exc()
-        open(PATH + 'error.log', 'w').write(error_text)
+        save_error(error_text)
 
 if __name__ == '__main__':
     main()
