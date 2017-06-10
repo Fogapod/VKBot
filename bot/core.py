@@ -609,7 +609,7 @@ class LongPollSession(Bot):
                         elif command.lower_text == 'deactivate':
                             response_text, self.activated = self.deactivate_bot(command, self.activated)
 
-                        elif command.lower_text == 'raise':
+                        elif command.words[0].lower() == 'raise':
                             response_text = self._raise_debug_exception(command)
 
                         else:
