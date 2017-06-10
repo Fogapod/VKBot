@@ -232,10 +232,10 @@ class Bot():
                 in custom_commands[command.lower()]:
             response_text = u'Я уже знаю такой ответ'
         elif command in custom_commands.keys():
-            custom_commands[command.lower()].append(response)
+            custom_commands[command.lower()].append([response, 0, 0, 0, 0, 0])
             response_text = response_text.format(command.lower(), response)
         else:
-            custom_commands[command.lower()] = [response]
+            custom_commands[command.lower()] = [[response, 0, 0, 0, 0, 0]]
             response_text = response_text.format(command.lower(), response)
 
         save_custom_commands(custom_commands)
@@ -265,15 +265,20 @@ class Bot():
         if command and response:
             if not command in custom_commands.keys():
                 response = ''
-            elif len(custom_commands[command.lower()]) < 2:
-                response = ''
-            elif response not in custom_commands[command.lower()]:
+            elif len([x for x in custom_commands[command.lower()]\
+                    if response == x[0]]) == 0:
                 response_text = u'В команде «{}» нет ключа «{}»'.format(
-                                custom_commands[command.lower()], response
+                                command.lower(), response
                                 )
             else:
-                custom_commands[command.lower()].remove(response)
-                response_text = u'Ключ для команды забыт'
+                for response_list in custom_commands[command.lower()]:
+                    if response_list[0] == response:
+                        custom_commands[command.lower()].remove(response_list)
+                        break
+                if len(custom_commands[command.lower()]) == 0:
+                    custom_commands.pop(command.lower())
+                else:
+                    response_text = u'Ключ для команды забыт'
 
         if not response and not custom_commands.pop(command.lower(), None):
             response_text = u'Я не знаю такой команды ({})'.format(command)
