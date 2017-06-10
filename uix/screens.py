@@ -14,8 +14,8 @@ from uix.customcommandblock import CustomCommandBlock, ListDropDown, CommandButt
 from uix.editcommandpopup import EditCommandPopup
 
 from bot.utils import toast_notification, load_custom_commands, \
-    save_custom_commands
-from kivy.logger import Logger
+    save_custom_commands, save_error
+
 
 class AuthScreen(Screen):
     def __init__(self, **kwargs):
@@ -148,6 +148,11 @@ class MainScreen(Screen):
         self.session.authorization(logout=True)
         self.parent.show_auth_screen()
     
+    def show_bot_error(self, error_text):
+        error_text = error_text.decode('unicode-escape')
+        toast_notification(error_text)
+        save_error(error_text, from_bot=True)
+
     def check_if_bot_active(self, tick):
         self.update_answers_count(self.session.reply_count)
         if self.ids.main_btn.text == self.stop_bot_text and\

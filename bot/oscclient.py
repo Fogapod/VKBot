@@ -70,7 +70,7 @@ class OSCClient():
     def return_error(self, message, *args):
         # self.on_response(message)
         error = message[2]
-        # self.mainscreen.show_bot_error(error)
+        self.mainscreen.show_bot_error(error)
 
     def activation_changed(self, message, *args):
         # self.on_response(message)
