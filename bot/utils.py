@@ -16,7 +16,7 @@ DATA_PATH = 'data/'
 
 
 def update_paths():
-    global BOT_ERROR_FILE_PATH
+    global ERROR_FILE_PATH
     global BOT_ERROR_FILE_PATH
     global TOKEN_FILE_PATH
     global CUSTOM_COMMANDS_FILE_PATH
@@ -28,7 +28,7 @@ def update_paths():
     CUSTOM_COMMANDS_FILE_PATH = PATH + 'custom_commands.txt'
     BLACKLIST_FILE_PATH = PATH + 'blacklist.txt'
 
-update_paths()
+update_paths()    
 
 
 def parse_input(string, replace_vkurl=True, replace_url=True):
