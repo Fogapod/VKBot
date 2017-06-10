@@ -222,7 +222,11 @@ class Bot():
         text = ' '.join(words)
         text = text.split('::')
         command = text[0]
-        response = '::'.join(text[1:])
+        response = text[1]
+        if len(text) == 3:
+            options = map(lambda x: int(x), text[2])
+        else:
+            options = [0, 0, 0, 0, 0]
 
         if argument_required:
             response_text = argument_required
@@ -232,10 +236,10 @@ class Bot():
                 in custom_commands[command.lower()]:
             response_text = u'Я уже знаю такой ответ'
         elif command in custom_commands.keys():
-            custom_commands[command.lower()].append([response, 0, 0, 0, 0, 0])
+            custom_commands[command.lower()].append([response] + options)
             response_text = response_text.format(command.lower(), response)
         else:
-            custom_commands[command.lower()] = [[response, 0, 0, 0, 0, 0]]
+            custom_commands[command.lower()] = [[response] + options]
             response_text = response_text.format(command.lower(), response)
 
         save_custom_commands(custom_commands)
@@ -257,7 +261,7 @@ class Bot():
         if '::' in text:
             text = text.split('::')
             command = text[0]
-            response = '::'.join(text[1:])
+            response = text[1]
         else:
             command = text
             response = ''
