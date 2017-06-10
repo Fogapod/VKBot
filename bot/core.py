@@ -322,13 +322,16 @@ class Bot():
         if not response:
             return response_text, attachments, cmd
 
+        if choice[5] == 2: # disabled
+            return response_text, attachments, cmd
+
         if choice[4] == 1: # works only with appeal
             if cmd.was_appeal:
                 return response_text, attachments, cmd
         elif choice[4] == 2:
             if not cmd.was_appeal:
                 return response_text, attachments, cmd
-
+            
         if choice[2] == 1: # remove «'»
             cmd.mark_msg = True
         elif choice[2] == 2:
