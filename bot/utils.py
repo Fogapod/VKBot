@@ -102,6 +102,6 @@ def save_blacklist(blacklist):
 
 def save_error(error_text, from_bot=False):
     if from_bot:
-        open(BOT_ERROR_FILE_PATH, 'w').write(error_text)
+        open(BOT_ERROR_FILE_PATH, 'w').write(error_text.encode('utf8'))
     else:
-        open(ERROR_FILE_PATH, 'w').write(error_text)
+        open(ERROR_FILE_PATH, 'w').write(error_text.encode('utf8'))
