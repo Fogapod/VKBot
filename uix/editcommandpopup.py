@@ -7,29 +7,49 @@ class EditCommandPopup(Popup):
         self.ids.command_text.text = kwargs['command_text']
         self.ids.response_text.text = kwargs['response_text']
 
-        if kwargs['use_regex']:
-            self.ids.regex_btn.state = 'down'
-            self.ids.regex_btn.background_color = [0, 1, 0, .6]
-        if kwargs['force_unmark']:
-            self.ids.force_unmark_btn.state = 'down'
-            self.ids.force_unmark_btn.background_color = [0, 1, 0, .6]
-        if kwargs['force_forward']:
-            self.ids.force_forward_btn.state = 'down'
-            self.ids.force_forward_btn.background_color = [0, 1, 0, .6]
-        if kwargs['appeal_only']:
-            self.ids.appeal_only_btn.state = 'down'
-            self.ids.appeal_only_btn.background_color = [0, 1, 0, .6]
-        if kwargs['disable']:
-            self.ids.disable_btn.state = 'down'
-            self.ids.disable_btn.background_color = [0, 1, 0, .6]
+        self.switch_option_state(self.ids.regex_btn,
+                                 self.ids.regex_btn.states,
+                                 force_state=kwargs['use_regex'])
+
+        self.switch_option_state(self.ids.force_unmark_btn,
+                                 self.ids.force_unmark_btn.states,
+                                 force_state=kwargs['force_unmark'])
+        
+        self.switch_option_state(self.ids.force_forward_btn,
+        	                        self.ids.force_forward_btn.states,
+        	                        force_state=kwargs['force_forward'])
+
+        self.switch_option_state(self.ids.appeal_only_btn,
+                                 self.ids.appeal_only_btn.states,
+                                 force_state=kwargs['appeal_only'])
+
+        self.switch_option_state(self.ids.disable_btn,
+        	                        self.ids.disable_btn.states,
+        	                        force_state=kwargs['disable'])
 
         self.command_block = kwargs['command_block']
         self.command_button = kwargs['command_button']
         if not self.command_button:
             self.ids.delete_command_btn.disabled = True
 
+
     def switch_command(self, **kwargs):
         pass
-    
-    def switch_option_state(self, option_button, options_count):
-        pass
+
+
+    def switch_option_state(self, option_button, states, force_state=None):
+        if force_state is not None:
+            option_button.current_state = force_state
+        elif option_button.current_state == states[-1]:
+            option_button.current_state = states[0]
+        elif len(states) == 2:
+            option_button.current_state = states[1]
+        else:
+            option_button.current_state += 1
+        
+        if option_button.current_state == 0:
+            option_button.background_color = [1, 0, 0, .6]
+        elif option_button.current_state == 1:
+            option_button.background_color = [0, 0, 1, .6]
+        elif option_button.current_state == 2:
+            option_button.background_color = [0, 1, 0, .6]

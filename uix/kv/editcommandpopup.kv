@@ -9,6 +9,17 @@
 <TextInput>:
     font_name: 'Roboto-BoldItalic'
 
+
+<OptionButton@Button>:
+    states: (0, 1, 2)
+    current_state: 0
+
+    font_size: '16sp'
+    background_color: 1, 0, 0, .6
+    size_hint: None, None
+    size: self.texture_size[0], self.texture_size[1]*2.3
+
+
 <EditCommandPopup>:
     title_font: 'Roboto-BoldItalic'
     size_hint_y: None
@@ -44,47 +55,39 @@
                 height: self.minimum_height
                 spacing: dp(5)
 
-                ToggleButton:
+                OptionButton:
+                    states: (0, 2)
                     id: regex_btn
                     text: '      r      '
-                    font_size: '16sp'
-                    background_color: 1, 0, 0, .6
-                    size_hint: None, None
-                    size: self.texture_size[0], self.texture_size[1]*2.3
-                    on_release: self.background_color = [0, 1, 0, .6] if self.background_color[:-1] == [1, 0, 0] else [1, 0, 0, .6]
-                ToggleButton:
+                    on_release: root.switch_option_state(self, self.states)
+
+                OptionButton:
+                    states: (0, 1, 2)
                     id: force_unmark_btn
                     text: "      !'      "
-                    font_size: '16sp'
-                    background_color: 1, 0, 0, .6
-                    size_hint: None, None
-                    size: self.texture_size[0], self.texture_size[1]*2.3
-                    on_release: self.background_color = [0, 1, 0, .6] if self.background_color[:-1] == [1, 0, 0] else [1, 0, 0, .6]
-                ToggleButton:
+                    on_release: root.switch_option_state(self, self.states)
+
+                OptionButton:
+                    states: (0, 1, 2)
                     id: force_forward_btn
                     text: "      f      "
-                    font_size: '16sp'
-                    background_color: 1, 0, 0, .6
-                    size_hint: None, None
-                    size: self.texture_size[0], self.texture_size[1]*2.3
-                    on_release: self.background_color = [0, 1, 0, .6] if self.background_color[:-1] == [1, 0, 0] else [1, 0, 0, .6]
-                ToggleButton:
+                    on_release: root.switch_option_state(self, self.states)
+
+                OptionButton:
+                    states: (0, 1, 2)
+                    current_state: 0
                     id: appeal_only_btn
                     text: "      /      "
-                    font_size: '16sp'
-                    background_color: 1, 0, 0, .6
-                    size_hint: None, None
-                    size: self.texture_size[0], self.texture_size[1]*2.3
-                    on_release: self.background_color = [0, 1, 0, .6] if self.background_color[:-1] == [1, 0, 0] else [1, 0, 0, .6]
-                ToggleButton:
+                    on_release: root.switch_option_state(self, self.states)
+
+                OptionButton:
+                    states: (0, 2)
                     id: disable_btn
-                    text: " disable "
-                    font_size: '16sp'
-                    background_color: 1, 0, 0, .6
-                    size_hint: None, None
-                    size: self.texture_size[0], self.texture_size[1]*2.3
-                    on_release: self.background_color = [0, 1, 0, .6] if self.background_color[:-1] == [1, 0, 0] else [1, 0, 0, .6]
+                    text: "отключить"
+                    on_release: root.switch_option_state(self, self.states)
+
                 Widget:
+
         GridLayout:
             cols: 3
             size_hint_y: None
