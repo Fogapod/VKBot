@@ -296,7 +296,7 @@ class Bot():
         matched = []
         response = ''
         for key in custom_commands.keys():
-            if custom_commands[key][0][1]: # use regex
+            if custom_commands[key][0][1] == 2: # use regex
                 pattern = re.compile(key, re.U + re.I)
                 if pattern.search(cmd.text):
                     matched.append(key)
@@ -322,14 +322,16 @@ class Bot():
         if not response:
             return response_text, attachments, cmd
 
-        if choice[4] is 1: # works only with appeal
-            if not cmd.was_appeal:
-                return response_text, attachments, cmd
-        elif choice[4] is 2:
+        if choice[4] == 1: # works only with appeal
             if cmd.was_appeal:
                 return response_text, attachments, cmd
+        elif choice[4] == 2:
+            if not cmd.was_appeal:
+                return response_text, attachments, cmd
 
-        if choice[2] is 1: # remove «'»
+        if choice[2] == 1: # remove «'»
+            cmd.mark_msg = True
+        elif choice[2] == 2:
             cmd.mark_msg = False
 
         if response.startswith('self='):
