@@ -32,9 +32,9 @@ __help__ = u'''
 *Выбирать участника беседы
 (/who ... |/кто ... )
 *Учить команды
-(/learn command:response |/выучи команда:ответ ) +
+(/learn command::response |/выучи команда::ответ ) +
 *Забывать команды
-(/forgot command:response |/забудь команда:ответ ) -
+(/forgot command::response |/забудь команда::ответ ) -
 *Вызывать помощь
 (/help |/помощь ) ?
 
@@ -220,9 +220,9 @@ class Bot():
 
         del words[0]
         text = ' '.join(words)
-        text = text.split(':')
+        text = text.split('::')
         command = text[0]
-        response = ':'.join(text[1:])
+        response = '::'.join(text[1:])
 
         if argument_required:
             response_text = argument_required
@@ -254,10 +254,10 @@ class Bot():
 
         del words[0]
         text = ' '.join(words)
-        if ':' in text:
-            text = text.split(':')
+        if '::' in text:
+            text = text.split('::')
             command = text[0]
-            response = ':'.join(text[1:])
+            response = '::'.join(text[1:])
         else:
             command = text
             response = ''
