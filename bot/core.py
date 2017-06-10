@@ -658,11 +658,7 @@ class LongPollSession(Bot):
         except:
             if not 'traceback' in globals():
                 import traceback
-            tb = traceback.format_exc()
-            try:
-                self.runtime_error = tb.decode('unicode-escape')
-            except UnicodeDecodeError:
-                self.runtime_error = tb
+            self.runtime_error = traceback.format_exc()
             self.run_bot = False
 
         self.running = False
