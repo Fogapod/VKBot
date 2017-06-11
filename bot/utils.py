@@ -28,7 +28,10 @@ def update_paths():
     CUSTOM_COMMANDS_FILE_PATH = PATH + 'custom_commands.txt'
     BLACKLIST_FILE_PATH = PATH + 'blacklist.txt'
 
-update_paths()    
+update_paths()
+
+
+CUSTOM_COMMAND_OPTONS_COUNT = 5
 
 
 def parse_input(string, replace_vkurl=True, replace_url=True):
