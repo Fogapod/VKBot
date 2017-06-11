@@ -215,7 +215,17 @@ class Bot():
             if not cmd.out:
                 return custom_commands, u'Отказано в доступе'
 
-        response_text = u'Команда выучена.\nТеперь на «{}» я буду отвечать «{}»'
+        response_text =\
+u"""Команда выучена.
+Теперь на «{}» я буду отвечать «{}»
+
+Опции:
+use_regex: {}
+force_unmark: {}
+force_forward: {}
+appeal_only: {}
+disabled: {}"""
+
         words = cmd.words
         argument_required = self._is_argument_missing(words)
 
@@ -242,10 +252,12 @@ class Bot():
             response_text = u'Я уже знаю такой ответ'
         elif command in custom_commands.keys():
             custom_commands[command.lower()].append([response] + options)
-            response_text = response_text.format(command.lower(), response)
+            response_text = response_text.format(command.lower(),
+                                                 response, *options)
         else:
             custom_commands[command.lower()] = [[response] + options]
-            response_text = response_text.format(command.lower(), response)
+            response_text = response_text.format(command.lower(),
+                                                 response, *options)
 
         save_custom_commands(custom_commands)
         return custom_commands, response_text
@@ -480,7 +492,7 @@ class LongPollSession(Bot):
         self.reply_count = 0
         self.custom_commands = None
 
-        self.appeals = ('/', u'бот, ')
+        self.appeals = ('/')
         self.activated = False
         self.use_custom_commands = False
         self.protect_custom_commands = True
