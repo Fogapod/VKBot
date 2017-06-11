@@ -207,7 +207,7 @@ class Bot():
             user_id = random.choice(cmd.chat_users)
             user_name, error = vkr.get_user_name(user_id=user_id, name_case='acc')
             if user_name:
-                return u'Я выбираю [id{0}|{1}]'.format(str(user_id), user_name)
+                return u'Я выбираю [id{}|{}]'.format(str(user_id), user_name)
 
     def learn(self, cmd, custom_commands, protect=True):
         if protect:
@@ -220,13 +220,16 @@ class Bot():
 
         del words[0]
         text = ' '.join(words)
-        text = text.split('::')
-        command = text[0]
-        response = text[1]
-        if len(text) == 3:
-            options = map(lambda x: int(x), text[2])
+        if '::' in text:
+            text = text.split('::')
+            command = text[0]
+            response = text[1]
+            if len(text) == 3:
+                options = map(lambda x: int(x), text[2])
+            else:
+                options = [0, 0, 0, 0, 0]
         else:
-            options = [0, 0, 0, 0, 0]
+            text = ''
 
         if argument_required:
             response_text = argument_required
