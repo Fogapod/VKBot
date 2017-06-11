@@ -14,7 +14,7 @@ from uix.customcommandblock import CustomCommandBlock, ListDropDown, CommandButt
 from uix.editcommandpopup import EditCommandPopup
 
 from bot.utils import toast_notification, load_custom_commands, \
-    save_custom_commands, save_error
+    save_custom_commands, save_error, CUSTOM_COMMAND_OPTONS_COUNT
 
 
 class AuthScreen(Screen):
@@ -175,8 +175,6 @@ class CustomCommandsScreen(Screen):
         self.included_keys = []
 
     def on_enter(self):
-        RESPONSE_OPTONS_COUNT = 6
-
         self.custom_commands = load_custom_commands()
         if not self.custom_commands and type(self.custom_commands) is not dict:
             toast_notification(u'Повреждён файл пользовательских команд')
@@ -185,11 +183,12 @@ class CustomCommandsScreen(Screen):
             for key in sorted(self.custom_commands.keys()):
                 for item in sorted(self.custom_commands[key]):
                     # FIXME do not work without sorted()
-                    if type(item) is not list or len(item) < RESPONSE_OPTONS_COUNT:
+                    if type(item) is not list or len(item)\
+                            < CUSTOM_COMMAND_OPTONS_COUNT + 1:
                         self.custom_commands[key].remove(item)
                         if type(item) is not list:
                             item = [item]
-                        while len(item) < RESPONSE_OPTONS_COUNT:
+                        while len(item) < CUSTOM_COMMAND_OPTONS_COUNT + 1:
                             item.append(0)
                         self.custom_commands[key].append(item)
                         save_custom_commands(self.custom_commands)
