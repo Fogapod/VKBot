@@ -338,6 +338,11 @@ class Bot():
         elif choice[4] == 2:
             if not cmd.was_appeal:
                 return response_text, attachments, cmd
+
+        if choice[3] == 2: # force forward
+            cmd.forward_msg = cmd.msg_id
+        elif choice[3] == 1:
+            cmd.forward_msg = None
             
         if choice[2] == 1: # remove «'»
             cmd.mark_msg = True
@@ -409,11 +414,12 @@ class Command():
         self.from_user = False
         self.from_chat = False
         self.from_group = False
+        self.forward_msg = None
         self.msg_from = None, None
         self.chat_user = None
         self.chat_users = []
         self.out = False
-        self.message_id = None
+        self.msg_id = None
 
     def load(self, message):
         self.__init__(self.SELF_ID, self.appeals) # refresh params
@@ -438,7 +444,7 @@ class Command():
             self.words = self.text.split(' ')
         self.lower_text = self.text.lower()
 
-        self.message_id = message['id']
+        self.msg_id = message['id']
 
         if 'chat_id' in message.keys():
             self.from_chat = True
@@ -450,7 +456,7 @@ class Command():
         if self.from_chat:
             self.msg_from = message['chat_id'], None
             self.chat_user = message['user_id']
-            self.forward_msg = self.message_id
+            self.forward_msg = self.msg_id
             self.chat_users = message['chat_active']
         else:
             self.msg_from = None, message['user_id']
