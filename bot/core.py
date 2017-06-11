@@ -9,7 +9,8 @@ import random
 from threading import Thread
 from kivy.logger import Logger
 from utils import TOKEN_FILE_PATH, load_custom_commands,\
-save_custom_commands, load_blacklist, save_blacklist
+save_custom_commands, load_blacklist, save_blacklist,\
+CUSTOM_COMMAND_OPTONS_COUNT
 
 import vkrequests as vkr
 
@@ -233,7 +234,8 @@ class Bot():
 
         if argument_required:
             response_text = argument_required
-        elif len(text) <2 or not (command and response):
+        elif len(text) <2 or not (command and response)\
+                or len(options) != CUSTOM_COMMAND_OPTONS_COUNT:
             response_text = u'Неправильный синтаксис команды' 
         elif command.lower() in custom_commands.keys() and response\
                 in custom_commands[command.lower()]:
