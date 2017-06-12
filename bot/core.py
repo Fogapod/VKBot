@@ -609,7 +609,7 @@ class LongPollSession(Bot):
                         elif re.match(u'((простое)|(prime)|%)$', command.words[0].lower()):
                             response_text = self.prime(command)
 
-                        elif re.match(u'((инфа)|(chance))$', command.words[0].lower()):
+                        elif re.match(u'((инфа)|(chance)),?$', command.words[0].lower()):
                             response_text = self.chance(command)
 
                         elif re.match(u'((кто)|(кого)|(who)|(whom))$', command.words[0].lower()):
