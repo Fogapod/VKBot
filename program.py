@@ -109,7 +109,7 @@ class VKBotApp(App):
         )
 
     def get_captcha_key(captcha_url):
-        return None
+        return 0
 
     def on_pause(self):
         return True

@@ -191,4 +191,5 @@ class AuthMixin(object):
         raise VkAuthError('Auth check code is needed')
 
     def get_captcha_key(self, captcha_url):
-        App.get_running_app().get_captcha_key(captcha_url)
+        # return App.get_running_app().get_captcha_key(captcha_url)
+        raise VkAuthError('Captcha is needed. Url: {}'.format(captcha_url))
