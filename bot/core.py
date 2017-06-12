@@ -211,6 +211,18 @@ class Bot():
             if user_name:
                 return u'Я выбираю [id{}|{}]'.format(str(user_id), user_name)
 
+    def pause(self, cmd):
+        if not cmd.out:
+            return custom_commands, u'Отказано в доступе'
+
+        if len(cmd.words) == 2:
+            delay = float(cmd.words[1])
+        else:
+            delay = 5
+        time.sleep(delay)
+
+        return u'Пауза окончена'
+
     def learn(self, cmd, custom_commands, protect=True):
         if protect:
             if not cmd.out:
@@ -555,7 +567,7 @@ class LongPollSession(Bot):
             SELF_ID = vkr.get_self_id()[0]
             command = Command(SELF_ID, self.appeals)
 
-            mlpd = vkr.get_message_long_poll_data()[0]
+            mlpd = None
             last_msg_id = 0
             response_text = ''
             custom_response = ''
@@ -565,7 +577,13 @@ class LongPollSession(Bot):
 
             print('@LAUNCHED')
             while self.run_bot:
-                updates, error = vkr.get_message_updates(ts=mlpd['ts'],pts=mlpd['pts'])
+                if not mlpd:
+                    mlpd, error = vkr.get_message_long_poll_data()
+                    if error:
+                        raise Exception(error)
+
+                updates, error = vkr.get_message_updates(ts=mlpd['ts'],
+                	                                        pts=mlpd['pts'])
                 
                 if updates:
                     history = updates[0]
@@ -637,6 +655,10 @@ class LongPollSession(Bot):
                         elif re.match(u'((stop)|(выйти)|(exit)|(стоп)|\!)$',\
                                 command.lower_text):
                             response_text = self._stop_bot_from_message(command)
+
+                        elif command.words[0].lower() == 'pause':
+                            mlpd = None
+                            response_text = self.pause(command)
 
                         elif command.lower_text == 'activate':
                             response_text, self.activated = self.activate_bot(command, self.activated)
