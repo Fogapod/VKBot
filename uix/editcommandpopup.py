@@ -4,8 +4,8 @@ from kivy.uix.popup import Popup
 class EditCommandPopup(Popup):
     def __init__(self, **kwargs):
         super(EditCommandPopup, self).__init__(**kwargs)
-        self.ids.command_text.text = kwargs['command_text']
-        self.ids.response_text.text = kwargs['response_text']
+        self.ids.command_textinput.text = kwargs['command_text']
+        self.ids.response_textinput.text = kwargs['response_text']
 
         self.switch_option_state(self.ids.regex_btn,
                                  self.ids.regex_btn.states,
@@ -40,7 +40,7 @@ class EditCommandPopup(Popup):
     def switch_option_state(self, option_button, states, force_state=None):
         if force_state is not None:
             option_button.current_state = force_state
-        elif option_button.current_state == states[-1]:
+        elif option_button.current_state >= states[-1]:
             option_button.current_state = states[0]
         elif len(states) == 2:
             option_button.current_state = states[1]
@@ -53,3 +53,7 @@ class EditCommandPopup(Popup):
             option_button.background_color = [0, 0, 1, .6]
         elif option_button.current_state == 2:
             option_button.background_color = [0, 1, 0, .6]
+
+        if option_button.text == '      r      ':
+            self.ids.command_textinput.regex_activated =\
+                option_button.current_state == 2

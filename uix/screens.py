@@ -232,8 +232,8 @@ class CustomCommandsScreen(Screen):
             )
         popup.ids.apply_btn.bind(
             on_release=lambda x: self.save_edited_command(
-                popup.ids.command_text.text,
-                popup.ids.response_text.text,
+                popup.ids.command_textinput.text,
+                popup.ids.response_textinput.text,
                 popup.command_button,
                 popup.command_block,
                 popup
@@ -251,8 +251,8 @@ class CustomCommandsScreen(Screen):
             )
         popup.ids.apply_btn.bind(
             on_release=lambda x: self.create_command(
-                popup.ids.command_text.text,
-                popup.ids.response_text.text,
+                popup.ids.command_textinput.text,
+                popup.ids.response_textinput.text,
                 popup
                 )
             )
@@ -271,7 +271,7 @@ class CustomCommandsScreen(Screen):
         except UnicodeEncodeError:
             pass
 
-        if not (popup.ids.command_text.text and popup.ids.response_text.text):
+        if not (popup.ids.command_textinput.text and popup.ids.response_text.text):
             toast_notification(u'Поля с командой и ответом не могут быть пустыми')
             return
 
@@ -383,7 +383,7 @@ class CustomCommandsScreen(Screen):
         except UnicodeEncodeError:
             pass
 
-        if not (popup.ids.command_text.text and popup.ids.response_text.text):
+        if not (popup.ids.command_textinput.text and popup.ids.response_text.text):
             toast_notification(u'Поля с командой и ответом не могут быть пустыми')
             return
 
