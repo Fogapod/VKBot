@@ -55,7 +55,7 @@ icon.filename = %(source.dir)s/data/images/icon.png
 orientation = portrait
 
 # (list) List of service to declare
-services = VKBot:/service/main.py #,NAME2:ENTRYPOINT2_TO_PY
+# services = VKBot:/service/main.py #,NAME2:ENTRYPOINT2_TO_PY
 
 #
 # OSX Specific
