@@ -21,31 +21,31 @@ __author__ = 'Eugene Ershov - https://vk.com/id%d' % AUTHOR_VK_ID
 __help__ = u'''
 Версия: {v}
 
+Обращения ко мне: {appeals}
+
 Я умею:
-*Говорить то, что вы попросите
-(/say ... |/скажи ... )
-*Производить математические операции
-(/calculate ... |/посчитай ... ) =
-*Проверять, простое ли число
-(/prime ... |/простое ... ) %
-*Определять достоверность информации
-(/chance ... |/инфа ... )
-*Выбирать участника беседы
-(/who ... |/кто ... )
-*Учить команды
-(/learn command::response |/выучи команда::ответ ) +
-*Забывать команды
-(/forgot command::response |/забудь команда::ответ ) -
-*Вызывать помощь
-(/help |/помощь ) ?
+-Говорить то, что вы попросите
+(скажи ... |say ... )
+-Производить математические операции
+(посчитай ... |calculate ... ) =
+-Проверять, простое ли число
+(простое ... |prime ... ) %
+-Определять достоверность информации
+(инфа ... |chance ... )
+-Выбирать участника беседы
+(кто ... |who ... )
+-Учить команды
+(выучи команда::ответ |learn command::response ) +
+-Забывать команды
+(забудь команда::ответ |forgot command::response ) -
+-Вызывать помощь
+(помощь|help) ?
 
 
 Автор: {author}
 
 В конце моих сообщений ставится знак верхней кавычки
-'''.format(\
-    v = __version__, author = __author__
-)
+'''
 
 
 class Bot():
@@ -99,8 +99,9 @@ class Bot():
         cmd.forward_msg = None
         return 'pong', cmd
 
-    def help(self):
-        return __help__
+    def help(self, cmd):
+        return __help__.format(v=__version__, author=__author__,\
+                               appeals=' '.join(cmd.appeals))
 
     def say(self, cmd):
         words = cmd.words
@@ -422,7 +423,6 @@ class Command():
         self.text = u''
         self.lower_text = u''
         self.words = [u'']
-        self.is_command = False
         self.was_appeal = False
         self.mark_msg = True
         self.from_user = False
@@ -448,7 +448,6 @@ class Command():
             )):]
             if self.text.startswith(' '):
                 self.text = self.text[1:]
-            self.is_command = True
             self.was_appeal = True
             if self.text.startswith('/'):
                 self.text = self.text[1:]
@@ -586,20 +585,20 @@ class LongPollSession(Bot):
                         continue
 
                     blacklisted = False
-                    if command.is_command and re.match(u'^blacklist$', command.words[0].lower()):
+                    if command.was_appeal and re.match(u'^blacklist$', command.words[0].lower()):
                         response_text, self.black_list = self.blacklist(command, self.black_list)
                     elif command.msg_from[0] and str(command.msg_from[0] + 2000000000) in self.black_list:
                         blacklisted = True
                     elif str(command.msg_from[1]) in self.black_list:
                         blacklisted = True
 
-                    if command.is_command and not blacklisted and not response_text:
+                    if command.was_appeal and not blacklisted and not response_text:
                         if re.match('ping$', command.lower_text):
                             response_text, command = self.pong(command)
 
                         elif re.match(u'((help)|(помощь)|(info)|(инфо)|(^информация)|\?)$',\
                                 command.lower_text):
-                            response_text = self.help()
+                            response_text = self.help(command)
 
                         elif re.match(u'((скажи)|(say))$', command.words[0].lower()):
                             response_text = self.say(command)
@@ -723,12 +722,14 @@ class LongPollSession(Bot):
             self.custom_commands = load_custom_commands()
 
         appeals = appeals.split(':')
-        self.appeals = []
+        _appeals = []
         for appeal in appeals:
             if appeal and not re.match('^\s+$', appeal):
-                self.appeals.append(appeal.lower())
+                _appeals.append(appeal.lower())
 
-        self.appeals = tuple(self.appeals)
+        if _appeals:
+            self.appeals = tuple(_appeals)
+
         self.activated = activated
         self.use_custom_commands = use_custom_commands
         self.protect_custom_commands = protect_custom_commands
