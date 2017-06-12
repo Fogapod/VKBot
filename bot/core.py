@@ -237,28 +237,33 @@ disabled: {}"""
             command = text[0]
             response = text[1]
             if len(text) == 3:
-                options = map(lambda x: int(x), text[2])
+                try:
+                    options = map(lambda x: int(x), text[2])
+                except:
+                    return custom_commands, u'Ошибка при разборе опций'
             else:
                 options = [0, 0, 0, 0, 0]
         else:
             text = ''
 
+        if options[0] == 0:
+            command = command.lower()
+
         if argument_required:
             response_text = argument_required
-        elif len(text) <2 or not (command and response)\
-                or len(options) != CUSTOM_COMMAND_OPTONS_COUNT:
+        elif len(text) <2 or not (command and response):
             response_text = u'Неправильный синтаксис команды' 
-        elif command.lower() in custom_commands.keys() and response\
-                in custom_commands[command.lower()]:
+        elif len(options) != CUSTOM_COMMAND_OPTONS_COUNT:
+            response_text = u'Неправильное количество опций'
+        elif command in custom_commands.keys() and response\
+                in custom_commands[command]:
             response_text = u'Я уже знаю такой ответ'
         elif command in custom_commands.keys():
-            custom_commands[command.lower()].append([response] + options)
-            response_text = response_text.format(command.lower(),
-                                                 response, *options)
+            custom_commands[command].append([response] + options)
+            response_text = response_text.format(command, response, *options)
         else:
-            custom_commands[command.lower()] = [[response] + options]
-            response_text = response_text.format(command.lower(),
-                                                 response, *options)
+            custom_commands[command] = [[response] + options]
+            response_text = response_text.format(command, response, *options)
 
         save_custom_commands(custom_commands)
         return custom_commands, response_text
@@ -287,7 +292,7 @@ disabled: {}"""
         if command and response:
             if not command in custom_commands.keys():
                 response = ''
-            elif len([x for x in custom_commands[command.lower()]\
+            elif len([x for x in custom_commands[command]\
                     if response == x[0]]) == 0:
                 response_text = u'В команде «{}» нет ключа «{}»'.format(
                                 command.lower(), response
@@ -295,14 +300,14 @@ disabled: {}"""
             else:
                 for response_list in custom_commands[command.lower()]:
                     if response_list[0] == response:
-                        custom_commands[command.lower()].remove(response_list)
+                        custom_commands[command].remove(response_list)
                         break
-                if len(custom_commands[command.lower()]) == 0:
-                    custom_commands.pop(command.lower())
+                if len(custom_commands[command]) == 0:
+                    custom_commands.pop(command)
                 else:
                     response_text = u'Ключ для команды забыт'
 
-        if not response and not custom_commands.pop(command.lower(), None):
+        if not response and not custom_commands.pop(command, None):
             response_text = u'Я не знаю такой команды ({})'.format(command)
         
         save_custom_commands(custom_commands)
@@ -738,6 +743,7 @@ class LongPollSession(Bot):
     def _stop_bot_from_message(self, command):
         if command.out:
             self.run_bot = False
+            self.runtime_error = 1
             return u'Завершаю работу'
         else:
             return u'Отказано в доступе'

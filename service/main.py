@@ -89,7 +89,8 @@ if __name__ == '__main__':
             activated = session.activated
             osc.sendMsg('/activation_changed', [str(activated), ], port=3002)
         if session.runtime_error:
-            send_error(session.runtime_error)
+            if session.runtime_error != 1:
+                send_error(session.runtime_error)
             break
         if not session.running:
             break
