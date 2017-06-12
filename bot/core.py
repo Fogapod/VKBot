@@ -236,18 +236,18 @@ disabled: {}"""
             text = text.split('::')
             command = text[0]
             response = text[1]
-            if len(text) == 3:
+            if len(text) == 3 and text[2]:
                 try:
                     options = map(lambda x: int(x), text[2])
                 except:
                     return custom_commands, u'Ошибка при разборе опций'
             else:
                 options = [0, 0, 0, 0, 0]
+
+            if options[0] == 0:
+                command = command.lower()
         else:
             text = ''
-
-        if options[0] == 0:
-            command = command.lower()
 
         if argument_required:
             response_text = argument_required
