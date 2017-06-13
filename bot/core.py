@@ -18,34 +18,65 @@ __version__ = '0.0.9dev'
 AUTHOR_VK_ID = 180850898
 __author__ = 'Eugene Ershov - https://vk.com/id%d' % AUTHOR_VK_ID
 
-__help__ = u'''
+__help__ = (
+u'''--Страница 0--
 Версия: {v}
 
-Обращения ко мне: {appeals}
+Обращения к боту: {appeals}
 
-Я умею:
--Говорить то, что вы попросите
-(скажи ... |say ... )
--Производить математические операции
-(посчитай ... |calculate ... ) =
--Проверять, простое ли число
-(простое ... |prime ... ) %
--Определять достоверность информации
-(инфа ... |chance ... )
--Выбирать участника беседы
-(кто ... |who ... )
--Учить команды
-(выучи команда::ответ |learn command::response ) +
--Забывать команды
-(забудь команда::ответ |forgot command::response ) -
--Вызывать помощь
-(помощь|help) ?
-
+Базовые команды:
+-Показывать это сообщение
+(помощь|help <?страница=0>) ?
+-Написать сообщение
+(скажи|say <фраза>)
+-Посчитать математическое выражение
+(посчитай|calculate <выражение>) =
+-Проверить, простое ли число
+(простое|prime <число>) %
+-Определить достоверность информации
+(инфа|chance <вопрос>)
+-Выбрать участника беседы
+(кто|who <вопрос>)
 
 Автор: {author}
 
 В конце моих сообщений ставится знак верхней кавычки
-'''
+''',
+u'''--Страница 1--
+
+Опциональные команды (доступ ограничивает владелец бота):
+-Выучить команду
+(выучи|learn <команда>::<ответ>::<?опции=00000>) +
+-Забывать команды
+(забудь|forgot <команда>::<?ответ>) -
+''',
+u'''--Страница 2--
+
+Ограниченные команды (доступны только владельц):
+-Игнорировать пользователя (лс), беседу или группу
+(blacklist <?-> <?id=id_диалога>)
+-Выключить бота
+(выйти|exit) !
+''',
+u'''--Страница 3--
+
+Отладочные команды (доступны только владельцу):
+
+-Спровоцировать ошибку бота
+(raise <?сообщение=Default exception text>)
+-Поставить бота на паузу (игнорирование сообщений)
+(pause <время=5>)
+-Быстрая проверка активности бота (доступна всем)
+(ping)
+''',
+u'''--Страница 4--
+
+Закрытые команды (доступны только автору):
+-Активировать бота
+(activate)
+-Деактивировать бота
+(deactivate)
+''')
 
 
 class Bot():
@@ -100,8 +131,24 @@ class Bot():
         return 'pong', cmd
 
     def help(self, cmd):
-        return __help__.format(v=__version__, author=__author__,\
-                               appeals=' '.join(cmd.appeals))
+        if len(cmd.words) > 1:
+            try:
+                page = int(cmd.words[1])
+            except ValueError:
+                return u'Неверно указана страница'
+        else:
+            page = 0
+
+        if page == -1:
+            response_text = '\n'.join(__help__)
+        else:
+            try:
+                response_text = __help__[page]
+            except IndexError:
+                return u'Такой страницы не существует'
+
+        return response_text.format(v=__version__, author=__author__,
+                                    appeals=' '.join(cmd.appeals))
 
     def say(self, cmd):
         words = cmd.words
@@ -619,8 +666,8 @@ class LongPollSession(Bot):
                         if re.match('ping$', command.lower_text):
                             response_text, command = self.pong(command)
 
-                        elif re.match(u'((help)|(помощь)|(info)|(инфо)|(^информация)|\?)$',\
-                                command.lower_text):
+                        elif re.match(u'((help)|(помощь)|\?)$',\
+                                command.words[0].lower()):
                             response_text = self.help(command)
 
                         elif re.match(u'((скажи)|(say))$', command.words[0].lower()):
@@ -652,7 +699,7 @@ class LongPollSession(Bot):
                                 protect=self.protect_custom_commands
                                 )
                             
-                        elif re.match(u'((stop)|(выйти)|(exit)|(стоп)|\!)$',\
+                        elif re.match(u'((выйти)|(exit)|\!)$',\
                                 command.lower_text):
                             response_text = self._stop_bot_from_message(command)
 
@@ -670,7 +717,9 @@ class LongPollSession(Bot):
                             response_text = self._raise_debug_exception(command)
 
                         else:
-                            response_text = u'Неизвестная команда. Вы можете использовать /help для получения списка команд.'
+                            response_text =\
+                                u'Неизвестная команда. Вы можете использовать {}help для получения списка команд.'.format(
+                                    random.choice(self.appeals))
                             if self.use_custom_commands:
                                 custom_response, attachments, command=\
                                     self.custom_command(command, self.custom_commands)
