@@ -459,13 +459,13 @@ disabled: {}"""
     def activate_bot(self, cmd, activated):
         if activated:
             return u'Бот уже активирован', True
-        elif cmd.from_chat and cmd.chat_user == AUTHOR_VK_ID:
+        elif cmd.from_chat and cmd.user_id == AUTHOR_VK_ID:
             return u'Активация прошла успешно', True
         else:
             return u'Отказано в доступе', False
 
     def deactivate_bot(self, cmd, activated):
-        if cmd.from_chat and cmd.chat_user == AUTHOR_VK_ID:
+        if cmd.from_chat and cmd.user_id == AUTHOR_VK_ID:
             return u'Деактивация прошла успешно', False
         elif activated:
             return u'Отказано в доступе', True
