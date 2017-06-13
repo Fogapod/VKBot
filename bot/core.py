@@ -7,7 +7,7 @@ import math
 import random
 
 from threading import Thread
-from kivy.logger import Logger
+
 from utils import TOKEN_FILE_PATH, load_custom_commands,\
 save_custom_commands, load_blacklist, save_blacklist,\
 CUSTOM_COMMAND_OPTONS_COUNT
@@ -52,7 +52,7 @@ u'''--Страница 1--
 ''',
 u'''--Страница 2--
 
-Ограниченные команды (доступны только владельц):
+Ограниченные команды (доступны только владельцу):
 -Игнорировать пользователя (лс), беседу или группу
 (blacklist <?-> <?id=id_диалога>)
 -Выключить бота
@@ -84,7 +84,7 @@ class Bot():
         if not cmd.out:
             return u'Отказано в доступе', blacklist
         if len(cmd.words) == 1:
-            chat_id = cmd.msg_from[0] if cmd.msg_from[0] else cmd.msg_from[1]
+            chat_id = cmd.chat_id if cmd.chat_id else cmd.user_id
             if cmd.from_chat:
                 chat_id += 2000000000
             chat_id = str(chat_id)
@@ -97,7 +97,7 @@ class Bot():
         else:
             if cmd.words[1] == '-':
                 if len(cmd.words) == 2:
-                    chat_id = cmd.msg_from[0] if cmd.msg_from[0] else cmd.msg_from[1]
+                    chat_id = cmd.chat_id if cmd.chat_id else cmd.user_id
                 else:
                     if re.match('^\d+$', cmd.words[2]):
                         chat_id = cmd.words[2]
@@ -493,8 +493,8 @@ class Command():
         self.from_chat = False
         self.from_group = False
         self.forward_msg = None
-        self.msg_from = None, None
-        self.chat_user = None
+        self.user_id = None
+        self.chat_id = None
         self.chat_users = []
         self.out = False
         self.msg_id = None
@@ -522,24 +522,21 @@ class Command():
         self.lower_text = self.text.lower()
 
         self.msg_id = message['id']
+        self.user_id = message['user_id']
 
         if 'chat_id' in message.keys():
             self.from_chat = True
-        elif int(message['user_id']) < 1:
+        elif self.user_id < 1:
             self.from_group = True
         else:
             self.from_user = True
 
         if self.from_chat:
-            self.msg_from = message['chat_id'], None
-            self.chat_user = message['user_id']
+            self.chat_id = message['chat_id']
             self.forward_msg = self.msg_id
             self.chat_users = message['chat_active']
-        else:
-            self.msg_from = None, message['user_id']
-            self.forward_msg = None
 
-        if self.msg_from[1] == self.SELF_ID:
+        if self.user_id == self.SELF_ID:
             self.out = 1
         else:
             self.out = message['out']
@@ -657,9 +654,9 @@ class LongPollSession(Bot):
                     blacklisted = False
                     if command.was_appeal and re.match(u'^blacklist$', command.words[0].lower()):
                         response_text, self.black_list = self.blacklist(command, self.black_list)
-                    elif command.msg_from[0] and str(command.msg_from[0] + 2000000000) in self.black_list:
-                        blacklisted = True
-                    elif str(command.msg_from[1]) in self.black_list:
+                    elif str(command.user_id) in self.black_list\
+                            or (command.chat_id and str(command.chat_id + 2000000000)\
+                                in self.black_list):
                         blacklisted = True
 
                     if command.was_appeal and not blacklisted and not response_text:
@@ -743,9 +740,14 @@ class LongPollSession(Bot):
                     if command.mark_msg:
                         response_text += "'"
 
-                    chat_id, user_id = command.msg_from
-                    message_to_resend = command.forward_msg
+                    user_id = None
+                    chat_id = None
+                    if command.from_chat:
+                        chat_id = command.chat_id
+                    else:
+                        user_id = command.user_id
 
+                    message_to_resend = command.forward_msg
                     msg_id, error = vkr.send_message(
                                         text = response_text,
                                         uid = user_id,
