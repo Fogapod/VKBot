@@ -615,7 +615,7 @@ class LongPollSession(Bot):
             command = Command(SELF_ID, self.appeals)
 
             mlpd = None
-            last_msg_id = 0
+            last_msg_ids = [0, 0, 0, 0, 0]
             response_text = ''
             custom_response = ''
             attachments = []
@@ -651,7 +651,7 @@ class LongPollSession(Bot):
 
                 for message in messages['items']:
                     command.load(message)
-                    if not command.text or command.msg_id == last_msg_id:
+                    if not command.text or command.msg_id in last_msg_ids:
                         continue
 
                     blacklisted = False
@@ -746,7 +746,7 @@ class LongPollSession(Bot):
                     chat_id, user_id = command.msg_from
                     message_to_resend = command.forward_msg
 
-                    last_msg_id, error = vkr.send_message(
+                    msg_id, error = vkr.send_message(
                                         text = response_text,
                                         uid = user_id,
                                         gid = chat_id,
@@ -760,6 +760,7 @@ class LongPollSession(Bot):
                     attachments = []
                     custom_response = ''
                     self.reply_count += 1
+                    last_msg_ids = last_msg_ids[1:] + [msg_id]
                 time.sleep(2)
         except:
             if not 'traceback' in globals():
