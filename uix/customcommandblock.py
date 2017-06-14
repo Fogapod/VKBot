@@ -12,9 +12,9 @@ class CustomCommandBlock(GridLayout):
 
 
 class ListDropDown(DropDown):
-	def __init__(self, **kwargs):
-		super(ListDropDown, self).__init__(**kwargs)
-		self.container.spacing = self.required_spacing
+    def __init__(self, **kwargs):
+        super(ListDropDown, self).__init__(**kwargs)
+        self.container.spacing = self.required_spacing
 
 
 class CommandButton(Button):

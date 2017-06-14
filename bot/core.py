@@ -10,7 +10,7 @@ from threading import Thread
 
 from utils import TOKEN_FILE_PATH, load_custom_commands,\
 save_custom_commands, load_blacklist, save_blacklist,\
-CUSTOM_COMMAND_OPTONS_COUNT
+CUSTOM_COMMAND_OPTIONS_COUNT
 
 import vkrequests as vkr
 
@@ -93,7 +93,8 @@ class Bot():
             else:
                 blacklist.append(chat_id)
                 save_blacklist(blacklist)
-                return u'id {} добавлен в чёрный список'.format(chat_id), blacklist
+                return u'id {} добавлен в чёрный список'.format(chat_id),\
+                       blacklist
         else:
             if cmd.words[1] == '-':
                 if len(cmd.words) == 2:
@@ -112,17 +113,20 @@ class Bot():
                 else:
                     blacklist.remove(chat_id)
                     save_blacklist(blacklist)
-                    return u'id {} удалён из чёрного спика'.format(chat_id), blacklist
+                    return u'id {} удалён из чёрного спика'.format(chat_id),\
+                           blacklist
             else:
                 if re.match('\d+', cmd.words[1]):
                     chat_id = cmd.words[1]
                     chat_id = str(chat_id)
                     if chat_id in blacklist:
-                        return u'Данный id уже находится в чёрном списке', blacklist
+                        return u'Данный id уже находится в чёрном списке',\
+                               blacklist
                     else:
                         blacklist.append(chat_id)
                         save_blacklist(blacklist)
-                    return u'id {} добавлен в чёрный список'.format(chat_id), blacklist
+                    return u'id {} добавлен в чёрный список'.format(chat_id),\
+                           blacklist
                 else:
                     return u'Неправильно указан id', blacklist
 
@@ -171,7 +175,8 @@ class Bot():
         else:
             del words[0]
         words = ''.join(words).lower()
-        if not re.match(u'[^\d+\-*/:().,^√πe]', words) or re.match('(sqrt\(.+\))|(pi)', words):
+        if not re.match(u'[^\d+\-*/:().,^√πe]', words)\
+                or re.match('(sqrt\(.+\))|(pi)', words):
             words = ' ' + words + ' '
             words = re.sub(u'(sqrt)|√', 'math.sqrt', words)
             words = re.sub(u'(pi)|π', 'math.pi', words)
@@ -225,11 +230,14 @@ class Bot():
                     last_luc_number = luc_number
                     luc_number = 3
                 else:
-                    luc_number, last_luc_number = last_luc_number + luc_number, luc_number
+                    luc_number, last_luc_number = last_luc_number\
+                                                  + luc_number, luc_number
                             
             if input_number != 0:
-                is_prime = True if (luc_number - 1) % input_number == 0 else False
-                result = u'Является простым числом' if is_prime else u'Не является простым числом'
+                is_prime = True if (luc_number - 1) %\
+                                   input_number == 0 else False
+                result = u'Является простым числом'\
+                    if is_prime else u'Не является простым числом'
             else:
                 result = u'0 не является простым числом'
         else:
@@ -251,10 +259,12 @@ class Bot():
         if not cmd.from_chat:
             return u'Данная команда работает только в беседе'
         elif len(cmd.chat_users) < 2:
-            return u'Для корректной работы команды в беседе должно находиться больше одного человека'
+            return u'Для корректной работы команды в беседе должно находиться'\
+                u' больше одного человека'
         else:
             user_id = random.choice(cmd.chat_users)
-            user_name, error = vkr.get_user_name(user_id=user_id, name_case='acc')
+            user_name, error = vkr.get_user_name(
+                user_id=user_id, name_case='acc')
             if user_name:
                 return u'Я выбираю [id{}|{}]'.format(str(user_id), user_name)
 
@@ -312,7 +322,7 @@ disabled: {}"""
             response_text = argument_required
         elif len(text) <2 or not (command and response):
             response_text = u'Неправильный синтаксис команды' 
-        elif len(options) != CUSTOM_COMMAND_OPTONS_COUNT:
+        elif len(options) != CUSTOM_COMMAND_OPTIONS_COUNT:
             response_text = u'Неправильное количество опций'
         elif command in custom_commands.keys() and response\
                 in custom_commands[command]:
@@ -434,12 +444,14 @@ disabled: {}"""
 
         elif response.startswith('attach='):
             media_id = response[7:]
-            if re.match('.*((photo)|(album)|(video)|(audio)|(doc)|(wall)|(market))\d+_\d+(_\d+)?$', media_id):
+            if re.match('.*((photo)|(album)|(video)|(audio)|(doc)|(wall)|'
+                            '(market))\d+_\d+(_\d+)?$', media_id):
                 if re.match('.*album\d+_\d+', media_id):
                     album_id = re.search('album\d+_(\d+)', media_id).group(1)
                     album_len = vkr.get_album_size(album_id)[0]
                     if album_len == 0:
-                        response_text = u'Пустой альбом. Невозможно выбрать фото'
+                        response_text =\
+                            u'Пустой альбом. Невозможно выбрать фото'
                         media_id = ''
                     else:
                         media_id = vkr.get_photo_id(
@@ -451,7 +463,8 @@ disabled: {}"""
                 if media_id:
                     attachments.append(media_id)
             else:
-                response_text = u'Не могу показать вложение. Неправильная ссылка'
+                response_text =\
+                    u'Не могу показать вложение. Неправильная ссылка'
         else:
             response_text = response
         return response_text, attachments, cmd
@@ -557,7 +570,8 @@ class LongPollSession(Bot):
         self.use_custom_commands = False
         self.protect_custom_commands = True
 
-    def authorization(self, login= '', password= '', token='', key='', logout=False):
+    def authorization(
+            self, login= '', password= '', token='', key='', logout=False):
         authorized = False
         error = None
         if logout:
@@ -627,7 +641,7 @@ class LongPollSession(Bot):
                         raise Exception(error)
 
                 updates, error = vkr.get_message_updates(ts=mlpd['ts'],
-                	                                        pts=mlpd['pts'])
+                                                         pts=mlpd['pts'])
                 
                 if updates:
                     history = updates[0]
@@ -655,7 +669,7 @@ class LongPollSession(Bot):
                     if command.was_appeal and re.match(u'^blacklist$', command.words[0].lower()):
                         response_text, self.black_list = self.blacklist(command, self.black_list)
                     elif str(command.user_id) in self.black_list\
-                            or (command.chat_id and str(command.chat_id + 2000000000)\
+                            or (command.chat_id and str(command.chat_id + 2000000000)
                                 in self.black_list):
                         blacklisted = True
 
@@ -663,7 +677,7 @@ class LongPollSession(Bot):
                         if re.match('ping$', command.lower_text):
                             response_text, command = self.pong(command)
 
-                        elif re.match(u'((help)|(помощь)|\?)$',\
+                        elif re.match(u'((help)|(помощь)|\?)$',
                                 command.words[0].lower()):
                             response_text = self.help(command)
 
@@ -696,7 +710,7 @@ class LongPollSession(Bot):
                                 protect=self.protect_custom_commands
                                 )
                             
-                        elif re.match(u'((выйти)|(exit)|\!)$',\
+                        elif re.match(u'((выйти)|(exit)|\!)$',
                                 command.lower_text):
                             response_text = self._stop_bot_from_message(command)
 
