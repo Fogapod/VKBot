@@ -1,41 +1,84 @@
+# coding:utf8
+
+
 from kivy.uix.popup import Popup
 
 
 class EditCommandPopup(Popup):
     def __init__(self, **kwargs):
         super(EditCommandPopup, self).__init__(**kwargs)
-        self.ids.command_textinput.text = kwargs['command_text']
-        self.ids.response_textinput.text = kwargs['response_text']
+        self.options = [0, 0, 0, 0, 0]
+        self.command_block = None
+
+    def switch_command(self, command_button, title):
+        self.title = title
+        self.ids.command_textinput.text = command_button.command
+        self.ids.response_textinput.text = command_button.response
 
         self.switch_option_state(self.ids.regex_btn,
                                  self.ids.regex_btn.states,
-                                 force_state=kwargs['use_regex'])
+                                 force_state=command_button.options[0])
 
         self.switch_option_state(self.ids.force_unmark_btn,
                                  self.ids.force_unmark_btn.states,
-                                 force_state=kwargs['force_unmark'])
+                                 force_state=command_button.options[1])
         
         self.switch_option_state(self.ids.force_forward_btn,
-        	                        self.ids.force_forward_btn.states,
-        	                        force_state=kwargs['force_forward'])
+                                 self.ids.force_forward_btn.states,
+                                 force_state=command_button.options[2])
 
         self.switch_option_state(self.ids.appeal_only_btn,
                                  self.ids.appeal_only_btn.states,
-                                 force_state=kwargs['appeal_only'])
+                                 force_state=command_button.options[3])
 
         self.switch_option_state(self.ids.disable_btn,
-        	                        self.ids.disable_btn.states,
-        	                        force_state=kwargs['disable'])
+                                 self.ids.disable_btn.states,
+                                 force_state=command_button.options[4])
 
-        self.command_block = kwargs['command_block']
-        self.command_button = kwargs['command_button']
-        if not self.command_button:
-            self.ids.delete_command_btn.disabled = True
+        self.ids.delete_command_btn.disabled = False
 
+    def switch_to_empty_command(self):
+        self.title = u'Настройка новой команды'
+        self.ids.command_textinput.text = ''
+        self.ids.response_textinput.text = ''
 
-    def switch_command(self, **kwargs):
-        pass
+        self.switch_option_state(self.ids.regex_btn,
+                                 self.ids.regex_btn.states,
+                                 force_state=0)
 
+        self.switch_option_state(self.ids.force_unmark_btn,
+                                 self.ids.force_unmark_btn.states,
+                                 force_state=0)
+        
+        self.switch_option_state(self.ids.force_forward_btn,
+                                 self.ids.force_forward_btn.states,
+                                 force_state=0)
+
+        self.switch_option_state(self.ids.appeal_only_btn,
+                                 self.ids.appeal_only_btn.states,
+                                 force_state=0)
+
+        self.switch_option_state(self.ids.disable_btn,
+                                 self.ids.disable_btn.states,
+                                 force_state=0)
+
+        self.options = [0, 0, 0, 0, 0]
+        self.command_block = None
+
+        if self.ids.delete_command_btn._callback:
+            self.ids.delete_command_btn.unbind(
+                on_release=self.ids.delete_command_btn._callback
+                )
+
+        if self.ids.apply_btn._callback:
+            self.ids.apply_btn.unbind(
+                on_release=self.ids.apply_btn._callback
+                )
+
+        self.ids.delete_command_btn.disabled = True
+
+    def get_options(self):
+        return self.options
 
     def switch_option_state(self, option_button, states, force_state=None):
         if force_state is not None:
@@ -57,3 +100,12 @@ class EditCommandPopup(Popup):
         if option_button.text == '      r      ':
             self.ids.command_textinput.regex_activated =\
                 option_button.current_state == 2
+            self.options[0] = option_button.current_state
+        elif option_button.text == '      !\'     ':
+            self.options[1] = option_button.current_state
+        elif option_button.text == '      f      ':
+            self.options[2] = option_button.current_state
+        elif option_button.text == '      /      ':
+            self.options[3] = option_button.current_state
+        elif option_button.text == ' отключить ':
+            self.options[4] = option_button.current_state

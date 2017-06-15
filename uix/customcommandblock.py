@@ -8,6 +8,7 @@ class CustomCommandBlock(GridLayout):
         super(CustomCommandBlock, self).__init__(**kwargs)
         self.command = ''
         self.responses = []
+        options = []
         self.dropdown = kwargs['dropdown']
 
 

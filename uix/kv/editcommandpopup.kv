@@ -64,26 +64,25 @@
                 OptionButton:
                     states: (0, 1, 2)
                     id: force_unmark_btn
-                    text: "      !'      "
+                    text: '      !\'     '
                     on_release: root.switch_option_state(self, self.states)
 
                 OptionButton:
                     states: (0, 1, 2)
                     id: force_forward_btn
-                    text: "      f      "
+                    text: '      f      '
                     on_release: root.switch_option_state(self, self.states)
 
                 OptionButton:
                     states: (0, 1, 2)
-                    current_state: 0
                     id: appeal_only_btn
-                    text: "      /      "
+                    text: '      /      '
                     on_release: root.switch_option_state(self, self.states)
 
                 OptionButton:
                     states: (0, 2)
                     id: disable_btn
-                    text: " отключить "
+                    text: ' отключить '
                     on_release: root.switch_option_state(self, self.states)
 
                 Widget:
@@ -96,9 +95,11 @@
 
             Button:
                 id: apply_btn
+                _callback: None
                 text: 'Применить'
             Button:
                 id: delete_command_btn
+                _callback: None
                 text: '      X      '
                 font_size: '16sp'
                 background_color: 1, 0, 0, 1
