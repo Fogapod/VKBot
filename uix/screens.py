@@ -10,11 +10,12 @@ from kivy.clock import mainthread, Clock
 from kivy.app import App
 from kivy import platform
 
-from uix.customcommandblock import CustomCommandBlock, ListDropDown, CommandButton
+from uix.customcommandblock import CustomCommandBlock, ListDropDown,\
+    CommandButton
 from uix.editcommandpopup import EditCommandPopup
 
 from bot.utils import toast_notification, load_custom_commands, \
-    save_custom_commands, save_error, CUSTOM_COMMAND_OPTONS_COUNT
+    save_custom_commands, save_error, CUSTOM_COMMAND_OPTIONS_COUNT
 
 
 class AuthScreen(Screen):
@@ -78,7 +79,8 @@ class TwoFAKeyEnterPopup(ModalView):
 class MainScreen(Screen):
     def __init__(self, **kwargs):
         super(MainScreen, self).__init__(**kwargs)
-        self.bot_check_event = Clock.schedule_interval(self.check_if_bot_active, 1)
+        self.bot_check_event = Clock.schedule_interval(
+            self.check_if_bot_active, 1)
         self.bot_check_event.cancel()
         self.session = App.get_running_app().session
         self.launch_bot_text = 'Включить бота'
@@ -115,7 +117,7 @@ class MainScreen(Screen):
             protect_custom_commands = config.get('General', 'protect_cc')
 
             self.session.load_params(
-            	       appials,
+                       appials,
                     activated=self.activation_status == 'True',
                     use_custom_commands=use_custom_commands == 'True',
                     protect_custom_commands=protect_custom_commands == 'True'
@@ -136,13 +138,15 @@ class MainScreen(Screen):
                 bot_stopped, new_activation_status = self.session.stop_bot()
 
             if new_activation_status != self.activation_status:
-                config.set('General', 'bot_activated', str(new_activation_status))
+                config.set(
+                    'General', 'bot_activated', str(new_activation_status))
                 config.write()
 
         self.ids.main_btn.text = self.launch_bot_text
 
     def update_answers_count(self, new_answers_count):
-        self.ids.answers_count_lb.text = 'Ответов: {}'.format(new_answers_count)
+        self.ids.answers_count_lb.text = 'Ответов: {}'.format(
+            new_answers_count)
 
     def logout(self):
         self.session.authorization(logout=True)
@@ -172,6 +176,7 @@ class MainScreen(Screen):
 class CustomCommandsScreen(Screen):
     def __init__(self, **kwargs):
         super(CustomCommandsScreen, self).__init__(**kwargs)
+        self.edit_popup = EditCommandPopup()
         self.included_keys = []
 
     def on_enter(self):
@@ -184,103 +189,103 @@ class CustomCommandsScreen(Screen):
                 for item in sorted(self.custom_commands[key]):
                     # FIXME do not work without sorted()
                     if type(item) is not list or len(item)\
-                            < CUSTOM_COMMAND_OPTONS_COUNT + 1:
+                            < CUSTOM_COMMAND_OPTIONS_COUNT + 1:
                         self.custom_commands[key].remove(item)
                         if type(item) is not list:
                             item = [item]
-                        while len(item) < CUSTOM_COMMAND_OPTONS_COUNT + 1:
+                        while len(item) < CUSTOM_COMMAND_OPTIONS_COUNT + 1:
                             item.append(0)
                         self.custom_commands[key].append(item)
                         save_custom_commands(self.custom_commands)
 
-                self.custom_commands[key] = sorted(self.custom_commands[key], key=lambda x: x[0])
+                self.custom_commands[key] = sorted(
+                    self.custom_commands[key], key=lambda x: x[0])
                 if key not in self.included_keys:
                     self.add_command(key, self.custom_commands[key])
 
     def leave(self, delay=None):
         self.parent.show_main_screen()
 
-    def open_edit_popup(
-                self, command, response, use_regex, force_unmark,
-                force_forward, appeal_only, disable,
-                command_button, command_block, *args
-                ):
-        MAX_TITLE_LEN = 30
-        title = command.replace('\n', ' ')
-        if len(command) > MAX_TITLE_LEN:
-            title = command[:MAX_TITLE_LEN] + '...'
-        popup = EditCommandPopup(
-            title=u'Настройка команды «{}»'.format(title),
-            command_text=command,
-            response_text=response,
-            use_regex=use_regex,
-            force_unmark=force_unmark,
-            force_forward=force_forward,
-            appeal_only=appeal_only,
-            disable=disable,
-            command_button=command_button,
-            command_block=command_block
+    def open_edit_popup(self, command_button, command_block):
+        max_title_len = 30
+        title = command_button.command.replace('\n', ' ')
+        if len(title) > max_title_len:
+            title = title[:max_title_len] + '...'
+
+        self.edit_popup.command_block = command_block
+        self.edit_popup.switch_command(
+            command_button,
+            title=u'Настройка команды «{}»'.format(title)
             )
-        popup.ids.delete_command_btn.bind(
-            on_release=lambda x: self.remove_command(
-                command_button.command,
-                command_button.response,
-                command_button,
-                popup.command_block,
-                popup
-                )
+
+        self.edit_popup.ids.delete_command_btn.unbind(
+            on_release=self.edit_popup.ids.delete_command_btn._callback
             )
-        popup.ids.apply_btn.bind(
-            on_release=lambda x: self.save_edited_command(
-                popup.ids.command_textinput.text,
-                popup.ids.response_textinput.text,
-                popup.command_button,
-                popup.command_block,
-                popup
-                )
+        self.edit_popup.ids.apply_btn.unbind(
+            on_release=self.edit_popup.ids.apply_btn._callback
             )
-        popup.open()
+
+        new_delete_callback = lambda x: self.remove_command(
+            command_button.command, command_button.response,
+            command_button, self.edit_popup.command_block
+            )
+        new_save_callback = lambda x: self.save_edited_command(
+            self.edit_popup.ids.command_textinput.text,
+            self.edit_popup.ids.response_textinput.text,
+            command_button, self.edit_popup.command_block
+            )
+
+        self.edit_popup.ids.delete_command_btn._callback = new_delete_callback
+        self.edit_popup.ids.apply_btn._callback = new_save_callback
+
+        self.edit_popup.ids.delete_command_btn.bind(
+            on_release=self.edit_popup.ids.delete_command_btn._callback
+            )
+        self.edit_popup.ids.apply_btn.bind(
+            on_release=self.edit_popup.ids.apply_btn._callback
+            )
+
+        self.edit_popup.open()
 
     def open_new_command_popup(self):
-        popup = EditCommandPopup(
-            title='Настройка новой команды',
-            command_text='',
-            response_text='',
-            command_button=None,
-            command_block=None
-            )
-        popup.ids.apply_btn.bind(
-            on_release=lambda x: self.create_command(
-                popup.ids.command_textinput.text,
-                popup.ids.response_textinput.text,
-                popup
-                )
-            )
-        popup.open()
+        self.edit_popup.switch_to_empty_command()
+        self.edit_popup.command_block = None
 
-    def save_edited_command(
-                self, command, response,
-                command_button, block, popup
-                ):
-        try:
+        create_callback = lambda x: self.create_command(
+            self.edit_popup.ids.command_textinput.text,
+            self.edit_popup.ids.response_textinput.text,
+            )
+        self.edit_popup.ids.apply_btn._callback = create_callback
+
+        self.edit_popup.ids.apply_btn.bind(
+            on_release=self.edit_popup.ids.apply_btn._callback
+            )
+        self.edit_popup.open()
+
+    def save_edited_command(self, command, response, command_button, block):
+        '''try:
             command = command.decode('utf8')
         except UnicodeEncodeError:
             pass
         try:
             response = response.decode('utf8')
         except UnicodeEncodeError:
-            pass
+            pass'''
 
-        if not (popup.ids.command_textinput.text and popup.ids.response_text.text):
-            toast_notification(u'Поля с командой и ответом не могут быть пустыми')
+        if not (self.edit_popup.ids.command_textinput.text
+                and self.edit_popup.ids.response_textinput.text):
+            toast_notification(
+                u'Поля с командой и ответом не могут быть пустыми')
             return
 
+        options = self.edit_popup.get_options()
+
         button_command = command_button.command
+
         if button_command != command:
             if command in self.included_keys:
                 toast_notification(u'Такая команда уже есть')
                 return
-            self.custom_commands.pop(button_command)
             self.included_keys.remove(button_command)
             self.included_keys.append(command)
             command_button.command = command
@@ -290,155 +295,168 @@ class CustomCommandsScreen(Screen):
                 for button in block.dropdown.container.children:
                     button.command = command
                     button.unbind(on_release=button.callback)
-                    callback = partial(
-                        self.open_edit_popup,
-                        button.command,
-                        button.response,
-                        button,
-                        block
-                        )
+                    callback = lambda x: self.open_edit_popup(x, block)
                     button.callback = callback
                     button.bind(on_release=button.callback)
-                command_button.text = response
+                command_button.text = command
             else:
                 command_button.unbind(on_release=command_button.callback)
-                callback = partial(
-                    self.open_edit_popup,
-                    command_button.command,
-                    command_button.response,
-                    command_button,
-                    block
-                    )
+                callback = lambda x: self.open_edit_popup(x, block)
                 command_button.callback = callback
                 command_button.bind(on_release=command_button.callback)
                 command_button.text = command
 
+            self.custom_commands[command] = []
+            for r in self.custom_commands[button_command]:
+                self.custom_commands[command].append(r)
+            self.custom_commands.pop(button_command)
+
         if response != command_button.response:
+            self.custom_commands[command].remove(
+                [command_button.response] + command_button.options)
             block.responses.remove(command_button.response)
+
             command_button.response = response
-            command_button.text = response
+            command_button.text = command
             block.responses.append(response)
             command_button.unbind(on_release=command_button.callback)
-            callback = partial(
-                self.open_edit_popup,
-                command_button.command,
-                command_button.response,
-                command_button,
-                block
-                )
+            callback = lambda x: self.open_edit_popup(x, block)
             command_button.callback = callback
             command_button.bind(on_release=command_button.callback)
-        self.custom_commands[command] = []
-        for response in block.responses:
-            self.custom_commands[command].append(response)
-        # self.custom_commands[command] = responses
-        # will cause
-        # self.custom_commands[command] is responses
+
+            self.custom_commands[command].append([response] + options)
+
+        if options != command_button.options:
+            command_button.options = options
+            if options[0] == 2: # use_regex
+                for r in self.custom_commands[button_command]:
+                    self.custom_commands[button_command].remove(r)
+                    r[1] = 2
+                    self.custom_commands[button_command].append(r)
+            else:
+                for r in self.custom_commands[button_command]:
+                    self.custom_commands[button_command].remove(r)
+                    r[1] = 0
+                    self.custom_commands[button_command].append(r)
 
         save_custom_commands(self.custom_commands)
-        popup.dismiss()
+        self.edit_popup.dismiss()
 
-    def remove_command(self, command, response, command_button, block, popup):
+    def remove_command(self, command, response, command_button, block):
+        options = self.edit_popup.get_options()
+
         if len(block.responses) == 1:
-            self.custom_commands.pop(command, None)
+            print self.custom_commands.pop(command, None)
             self.included_keys.remove(command)
             self.ids.cc_list.remove_widget(block)
         elif len(block.responses) == 2:
-            block.ids.dropdown_btn.unbind(on_release=block.ids.dropdown_btn.callback)
+            block.ids.dropdown_btn.unbind(
+                on_release=block.ids.dropdown_btn.callback)
             block.dropdown.remove_widget(command_button)
 
             command_button = block.ids.dropdown_btn
             command_button.command = command
-            command_button.response = block.dropdown.container.children[0].response # last child
+            command_button.response =\
+                block.dropdown.container.children[0].response # last child
             block.dropdown.remove_widget(block.dropdown.container.children[0])
 
-            callback = partial(
-                self.open_edit_popup,
-                command_button.command,
-                command_button.response,
-                command_button,
-                block
-                )
+            command_button.options = self.custom_commands[command][0][1:]
+
+            callback = lambda x: self.open_edit_popup(x, block)
             command_button.callback = callback
             command_button.bind(on_release=command_button.callback)
             block.responses.remove(response)
-            self.custom_commands[command].remove(response)
+            self.custom_commands[command].remove(
+                [response] + options)
             block.dropdown.dismiss()
         else:
-            self.custom_commands[command].remove(response)
+            self.custom_commands[command].remove(
+                [response] + options)
             block.dropdown.remove_widget(command_button)
             block.responses.remove(response)
             block.dropdown.dismiss()
 
         save_custom_commands(self.custom_commands)
-        popup.dismiss()
+        self.edit_popup.dismiss()
 
-    def create_command(self, command, response, popup):
-        try:
+    def create_command(self, command, response):
+        '''try:
             command = command.decode('utf8')
         except UnicodeEncodeError:
             pass
         try:
             response = response.decode('utf8')
         except UnicodeEncodeError:
-            pass
+            pass'''
 
-        if not (popup.ids.command_textinput.text and popup.ids.response_text.text):
-            toast_notification(u'Поля с командой и ответом не могут быть пустыми')
+        if not (self.edit_popup.ids.command_textinput.text
+                and self.edit_popup.ids.response_textinput.text):
+            toast_notification(
+                u'Поля с командой и ответом не могут быть пустыми')
             return
 
+        options = self.edit_popup.get_options()
+
         if command not in self.included_keys:
-            self.custom_commands[command] = [response]
-            self.add_command(command, [response])
+            self.custom_commands[command] = [[response] + options]
+            self.add_command(command, [[response] + options])
         else:
             for child in self.ids.cc_list.children:
-                if command == child.command:
+                if child.command == command:
                     block = child
                     break
 
             if len(self.custom_commands[command]) == 1:
-                old_command_button = CommandButton(text=block.ids.dropdown_btn.response)
+                old_command_button = CommandButton(
+                    text=block.ids.dropdown_btn.response)
                 old_command_button.command = block.ids.dropdown_btn.command
                 old_command_button.response = block.ids.dropdown_btn.response
                 del block.ids.dropdown_btn.command
                 del block.ids.dropdown_btn.response
 
-                callback = partial(
-                    self.open_edit_popup,
-                    old_command_button.command,
-                    old_command_button.response,
-                    old_command_button,
-                    block
-                    )
+                old_command_button.options = options
+
+                callback = lambda x: self.open_edit_popup(x, block)
                 old_command_button.callback = callback
                 old_command_button.bind(on_release=old_command_button.callback)
 
-                block.ids.dropdown_btn.unbind(on_release=block.ids.dropdown_btn.callback)
+                block.ids.dropdown_btn.unbind(
+                    on_release=block.ids.dropdown_btn.callback)
                 dropdown_callback = block.dropdown.open
                 block.ids.dropdown_btn.callback = dropdown_callback
-                block.ids.dropdown_btn.bind(on_release=block.ids.dropdown_btn.callback)
+                block.ids.dropdown_btn.bind(
+                    on_release=block.ids.dropdown_btn.callback)
 
                 block.dropdown.add_widget(old_command_button)
 
             command_button = CommandButton(text=response)
             command_button.command = command
             command_button.response = response
-            callback = partial(
-                self.open_edit_popup,
-                command_button.command,
-                command_button.response,
-                command_button,
-                block
-                )
+            command_button.options = options
+
+            callback = lambda x: self.open_edit_popup(x, block)
             command_button.callback = callback
             command_button.bind(on_release=command_button.callback)
 
             block.dropdown.add_widget(command_button)
             block.responses.append(response)
-            self.custom_commands[command].append(response)
+            self.custom_commands[command].append([response] + options)
+
+            if options[0] == 2: # use_regex
+                for r in self.custom_commands[command]:
+                    self.custom_commands[command].remove(r)
+                    r[1] = 2
+                    print r # FIXME DO NOT WORK WITHOUT PRINT
+                    self.custom_commands[command].append(r)
+            else:
+                for r in self.custom_commands[command]:
+                    self.custom_commands[command].remove(r)
+                    r[1] = 0
+                    print r # FIXME DO NOT WORK WITHOUT PRINT
+                    self.custom_commands[command].append(r)
 
         save_custom_commands(self.custom_commands)
-        popup.dismiss()
+        self.edit_popup.dismiss()
 
     def add_command(self, command, response):
         dropdown = ListDropDown()
@@ -452,36 +470,23 @@ class CustomCommandsScreen(Screen):
 
             command_button.command = command
             command_button.response = item[0]
-            command_button.use_regex = item[1]
-            command_button.force_unmark = item[2]
-            command_button.force_forward = item[3]
-            command_button.appeal_only = item[4]
-            command_button.disable = item[5]
-            callback = partial(
-                self.open_edit_popup,
-                command_button.command,
-                command_button.response,
-                command_button.use_regex,
-                command_button.force_unmark,
-                command_button.force_forward,
-                command_button.appeal_only,
-                command_button.disable,
-                command_button,
-                block
-                )
+            command_button.options = item[1:]
+
+            callback = lambda x: self.open_edit_popup(x, block)
             command_button.callback = callback
             command_button.bind(on_release=command_button.callback)
 
             if len(response) > 1:
                 block.dropdown.add_widget(command_button)
-            block.responses.append(item)
+            block.responses.append(item[0])
         block.command = command
 
         block.ids.dropdown_btn.text = command
         if len(response) > 1:
             dropdown_callback = block.dropdown.open
             block.ids.dropdown_btn.callback = dropdown_callback
-            block.ids.dropdown_btn.bind(on_release=block.ids.dropdown_btn.callback)
+            block.ids.dropdown_btn.bind(
+                on_release=block.ids.dropdown_btn.callback)
         self.ids.cc_list.add_widget(block)
         self.included_keys.append(command)
 
