@@ -121,7 +121,7 @@
             padding_y: dp(9)
             size_hint_y: None
             height: self.texture_size[1]
-            on_press: root.update_pass_input_status(self)
+            on_release: root.update_pass_input_status(self)
 
         GridLayout:
             cols: 3
@@ -165,11 +165,12 @@
             id: actionbar
             ActionView:
                 ActionPrevious:
+                    app_icon: 'data/images/icon.png'
                 ActionOverflow:
                     mode: 'spinner'
                     ActionButton:
                         text: 'Настройки'
-                        on_press: app.open_settings()                        
+                        on_release: app.open_settings()                        
                     ActionButton:
                         text: 'Авторизация'
                         minimum_width: '110sp'
@@ -177,7 +178,7 @@
                             root.parent.show_auth_screen()
                     ActionButton:
                         text: 'Выйти'
-                        on_press: root.logout()
+                        on_release: root.logout()
 
         Carousel:
             loop: True
@@ -193,7 +194,7 @@
                     pos_hint: {'center_x':.5}
                     pos_hint_y: None
                     pos: self.pos[0], actionbar.pos[1]-actionbar.height*1.5
-                    on_press: root.on_main_btn_press()
+                    on_release: root.on_main_btn_press()
                 Head:
                     id: answers_count_lb
                     pos_hint: {'center_x':.5}
@@ -204,7 +205,7 @@
                     text: 'Настройки пользовательских команд'
                     width: self.texture_size[0] + dp(4)
                     pos_hint: {'center_x':.5, 'center_y':.1}
-                    on_press: root.parent.show_custom_commands_screen()
+                    on_release: root.parent.show_custom_commands_screen()
                     background_color: 1, 0, 0, .8 # WIP feature
 
             FloatLayout:

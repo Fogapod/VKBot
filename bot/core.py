@@ -8,8 +8,9 @@ import random
 
 from threading import Thread
 
-from utils import PATH, DATA_PATH, load_custom_commands,\
-save_custom_commands, load_blacklist, save_blacklist
+from utils import TOKEN_FILE_PATH, load_custom_commands,\
+save_custom_commands, load_blacklist, save_blacklist,\
+CUSTOM_COMMAND_OPTIONS_COUNT
 
 import vkrequests as vkr
 
@@ -17,34 +18,65 @@ __version__ = '0.0.9'
 AUTHOR_VK_ID = 180850898
 __author__ = 'Eugene Ershov - https://vk.com/id%d' % AUTHOR_VK_ID
 
-__help__ = u'''
+__help__ = (
+u'''--Страница 0--
 Версия: {v}
 
-Я умею:
-*Говорить то, что вы попросите
-(/say ... |/скажи ... )
-*Производить математические операции
-(/calculate ... |/посчитай ... ) =
-*Проверять, простое ли число
-(/prime ... |/простое ... ) %
-*Определять достоверность информации
-(/chance ... |/инфа ... )
-*Выбирать участника беседы
-(/who ... |/кто ... )
-*Учить ответы
-(/learn command:response |/выучи команда:ответ ) +
-*Забывать ответы
-(/forgot command:response |/забудь команда:ответ ) -
-*Вызывать помощь
-(/help |/помощь ) ?
+Обращения к боту: {appeals}
 
+Базовые команды:
+-Показывать это сообщение
+(помощь|help <?страница=0>) ?
+-Написать сообщение
+(скажи|say <фраза>)
+-Посчитать математическое выражение
+(посчитай|calculate <выражение>) =
+-Проверить, простое ли число
+(простое|prime <число>) %
+-Определить достоверность информации
+(инфа|chance <вопрос>)
+-Выбрать участника беседы
+(кто|who <вопрос>)
 
 Автор: {author}
 
 В конце моих сообщений ставится знак верхней кавычки
-'''.format(\
-    v = __version__, author = __author__
-)
+''',
+u'''--Страница 1--
+
+Опциональные команды (доступ ограничивает владелец бота):
+-Выучить команду
+(выучи|learn <команда>::<ответ>::<?опции=00000>) +
+-Забывать команды
+(забудь|forgot <команда>::<?ответ>) -
+''',
+u'''--Страница 2--
+
+Ограниченные команды (доступны только владельцу):
+-Игнорировать пользователя (лс), беседу или группу
+(blacklist <?-> <?id=id_диалога>)
+-Выключить бота
+(выйти|exit) !
+''',
+u'''--Страница 3--
+
+Отладочные команды (доступны только владельцу):
+
+-Спровоцировать ошибку бота
+(raise <?сообщение=Default exception text>)
+-Поставить бота на паузу (игнорирование сообщений)
+(pause <время=5>)
+-Быстрая проверка активности бота (доступна всем)
+(ping)
+''',
+u'''--Страница 4--
+
+Закрытые команды (доступны только автору):
+-Активировать бота
+(activate)
+-Деактивировать бота
+(deactivate)
+''')
 
 
 class Bot():
@@ -52,7 +84,7 @@ class Bot():
         if not cmd.out:
             return u'Отказано в доступе', blacklist
         if len(cmd.words) == 1:
-            chat_id = cmd.msg_from[0] if cmd.msg_from[0] else cmd.msg_from[1]
+            chat_id = cmd.chat_id if cmd.chat_id else cmd.user_id
             if cmd.from_chat:
                 chat_id += 2000000000
             chat_id = str(chat_id)
@@ -61,11 +93,12 @@ class Bot():
             else:
                 blacklist.append(chat_id)
                 save_blacklist(blacklist)
-                return u'id {} добавлен в чёрный список'.format(chat_id), blacklist
+                return u'id {} добавлен в чёрный список'.format(chat_id),\
+                       blacklist
         else:
             if cmd.words[1] == '-':
                 if len(cmd.words) == 2:
-                    chat_id = cmd.msg_from[0] if cmd.msg_from[0] else cmd.msg_from[1]
+                    chat_id = cmd.chat_id if cmd.chat_id else cmd.user_id
                 else:
                     if re.match('^\d+$', cmd.words[2]):
                         chat_id = cmd.words[2]
@@ -80,22 +113,46 @@ class Bot():
                 else:
                     blacklist.remove(chat_id)
                     save_blacklist(blacklist)
-                    return u'id {} удалён из чёрного спика'.format(chat_id), blacklist
+                    return u'id {} удалён из чёрного спика'.format(chat_id),\
+                           blacklist
             else:
                 if re.match('\d+', cmd.words[1]):
                     chat_id = cmd.words[1]
                     chat_id = str(chat_id)
                     if chat_id in blacklist:
-                        return u'Данный id уже находится в чёрном списке', blacklist
+                        return u'Данный id уже находится в чёрном списке',\
+                               blacklist
                     else:
                         blacklist.append(chat_id)
                         save_blacklist(blacklist)
-                    return u'id {} добавлен в чёрный список'.format(chat_id), blacklist
+                    return u'id {} добавлен в чёрный список'.format(chat_id),\
+                           blacklist
                 else:
                     return u'Неправильно указан id', blacklist
 
-    def help(self):
-        return __help__
+    def pong(self, cmd):
+        cmd.forward_msg = None
+        return 'pong', cmd
+
+    def help(self, cmd):
+        if len(cmd.words) > 1:
+            try:
+                page = int(cmd.words[1])
+            except ValueError:
+                return u'Неверно указана страница'
+        else:
+            page = 0
+
+        if page == -1:
+            response_text = '\n'.join(__help__)
+        else:
+            try:
+                response_text = __help__[page]
+            except IndexError:
+                return u'Такой страницы не существует'
+
+        return response_text.format(v=__version__, author=__author__,
+                                    appeals=' '.join(cmd.appeals))
 
     def say(self, cmd):
         words = cmd.words
@@ -105,7 +162,7 @@ class Bot():
 
         del words[0]
         text = ' '.join(words)
-        return text
+        return text        
 
     def calculate(self, cmd):
         words = cmd.words
@@ -118,7 +175,8 @@ class Bot():
         else:
             del words[0]
         words = ''.join(words).lower()
-        if not re.match(u'[^\d+\-*/:().,^√πe]', words) or re.match('(sqrt\(.+\))|(pi)', words):
+        if not re.match(u'[^\d+\-*/:().,^√πe]', words)\
+                or re.match('(sqrt\(.+\))|(pi)', words):
             words = ' ' + words + ' '
             words = re.sub(u'(sqrt)|√', 'math.sqrt', words)
             words = re.sub(u'(pi)|π', 'math.pi', words)
@@ -172,11 +230,14 @@ class Bot():
                     last_luc_number = luc_number
                     luc_number = 3
                 else:
-                    luc_number, last_luc_number = last_luc_number + luc_number, luc_number
+                    luc_number, last_luc_number = last_luc_number\
+                                                  + luc_number, luc_number
                             
             if input_number != 0:
-                is_prime = True if (luc_number - 1) % input_number == 0 else False
-                result = u'Является простым числом' if is_prime else u'Не является простым числом'
+                is_prime = True if (luc_number - 1) %\
+                                   input_number == 0 else False
+                result = u'Является простым числом'\
+                    if is_prime else u'Не является простым числом'
             else:
                 result = u'0 не является простым числом'
         else:
@@ -198,41 +259,93 @@ class Bot():
         if not cmd.from_chat:
             return u'Данная команда работает только в беседе'
         elif len(cmd.chat_users) < 2:
-            return u'Для корректной работы команды в беседе должно находиться больше одного человека'
+            return u'Для корректной работы команды в беседе должно находиться'\
+                u' больше одного человека'
         else:
             user_id = random.choice(cmd.chat_users)
-            user_name, error = vkr.get_user_name(user_id=user_id, name_case='acc')
+            user_name, error = vkr.get_user_name(
+                user_id=user_id, name_case='acc')
             if user_name:
-                return u'Я выбираю [id{0}|{1}]'.format(str(user_id), user_name)
+                return u'Я выбираю [id{}|{}]'.format(str(user_id), user_name)
+
+    def pause(self, cmd):
+        if not cmd.out:
+            return custom_commands, u'Отказано в доступе'
+
+        if len(cmd.words) == 2:
+            delay = float(cmd.words[1])
+        else:
+            delay = 5
+        time.sleep(delay)
+
+        return u'Пауза окончена'
 
     def learn(self, cmd, custom_commands, protect=True):
         if protect:
             if not cmd.out:
                 return custom_commands, u'Отказано в доступе'
 
-        response_text = u'Команда выучена.\nТеперь на «{}» я буду отвечать «{}»'
+        response_text =\
+u"""Команда выучена.
+Теперь на «{}» я буду отвечать «{}»
+
+Опции:
+use_regex: {}
+force_unmark: {}
+force_forward: {}
+appeal_only: {}
+disabled: {}"""
+
         words = cmd.words
         argument_required = self._is_argument_missing(words)
 
         del words[0]
         text = ' '.join(words)
-        text = text.split(':')
-        command = text[0]
-        response = ':'.join(text[1:])
+        if '::' in text:
+            text = text.split('::')
+            command = text[0]
+            response = text[1]
+            if len(text) == 3 and text[2]:
+                try:
+                    options = map(lambda x: int(x), text[2])
+                except:
+                    return custom_commands, u'Ошибка при разборе опций'
+            else:
+                options = [0, 0, 0, 0, 0]
+
+            if options[0] == 0:
+                command = command.lower()
+        else:
+            text = ''
 
         if argument_required:
             response_text = argument_required
-        elif len(text) <2 or not (command and response):
+        elif len(text) < 2 or not (command and response):
             response_text = u'Неправильный синтаксис команды' 
-        elif command.lower() in custom_commands.keys() and response\
-                in custom_commands[command.lower()]:
+        elif len(options) != CUSTOM_COMMAND_OPTIONS_COUNT:
+            response_text = u'Неправильное количество опций'
+        elif command in custom_commands.keys() and response\
+                in custom_commands[command]:
             response_text = u'Я уже знаю такой ответ'
         elif command in custom_commands.keys():
-            custom_commands[command.lower()].append(response)
-            response_text = response_text.format(command.lower(), response)
+            updated_commands = []
+
+            if options[0] == 2: # use_regex
+                for r in custom_commands[command]:
+                    r[1] = 2
+                    updated_commands.append(r)
+            else:
+                for r in custom_commands[command]:
+                    r[1] = 0
+                    updated_commands.append(r)
+
+            custom_commands[command] = updated_commands
+
+            custom_commands[command].append([response] + options)
+            response_text = response_text.format(command, response, *options)
         else:
-            custom_commands[command.lower()] = [response]
-            response_text = response_text.format(command.lower(), response)
+            custom_commands[command] = [[response] + options]
+            response_text = response_text.format(command, response, *options)
 
         save_custom_commands(custom_commands)
         return custom_commands, response_text
@@ -250,10 +363,10 @@ class Bot():
 
         del words[0]
         text = ' '.join(words)
-        if ':' in text:
-            text = text.split(':')
+        if '::' in text:
+            text = text.split('::')
             command = text[0]
-            response = ':'.join(text[1:])
+            response = text[1]
         else:
             command = text
             response = ''
@@ -261,17 +374,22 @@ class Bot():
         if command and response:
             if not command in custom_commands.keys():
                 response = ''
-            elif len(custom_commands[command.lower()]) < 2:
-                response = ''
-            elif response not in custom_commands[command.lower()]:
+            elif len([x for x in custom_commands[command]\
+                    if response == x[0]]) == 0:
                 response_text = u'В команде «{}» нет ключа «{}»'.format(
-                                custom_commands[command.lower()], response
+                                command.lower(), response
                                 )
             else:
-                custom_commands[command.lower()].remove(response)
-                response_text = u'Ключ для команды забыт'
+                for response_list in custom_commands[command.lower()]:
+                    if response_list[0] == response:
+                        custom_commands[command].remove(response_list)
+                        break
+                if len(custom_commands[command]) == 0:
+                    custom_commands.pop(command)
+                else:
+                    response_text = u'Ключ для команды забыт'
 
-        if not response and not custom_commands.pop(command.lower(), None):
+        if not response and not custom_commands.pop(command, None):
             response_text = u'Я не знаю такой команды ({})'.format(command)
         
         save_custom_commands(custom_commands)
@@ -281,51 +399,99 @@ class Bot():
         response_text = ''
         attachments = []
 
-        if custom_commands and cmd.joined_text.lower() in custom_commands.keys():
-            response = random.choice(custom_commands[cmd.joined_text.lower()])
+        if not custom_commands:
+            return response_text, attachments, cmd
 
-            if response.startswith('self='):
-                command = '_' + response[5:]
-                if command.lower() in custom_commands.keys():
-                    response = custom_commands[command.lower()]
-                    response = random.choice(response)
-                else:
-                    response = u'Ошибка. Нет указанного ключа'
+        matched = []
+        response = ''
+        for key in custom_commands.keys():
+            if custom_commands[key][0][1] == 2: # use regex
+                pattern = re.compile(key, re.U + re.I)
+                if pattern.search(cmd.text):
+                    matched.append(key)
+            else:
+                if cmd.text.lower() in custom_commands.keys():
+                    choice = random.choice(custom_commands[cmd.text.lower()])
+                    response = choice[0]
+                    break
 
-            if response.startswith('attach='):
-                media_id = response[7:]
-                if re.match('.*/((photo)|(album)|(video)|(audio)|(doc)|(wall)|(market))(\d+_\d+(_\d+)?)$', media_id):
-                    if re.match('.*/album\d+_\d+', media_id):
-                        album_id = re.search('album\d+_(\d+)', media_id).group(1)
-                        album_len = vkr.get_album_size(album_id)[0]
-                        if album_len == 0:
-                            response_text = 'Пустой альбом. Невозможно выбрать фото'
-                            media_id = ''
-                        else:
-                            media_id = vkr.get_photo_id(
+        if matched:
+            match = random.choice(matched)
+            choice = random.choice(custom_commands[match])
+            response = choice[0]
+
+            pattern = re.compile(match, re.U + re.I)
+            groupdict = pattern.search(cmd.text).groupdict()
+            enterings = pattern.findall(cmd.text)
+            if groupdict:
+                response = response.format(**groupdict)
+            if enterings:
+                response = response.format(*enterings)
+
+        if not response:
+            return response_text, attachments, cmd
+
+        if choice[5] == 2: # disabled
+            return response_text, attachments, cmd
+
+        if choice[4] == 1: # works only with appeal
+            if cmd.was_appeal:
+                return response_text, attachments, cmd
+        elif choice[4] == 2:
+            if not cmd.was_appeal:
+                return response_text, attachments, cmd
+
+        if choice[3] == 2: # force forward
+            cmd.forward_msg = cmd.msg_id
+        elif choice[3] == 1:
+            cmd.forward_msg = None
+            
+        if choice[2] == 1: # remove «'»
+            cmd.mark_msg = True
+        elif choice[2] == 2:
+            cmd.mark_msg = False
+
+        if response.startswith('self='):
+            cmd.text = '_' + response[5:]
+            return self.custom_command(cmd, custom_commands)
+
+        elif response.startswith('attach='):
+            media_id = response[7:]
+            if re.match('.*((photo)|(album)|(video)|(audio)|(doc)|(wall)|'
+                            '(market))\d+_\d+(_\d+)?$', media_id):
+                if re.match('.*album\d+_\d+', media_id):
+                    album_id = re.search('album\d+_(\d+)', media_id).group(1)
+                    album_len = vkr.get_album_size(album_id)[0]
+                    if album_len == 0:
+                        response_text =\
+                            u'Пустой альбом. Невозможно выбрать фото'
+                        media_id = ''
+                    else:
+                        media_id = vkr.get_photo_id(
                                             album_id=album_id,
                                             offset=random.randrange(album_len)
                                             )[0]
-                    else:
-                        media_id = media_id.split('/')[-1] # URGLY # FIXME
-                    if media_id:
-                        attachments.append(media_id)
                 else:
-                    response_text = u'Не могу показать вложение. Неправильная ссылка'
+                    media_id = media_id.split('/')[-1] # URGLY # FIXME
+                if media_id:
+                    attachments.append(media_id)
             else:
-                response_text = response
-        return response_text, attachments
+                response_text =\
+                    u'Не могу показать вложение. Неправильная ссылка'
+        else:
+            response_text = response
+        return response_text, attachments, cmd
 
     def activate_bot(self, cmd, activated):
         if activated:
             return u'Бот уже активирован', True
-        elif cmd.from_chat and cmd.chat_user == AUTHOR_VK_ID:
+        elif cmd.from_chat and cmd.user_id == AUTHOR_VK_ID:
             return u'Активация прошла успешно', True
         else:
             return u'Отказано в доступе', False
 
     def deactivate_bot(self, cmd, activated):
-        if cmd.from_chat and cmd.chat_user == AUTHOR_VK_ID:
+        if cmd.from_chat and cmd.user_id == AUTHOR_VK_ID:
             return u'Деактивация прошла успешно', False
         elif activated:
             return u'Отказано в доступе', True
@@ -340,55 +506,63 @@ class Bot():
 
 
 class Command():
-    def __init__(self, SELF_ID):
+    def __init__(self, SELF_ID, appeals):
         self.SELF_ID = SELF_ID
-        self.text = ''
-        self.words = ['']
-        self.is_command = False
+        self.appeals = appeals
+        self.raw_text = u''
+        self.text = u''
+        self.lower_text = u''
+        self.words = [u'']
+        self.was_appeal = False
         self.mark_msg = True
-        self.joined_text = ''
         self.from_user = False
         self.from_chat = False
         self.from_group = False
-        self.msg_from = None, None
-        self.chat_user = None
+        self.forward_msg = None
+        self.user_id = None
+        self.chat_id = None
         self.chat_users = []
         self.out = False
+        self.msg_id = None
 
     def load(self, message):
-        self.__init__(self.SELF_ID) # refresh params
+        self.__init__(self.SELF_ID, self.appeals) # refresh params
 
-        self.text = message['body']
+        self.raw_text = message['body']
+        self.text = self.raw_text
+        self.lower_text = self.text.lower()
+
+        if self.lower_text.startswith(self.appeals):
+            self.text = self.text[len(next(
+                a for a in self.appeals if self.lower_text.startswith(a)
+            )):]
+            if self.text.startswith(' '):
+                self.text = self.text[1:]
+            self.was_appeal = True
+            if self.text.startswith('/'):
+                self.text = self.text[1:]
+                self.mark_msg = False
 
         if self.text:
             self.words = self.text.split(' ')
+        self.lower_text = self.text.lower()
 
-        if self.words[0].startswith('/'):
-            self.words[0] = self.words[0][1:]
-            self.is_command = True
-            if self.words[0].startswith('/'):
-                self.words[0] = self.words[0][1:]
-                self.mark_msg = False
+        self.msg_id = message['id']
+        self.user_id = message['user_id']
 
-        self.joined_text = ' '.join(self.words)
         if 'chat_id' in message.keys():
             self.from_chat = True
-        elif int(message['user_id']) < 1:
+        elif self.user_id < 1:
             self.from_group = True
-            self.mark_msg = False
         else:
             self.from_user = True
 
         if self.from_chat:
-            self.msg_from = message['chat_id'], None
-            self.chat_user = message['user_id']
-            self.forward_msg = message['id']
+            self.chat_id = message['chat_id']
+            self.forward_msg = self.msg_id
             self.chat_users = message['chat_active']
-        else:
-            self.msg_from = None, message['user_id']
-            self.forward_msg = None
 
-        if self.msg_from[1] == self.SELF_ID:
+        if self.user_id == self.SELF_ID:
             self.out = 1
         else:
             self.out = message['out']
@@ -396,7 +570,6 @@ class Command():
 
 class LongPollSession(Bot):
     def __init__(self):
-        self.activated = False
         self.authorized = False
         self.update_processing = None
         self.run_bot = False
@@ -404,16 +577,18 @@ class LongPollSession(Bot):
         self.runtime_error = None
         self.reply_count = 0
         self.custom_commands = None
+
+        self.appeals = ('/')
+        self.activated = False
         self.use_custom_commands = False
         self.protect_custom_commands = True
 
-    def authorization(self, login= '', password= '', token='', key='', logout=False, token_path=''):
-        if not token_path:
-            token_path = DATA_PATH + 'token.txt'
+    def authorization(
+            self, login= '', password= '', token='', key='', logout=False):
         authorized = False
         error = None
         if logout:
-            open(token_path, 'w').close()
+            open(TOKEN_FILE_PATH, 'w').close()
             self.authorized = False
             return authorized, error
 
@@ -424,13 +599,13 @@ class LongPollSession(Bot):
                     authorized = True
             else:
                 try:
-                    with open(token_path, 'r') as token_file:
+                    with open(TOKEN_FILE_PATH, 'r') as token_file:
                         lines = token_file.readlines()
                         if lines:
                             token = lines[0][:-1]
                 except:
                     token = None
-                    open(token_path, 'w').close()
+                    open(TOKEN_FILE_PATH, 'w').close()
 
                 if token:
                     response, error = vkr.log_in(token=token)
@@ -438,11 +613,11 @@ class LongPollSession(Bot):
                         authorized = True
                         if error:
                             if 'invalid access_token' in error:
-                                open(token_path, 'w').close()
+                                open(TOKEN_FILE_PATH, 'w').close()
         else:
             new_token, error = vkr.log_in(login=login, password=password, key=key)
             if new_token and not error:
-                with open(token_path, 'w') as token_file:
+                with open(TOKEN_FILE_PATH, 'w') as token_file:
                     token_file.write('{}\n{}'.format(\
                         new_token, 'НИКОМУ НЕ ПОКАЗЫВАЙТЕ СОДЕРЖИМОЕ ЭТОГО ФАЙЛА'
                         )
@@ -461,10 +636,10 @@ class LongPollSession(Bot):
             self.black_list = load_blacklist()
 
             SELF_ID = vkr.get_self_id()[0]
-            command = Command(SELF_ID)
+            command = Command(SELF_ID, self.appeals)
 
-            mlpd = vkr.get_message_long_poll_data()[0]
-            last_response_text = ''
+            mlpd = None
+            last_msg_ids = [0, 0, 0, 0, 0]
             response_text = ''
             custom_response = ''
             attachments = []
@@ -473,7 +648,13 @@ class LongPollSession(Bot):
 
             print('@LAUNCHED')
             while self.run_bot:
-                updates, error = vkr.get_message_updates(ts=mlpd['ts'],pts=mlpd['pts'])
+                if not mlpd:
+                    mlpd, error = vkr.get_message_long_poll_data()
+                    if error:
+                        raise Exception(error)
+
+                updates, error = vkr.get_message_updates(ts=mlpd['ts'],
+                                                         pts=mlpd['pts'])
                 
                 if updates:
                     history = updates[0]
@@ -494,80 +675,87 @@ class LongPollSession(Bot):
 
                 for message in messages['items']:
                     command.load(message)
-                    if not command.text or command.text == last_response_text:
+                    if not command.text or command.msg_id in last_msg_ids:
                         continue
 
                     blacklisted = False
-                    if command.is_command and re.match(u'^blacklist$', command.words[0].lower()):
+                    if command.was_appeal and re.match(u'^blacklist$', command.words[0].lower()):
                         response_text, self.black_list = self.blacklist(command, self.black_list)
-                    elif command.msg_from[0] and str(command.msg_from[0] + 2000000000) in self.black_list:
-                        blacklisted = True
-                    elif str(command.msg_from[1]) in self.black_list:
+                    elif str(command.user_id) in self.black_list\
+                            or (command.chat_id and str(command.chat_id + 2000000000)
+                                in self.black_list):
                         blacklisted = True
 
-                    if command.is_command and not blacklisted and not response_text:
-                        if re.match(u'(^help)|(^помощь)|(^info)|(^инфо)|(^информация)|^\?$',\
-                            command.words[0].lower()):
-                            response_text = self.help()
+                    if command.was_appeal and not blacklisted and not response_text:
+                        if re.match('ping$', command.lower_text):
+                            response_text, command = self.pong(command)
 
-                        elif re.match(u'(^скажи)|(^say)$', command.words[0].lower()):
+                        elif re.match(u'((help)|(помощь)|\?)$',
+                                command.words[0].lower()):
+                            response_text = self.help(command)
+
+                        elif re.match(u'((скажи)|(say))$', command.words[0].lower()):
                             response_text = self.say(command)
 
-                        elif re.match(u'(^посчитай)|(^calculate)|^=$', command.words[0].lower()):
+                        elif re.match(u'((посчитай)|(calculate)|=)$', command.words[0].lower()):
                             response_text = self.calculate(command)    
 
-                        elif re.match(u'(^простое)|(^prime)|%$', command.words[0].lower()):
+                        elif re.match(u'((простое)|(prime)|%)$', command.words[0].lower()):
                             response_text = self.prime(command)
 
-                        elif re.match(u'(^инфа)|(^chance)$', command.words[0].lower()):
+                        elif re.match(u'((инфа)|(chance)),?$', command.words[0].lower()):
                             response_text = self.chance(command)
 
-                        elif re.match(u'(^кто)|(^who)$', command.words[0].lower()):
+                        elif re.match(u'((кто)|(кого)|(who)|(whom))$', command.words[0].lower()):
                             response_text = self.who(command)
 
-                        elif re.match(u'(^выучи)|(^learn)|\+$', command.words[0].lower()):
+                        elif re.match(u'((выучи)|(learn)|\+)$', command.words[0].lower()):
                             self.custom_commands, response_text = self.learn(
                                 command,
                                 self.custom_commands,
                                 protect=self.protect_custom_commands
                                 )
 
-                        elif re.match(u'(^забудь)|(^forgot)|\-$', command.words[0].lower()):
+                        elif re.match(u'((забудь)|(forgot)|\-)$', command.words[0].lower()):
                             self.custom_commands, response_text = self.forgot(
                                 command,
                                 self.custom_commands,
                                 protect=self.protect_custom_commands
                                 )
                             
-                        elif re.match(u'(^stop)|(^выйти)|(^exit)|(^стоп)|(^terminate)|(^завершить)|(^close)|^!$',\
-                             command.words[0].lower()):
+                        elif re.match(u'((выйти)|(exit)|\!)$',
+                                command.lower_text):
                             response_text = self._stop_bot_from_message(command)
 
-                        elif command.words[0].lower() == 'activate':
+                        elif command.words[0].lower() == 'pause':
+                            mlpd = None
+                            response_text = self.pause(command)
+
+                        elif command.lower_text == 'activate':
                             response_text, self.activated = self.activate_bot(command, self.activated)
 
-                        elif command.words[0].lower() == 'deactivate':
+                        elif command.lower_text == 'deactivate':
                             response_text, self.activated = self.deactivate_bot(command, self.activated)
 
                         elif command.words[0].lower() == 'raise':
                             response_text = self._raise_debug_exception(command)
 
                         else:
-                            response_text = u'Неизвестная команда. Вы можете использовать /help для получения списка команд.'
+                            response_text =\
+                                u'Неизвестная команда. Вы можете использовать {}help для получения списка команд.'.format(
+                                    random.choice(self.appeals))
                             if self.use_custom_commands:
-                                custom_response, attachments = self.custom_command(
-                                                                    command,
-                                                                    self.custom_commands
-                                                                    )
+                                custom_response, attachments, command=\
+                                    self.custom_command(command, self.custom_commands)
 
-                    elif self.use_custom_commands and self.custom_commands is not None and not blacklisted:
-                        custom_response, attachments = self.custom_command(
-                            command,
-                            self.custom_commands
-                            )
+                    elif self.use_custom_commands\
+                            and self.custom_commands is not None\
+                            and not blacklisted:
+                        custom_response, attachments, command =\
+                            self.custom_command(command, self.custom_commands)
 
                     if custom_response or attachments:
-                            response_text = custom_response
+                        response_text = custom_response
 
                     if not (response_text or attachments):
                         continue
@@ -579,9 +767,14 @@ class LongPollSession(Bot):
                     if command.mark_msg:
                         response_text += "'"
 
-                    chat_id, user_id = command.msg_from
-                    message_to_resend = command.forward_msg
+                    user_id = None
+                    chat_id = None
+                    if command.from_chat:
+                        chat_id = command.chat_id
+                    else:
+                        user_id = command.user_id
 
+                    message_to_resend = command.forward_msg
                     msg_id, error = vkr.send_message(
                                         text = response_text,
                                         uid = user_id,
@@ -592,20 +785,16 @@ class LongPollSession(Bot):
                     if error:
                         raise Exception(error)
 
-                    last_response_text = response_text
                     response_text = ''
                     attachments = []
                     custom_response = ''
                     self.reply_count += 1
-                time.sleep(1)
+                    last_msg_ids = last_msg_ids[1:] + [msg_id]
+                time.sleep(2)
         except:
             if not 'traceback' in globals():
                 import traceback
-            tb = traceback.format_exc()
-            try:
-                self.runtime_error = tb.decode('unicode-escape')
-            except UnicodeDecodeError:
-                self.runtime_error = tb
+            self.runtime_error = traceback.format_exc()
             self.run_bot = False
 
         self.running = False
@@ -631,20 +820,30 @@ class LongPollSession(Bot):
         self.update_processing = None
         return True, self.activated
 
-    def load_params(self,
-                    activated=False,
-                    use_custom_commands=False,
-                    protect_custom_commands=True):
+    def load_params(self, appeals, activated,
+                    use_custom_commands,
+                    protect_custom_commands):
         if use_custom_commands:
             self.custom_commands = load_custom_commands()
+
+        appeals = appeals.split(':')
+        _appeals = []
+        for appeal in appeals:
+            if appeal and not re.match('^\s+$', appeal):
+                _appeals.append(appeal.lower())
+
+        if _appeals:
+            self.appeals = tuple(_appeals)
 
         self.activated = activated
         self.use_custom_commands = use_custom_commands
         self.protect_custom_commands = protect_custom_commands
+        return True
 
     def _stop_bot_from_message(self, command):
         if command.out:
             self.run_bot = False
+            self.runtime_error = 1
             return u'Завершаю работу'
         else:
             return u'Отказано в доступе'
@@ -660,21 +859,3 @@ class LongPollSession(Bot):
             raise Exception(exception_text)
         else:
             return u'Отказано в доступе'
-
-
-if __name__ == '__main__':
-    session = LongPollSession()
-    DATA_PATH = PATH + DATA_PATH
-    while not session.authorized:
-        response, error = session.authorization()
-        if not response:
-            LOGIN = raw_input('login:')
-            PASSWORD = raw_input('password:')
-            response, error = session.authorization(login=LOGIN, password=PASSWORD)
-
-        if error and 'code is needed' in error:
-            key = raw_input('key:')
-            response, error = session.authorization(login=LOGIN, password=PASSWORD, key=key)
-
-    print('\tУспешная авторизация\n')
-    session.start_bot()

@@ -13,7 +13,7 @@ package.domain = org
 source.dir = .
 
 # (list) Source files to include (let empty to include all the files)
-source.include_exts = py,jpg,kv
+source.include_exts = py,kv,jpg,png
 
 # (list) List of inclusions using pattern matching
 # source.include_patterns = assets/*,images/*.png
@@ -22,10 +22,10 @@ source.include_exts = py,jpg,kv
 # source.exclude_exts = spec,ini,log,pyc,pyx,pyo,txt
 
 # (list) List of directory to exclude (let empty to not exclude anything)
-source.exclude_dirs = .buildozer,bin
+source.exclude_dirs = bin
 
 # (list) List of exclusions using pattern matching
-# source.exclude_patterns =
+source.exclude_patterns = .*
 
 # (str) Application versioning (method 1)
 # version = 0.1
@@ -36,7 +36,7 @@ version.filename = %(source.dir)s/bot/core.py
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy
-requirements = openssl,requests,kivy,android
+requirements = kivy==master,android,openssl,requests
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -49,12 +49,13 @@ requirements = openssl,requests,kivy,android
 # presplash.filename = %(source.dir)s/data/presplash.png
 
 # (str) Icon of the application
-# icon.filename = %(source.dir)s/data/icon.png
+icon.filename = %(source.dir)s/data/images/icon.png
 
 # (str) Supported orientation (one of landscape, portrait or all)
 orientation = portrait
+
 # (list) List of service to declare
-# services = NAME:ENTRYPOINT_TO_PY,NAME2:ENTRYPOINT2_TO_PY
+# services = VKBot:/service/main.py #,NAME2:ENTRYPOINT2_TO_PY
 
 #
 # OSX Specific
