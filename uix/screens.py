@@ -284,23 +284,25 @@ class CustomCommandsScreen(Screen):
             # command_button.options = options will cause
             # command_button.options is options
 
+            updated_command = []
+
             if options[0] == 2: # use_regex
                 for r in self.custom_commands[button_command]:
-                    self.custom_commands[button_command].remove(r)
                     r[1] = 2
-                    self.custom_commands[button_command].append(r)
+                    updated_command.append(r)
 
                 for button in block.dropdown.container.children:
                     button.options[0] = 2
-                    
+
             else:
                 for r in self.custom_commands[button_command]:
-                    self.custom_commands[button_command].remove(r)
                     r[1] = 0
-                    self.custom_commands[button_command].append(r)
+                    updated_command.append(r)
 
                 for button in block.dropdown.container.children:
                     button.options[0] = 0
+            
+            self.custom_commands[button_command] = updated_command
 
         if button_command != command:
             if command in self.included_keys:
@@ -428,22 +430,24 @@ class CustomCommandsScreen(Screen):
             block.responses.append(response)
             self.custom_commands[command].append([response] + options)
 
+            updated_command = []
+
             if options[0] == 2: # use_regex
                 for r in self.custom_commands[command]:
-                    self.custom_commands[command].remove(r)
                     r[1] = 2
-                    self.custom_commands[command].append(r)
+                    updated_command.append(r)
 
                 for button in block.dropdown.container.children:
                     button.options[0] = 2
             else:
                 for r in self.custom_commands[command]:
-                    self.custom_commands[command].remove(r)
                     r[1] = 0
-                    self.custom_commands[command].append(r)
+                    updated_command.append(r)
 
                 for button in block.dropdown.container.children:
                     button.options[0] = 0
+
+            self.custom_commands[command] = updated_command
 
         save_custom_commands(self.custom_commands)
         self.edit_popup.dismiss()
