@@ -2,7 +2,6 @@
 
 
 import time
-from functools import partial
 
 from kivy.uix.screenmanager import Screen, ScreenManager, FadeTransition
 from kivy.uix.modalview import ModalView
@@ -263,15 +262,6 @@ class CustomCommandsScreen(Screen):
         self.edit_popup.open()
 
     def save_edited_command(self, command, response, command_button, block):
-        '''try:
-            command = command.decode('utf8')
-        except UnicodeEncodeError:
-            pass
-        try:
-            response = response.decode('utf8')
-        except UnicodeEncodeError:
-            pass'''
-
         if not (self.edit_popup.ids.command_textinput.text
                 and self.edit_popup.ids.response_textinput.text):
             toast_notification(
@@ -282,6 +272,36 @@ class CustomCommandsScreen(Screen):
 
         button_command = command_button.command
 
+        if options != command_button.options:
+            self.custom_commands[button_command].remove(
+                [command_button.response] + command_button.options)
+            self.custom_commands[button_command].append(
+                [command_button.response] + options)
+
+            command_button.options = []
+            for i in options:
+                command_button.options.append(i)
+            # command_button.options = options will cause
+            # command_button.options is options
+
+            if options[0] == 2: # use_regex
+                for r in self.custom_commands[button_command]:
+                    self.custom_commands[button_command].remove(r)
+                    r[1] = 2
+                    self.custom_commands[button_command].append(r)
+
+                for button in block.dropdown.container.children:
+                    button.options[0] = 2
+                    
+            else:
+                for r in self.custom_commands[button_command]:
+                    self.custom_commands[button_command].remove(r)
+                    r[1] = 0
+                    self.custom_commands[button_command].append(r)
+
+                for button in block.dropdown.container.children:
+                    button.options[0] = 0
+
         if button_command != command:
             if command in self.included_keys:
                 toast_notification(u'Такая команда уже есть')
@@ -291,20 +311,10 @@ class CustomCommandsScreen(Screen):
             command_button.command = command
             block.command = command
             if len(block.responses) > 1:
-                block.ids.dropdown_btn.text = command
                 for button in block.dropdown.container.children:
                     button.command = command
-                    button.unbind(on_release=button.callback)
-                    callback = lambda x: self.open_edit_popup(x, block)
-                    button.callback = callback
-                    button.bind(on_release=button.callback)
-                command_button.text = command
-            else:
-                command_button.unbind(on_release=command_button.callback)
-                callback = lambda x: self.open_edit_popup(x, block)
-                command_button.callback = callback
-                command_button.bind(on_release=command_button.callback)
-                command_button.text = command
+
+            block.ids.dropdown_btn.text = command
 
             self.custom_commands[command] = []
             for r in self.custom_commands[button_command]:
@@ -317,27 +327,12 @@ class CustomCommandsScreen(Screen):
             block.responses.remove(command_button.response)
 
             command_button.response = response
-            command_button.text = command
+            command_button.text = response
             block.responses.append(response)
-            command_button.unbind(on_release=command_button.callback)
-            callback = lambda x: self.open_edit_popup(x, block)
-            command_button.callback = callback
-            command_button.bind(on_release=command_button.callback)
+
+            block.ids.dropdown_btn.text = command
 
             self.custom_commands[command].append([response] + options)
-
-        if options != command_button.options:
-            command_button.options = options
-            if options[0] == 2: # use_regex
-                for r in self.custom_commands[button_command]:
-                    self.custom_commands[button_command].remove(r)
-                    r[1] = 2
-                    self.custom_commands[button_command].append(r)
-            else:
-                for r in self.custom_commands[button_command]:
-                    self.custom_commands[button_command].remove(r)
-                    r[1] = 0
-                    self.custom_commands[button_command].append(r)
 
         save_custom_commands(self.custom_commands)
         self.edit_popup.dismiss()
@@ -346,7 +341,7 @@ class CustomCommandsScreen(Screen):
         options = self.edit_popup.get_options()
 
         if len(block.responses) == 1:
-            print self.custom_commands.pop(command, None)
+            self.custom_commands.pop(command, None)
             self.included_keys.remove(command)
             self.ids.cc_list.remove_widget(block)
         elif len(block.responses) == 2:
@@ -380,15 +375,6 @@ class CustomCommandsScreen(Screen):
         self.edit_popup.dismiss()
 
     def create_command(self, command, response):
-        '''try:
-            command = command.decode('utf8')
-        except UnicodeEncodeError:
-            pass
-        try:
-            response = response.decode('utf8')
-        except UnicodeEncodeError:
-            pass'''
-
         if not (self.edit_popup.ids.command_textinput.text
                 and self.edit_popup.ids.response_textinput.text):
             toast_notification(
@@ -446,14 +432,18 @@ class CustomCommandsScreen(Screen):
                 for r in self.custom_commands[command]:
                     self.custom_commands[command].remove(r)
                     r[1] = 2
-                    print r # FIXME DO NOT WORK WITHOUT PRINT
                     self.custom_commands[command].append(r)
+
+                for button in block.dropdown.container.children:
+                    button.options[0] = 2
             else:
                 for r in self.custom_commands[command]:
                     self.custom_commands[command].remove(r)
                     r[1] = 0
-                    print r # FIXME DO NOT WORK WITHOUT PRINT
                     self.custom_commands[command].append(r)
+
+                for button in block.dropdown.container.children:
+                    button.options[0] = 0
 
         save_custom_commands(self.custom_commands)
         self.edit_popup.dismiss()
