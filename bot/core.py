@@ -14,7 +14,7 @@ CUSTOM_COMMAND_OPTIONS_COUNT
 
 import vkrequests as vkr
 
-__version__ = '0.0.9'
+__version__ = '0.1.0dev'
 AUTHOR_VK_ID = 180850898
 __author__ = 'Eugene Ershov - https://vk.com/id%d' % AUTHOR_VK_ID
 
