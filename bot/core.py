@@ -320,7 +320,7 @@ disabled: {}"""
 
         if argument_required:
             response_text = argument_required
-        elif len(text) <2 or not (command and response):
+        elif len(text) < 2 or not (command and response):
             response_text = u'Неправильный синтаксис команды' 
         elif len(options) != CUSTOM_COMMAND_OPTIONS_COUNT:
             response_text = u'Неправильное количество опций'
@@ -328,6 +328,19 @@ disabled: {}"""
                 in custom_commands[command]:
             response_text = u'Я уже знаю такой ответ'
         elif command in custom_commands.keys():
+            updated_commands = []
+
+            if options[0] == 2: # use_regex
+                for r in custom_commands[command]:
+                    r[1] = 2
+                    updated_commands.append(r)
+            else:
+                for r in custom_commands[command]:
+                    r[1] = 0
+                    updated_commands.append(r)
+
+            custom_commands[command] = updated_commands
+
             custom_commands[command].append([response] + options)
             response_text = response_text.format(command, response, *options)
         else:
