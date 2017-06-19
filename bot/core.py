@@ -742,7 +742,7 @@ class LongPollSession(Bot):
 
                         else:
                             response_text =\
-                                u'Неизвестная команда. Вы можете использовать {}help для получения списка команд.'.format(
+                                u'Неизвестная команда. Вы можете использовать {} help для получения списка команд.'.format(
                                     random.choice(self.appeals))
                             if self.use_custom_commands:
                                 custom_response, attachments, command=\
