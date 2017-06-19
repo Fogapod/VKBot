@@ -16,12 +16,14 @@ DATA_PATH = 'data/'
 
 
 def update_paths():
+    global SETTINGS_FILE_PATH
     global ERROR_FILE_PATH
     global BOT_ERROR_FILE_PATH
     global TOKEN_FILE_PATH
     global CUSTOM_COMMANDS_FILE_PATH
     global BLACKLIST_FILE_PATH
 
+    SETTINGS_FILE_PATH = PATH + '.vkbot.ini'
     ERROR_FILE_PATH = PATH + 'error.log'
     BOT_ERROR_FILE_PATH = PATH + 'bot_error.log'
     TOKEN_FILE_PATH = DATA_PATH + 'token.txt'

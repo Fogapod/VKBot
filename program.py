@@ -9,7 +9,7 @@ from kivy.uix.settings import SettingsWithNoMenu
 
 from uix.screens import Root
 
-from bot.utils import PATH, CUSTOM_COMMANDS_FILE_PATH
+from bot.utils import SETTINGS_FILE_PATH, CUSTOM_COMMANDS_FILE_PATH
 from bot.core import LongPollSession
 
 
@@ -41,7 +41,7 @@ class VKBotApp(App):
                     continue
 
     def get_application_config(self):
-        return '{}.vkbot.ini'.format(PATH)
+        return SETTINGS_FILE_PATH
 
     def build_config(self, config):
         config.setdefaults('General', 

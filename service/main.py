@@ -66,7 +66,7 @@ if __name__ == '__main__':
         send_error(error)
         exit()
 
-    Config.read(bot.utils.PATH + '.vkbot.ini')
+    Config.read(bot.utils.SETTINGS_FILE_PATH)
     appials = Config.get('General', 'appeals')
     activated = Config.get('General', 'bot_activated')
     use_custom_commands = Config.get('General', 'use_custom_commands')
@@ -79,15 +79,18 @@ if __name__ == '__main__':
                 use_custom_commands=use_custom_commands == 'True',
                 protect_custom_commands=protect_custom_commands == 'True'
                 )
-    send_status('got params')
     session.launch_bot()
+
+    send_status('launched')
 
     while True:
         osc.readQueue(oscid)
         send_answers_count()
         if session.activated != activated:
             activated = session.activated
-            osc.sendMsg('/activation_changed', [str(activated), ], port=3002)
+            Config.read(bot.utils.SETTINGS_FILE_PATH)
+            Config.set('General', 'bot_activated', str(activated))
+            Config.write()
         if session.runtime_error:
             if session.runtime_error != 1:
                 send_error(session.runtime_error)
