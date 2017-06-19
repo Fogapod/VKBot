@@ -72,7 +72,7 @@ class TwoFAKeyEnterPopup(ModalView):
         if code:
             if self.auth_screen.log_in(twofa_key=code):
                 self.dismiss()
-            self.ids.textinput.text = ''
+            self.ids.code_textinput.text = ''
 
 
 class MainScreen(Screen):
