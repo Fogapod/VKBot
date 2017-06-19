@@ -11,7 +11,7 @@
     states: (0, 1, 2)
     current_state: 0
 
-    font_size: '16sp'
+    font_size: '15sp'
     background_color: 1, 0, 0, .6
     size_hint: None, None
     size: self.texture_size[0], self.texture_size[1]*2.3
@@ -55,31 +55,31 @@
                 OptionButton:
                     states: (0, 2)
                     id: regex_btn
-                    text: '      r      '
+                    text: '    r    '
                     on_release: root.switch_option_state(self, self.states)
 
                 OptionButton:
                     states: (0, 1, 2)
                     id: force_unmark_btn
-                    text: '      !\'     '
+                    text: '    !\'   '
                     on_release: root.switch_option_state(self, self.states)
 
                 OptionButton:
                     states: (0, 1, 2)
                     id: force_forward_btn
-                    text: '      f      '
+                    text: '    f    '
                     on_release: root.switch_option_state(self, self.states)
 
                 OptionButton:
                     states: (0, 1, 2)
                     id: appeal_only_btn
-                    text: '      /      '
+                    text: '    /    '
                     on_release: root.switch_option_state(self, self.states)
 
                 OptionButton:
                     states: (0, 2)
                     id: disable_btn
-                    text: ' отключить '
+                    text: '  откл  '
                     on_release: root.switch_option_state(self, self.states)
 
                 Widget:

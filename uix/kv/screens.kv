@@ -43,37 +43,38 @@
 
 <TwoFAKeyEnterPopup>:
     size_hint_y: None
-    size_hint_x: None
-    width: gl.width + dp(30)
-    height: gl.height + dp(30)
+    height: content.height + dp(30)
     pos_hint: {'center_y': 0.7}
 
     GridLayout:
-        id: gl
+        id: content
         cols: 1
         size_hint: None, None
-        width: app.root_window.width*0.75
+        width: app.root_window.width - dp(20)
         height: self.minimum_height
-        orientation: 'vertical'
 
         Label:
             text: 'Код для двухфакторной авторизации:'
+            text_size: self.width, None
             font_size: sp(20)
             size_hint_y: None
-            height: self.texture_size[1] + dp(10)
+            height: self.texture_size[1]
         BoxLayout:
             size_hint_y: None
+            height: self.minimum_height
 
             TextInput:
-                id: textinput
+                id: code_textinput
                 multiline: False
-                font_size: sp(45)
+                font_size: sp(40)
+                size_hint_y: None
+                height: self.minimum_height
             Button:
-                text: 'Ввод'
+                text: '  Ввод  '
                 font_size: sp(20)
-                size_hint: None, None
-                width: self.texture_size[0] + dp(8)
-                on_release: root.twofa_auth(textinput.text)
+                size_hint_x: None
+                width: self.texture_size[0]
+                on_release: root.twofa_auth(code_textinput.text)
 
 
 <AuthScreen>:
@@ -100,7 +101,7 @@
             size_hint: None, None
             font_size: '18sp'
             height: self.minimum_height
-            width: self.height*10
+            width: self.height*8
             multiline: False
 
         TextInput:
@@ -109,7 +110,7 @@
             size_hint: None, None
             font_size: '18sp'
             height: self.minimum_height
-            width: self.height*10
+            width: self.height*8
             multiline: False
 
         Button:
