@@ -91,7 +91,9 @@ class MainScreen(Screen):
             self.service = OSCClient(self)
 
     def show_manual(self):
-        pass
+        if not 'webbrowser' in globals():
+            import webbrowser
+        webbrowser.open('https://github.com/fogapod/vkbot/blob/master/README.md')
 
     def on_enter(self):
         pass
