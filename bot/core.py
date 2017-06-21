@@ -270,10 +270,13 @@ class Bot():
 
     def pause(self, cmd):
         if not cmd.out:
-            return custom_commands, u'Отказано в доступе'
+            return u'Отказано в доступе'
 
         if len(cmd.words) == 2:
-            delay = float(cmd.words[1])
+            if re.match('\d+$', cmd.words[1]):
+                delay = float(cmd.words[1])
+            else:
+                return u'Неправильный аргумент'
         else:
             delay = 5
         time.sleep(delay)
