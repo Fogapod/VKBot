@@ -39,14 +39,12 @@ def send_status(status):
 
 def send_error(error):
     osc.sendMsg('/error', [error, ], port=3002)
-    Logger.info(unicode(error))
 
 def send_answers_count():
     osc.sendMsg('/answers', [session.reply_count, ], port=3002)
 
-def exit(*args):
+def exit():
     send_status('exiting')
-    session.runtime_error = 1
     sys.exit()
 
 
@@ -58,29 +56,37 @@ if __name__ == '__main__':
     osc.bind(oscid, ping, '/ping')
     osc.bind(oscid, exit, '/exit')
 
-    session = LongPollSession()
-    authorized, error = session.authorization()
+    try:
+        session = LongPollSession()
+        authorized, error = session.authorization()
 
-    if error:
-        send_error(error)
-        exit()
+        if error:
+            send_error(error)
+            exit()
 
-    Config.read(bot.utils.SETTINGS_FILE_PATH)
-    appials = Config.get('General', 'appeals')
-    activated = Config.get('General', 'bot_activated')
-    use_custom_commands = Config.get('General', 'use_custom_commands')
-    protect_custom_commands = Config.get('General', 'protect_cc')
+        Config.read(bot.utils.SETTINGS_FILE_PATH)
+        appials = Config.get('General', 'appeals')
+        activated = Config.get('General', 'bot_activated')
+        use_custom_commands = Config.get('General', 'use_custom_commands')
+        protect_custom_commands = Config.get('General', 'protect_cc')
 
     
-    session.load_params(
+        session.load_params(
     	            appials,
     	            activated=activated == 'True',
                 use_custom_commands=use_custom_commands == 'True',
                 protect_custom_commands=protect_custom_commands == 'True'
                 )
-    session.launch_bot()
+        session.launch_bot()
 
-    send_status('launched')
+        send_status('launched')
+    except SystemExit:
+        raise
+    except:
+        import traceback
+        error = traceback.format_exc()
+        send_error(error)
+        exit()
 
     while True:
         osc.readQueue(oscid)
