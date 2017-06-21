@@ -38,9 +38,8 @@ def send_status(status):
     osc.sendMsg('/status', [status, ], port=3002)
 
 def send_error(error):
-    error_text = unicode(error)
-    osc.sendMsg('/error', [error_text, ], port=3002)
-    Logger.info(error_text)
+    osc.sendMsg('/error', [error, ], port=3002)
+    Logger.info(unicode(error))
 
 def send_answers_count():
     osc.sendMsg('/answers', [session.reply_count, ], port=3002)
