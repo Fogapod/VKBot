@@ -22,7 +22,7 @@ source.include_exts = py,kv,jpg,png
 # source.exclude_exts = spec,ini,log,pyc,pyx,pyo,txt
 
 # (list) List of directory to exclude (let empty to not exclude anything)
-source.exclude_dirs = bin
+source.exclude_dirs = bin,data/images/screenshots
 
 # (list) List of exclusions using pattern matching
 source.exclude_patterns = .*
