@@ -10,7 +10,7 @@ from kivy.uix.settings import SettingsWithNoMenu
 from uix.screens import Root
 
 from bot.utils import SETTINGS_FILE_PATH, CUSTOM_COMMANDS_FILE_PATH
-from bot.core import LongPollSession
+from bot.core import LongPollSession, __version__
 
 
 class VKBotApp(App):
@@ -55,7 +55,8 @@ class VKBotApp(App):
             )
 
     def build_settings(self, settings):
-        settings.add_json_panel("Настройки бота", self.config, data=
+        settings.add_json_panel(
+            'Настройки бота. Версия {}'.format(__version__), self.config, data=
         '''[
             {
             "type": "bool",
