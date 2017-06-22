@@ -55,8 +55,10 @@ u'''--Страница 2--
 Ограниченные команды (доступны только владельцу):
 -Игнорировать пользователя (лс), беседу или группу
 (blacklist <?-> <?id=id_диалога>)
+-Перезапустить бота (применение команд и настроек)
+(restart)
 -Выключить бота
-(выйти|exit) !
+(stop) !
 ''',
 u'''--Страница 3--
 
@@ -65,7 +67,7 @@ u'''--Страница 3--
 -Спровоцировать ошибку бота
 (raise <?сообщение=Default exception text>)
 -Поставить бота на паузу (игнорирование сообщений)
-(pause <время=5>)
+(pause <время (секунды)=5>)
 -Быстрая проверка активности бота (доступна всем)
 (ping)
 ''',
@@ -574,6 +576,7 @@ class Command():
 class LongPollSession(Bot):
     def __init__(self):
         self.authorized = False
+        self.need_restart = False
         self.update_processing = None
         self.run_bot = False
         self.running = False
@@ -665,13 +668,13 @@ class LongPollSession(Bot):
                     messages = updates[2]
                 elif 'connection' in error or 'too many request' in error:
                     error = None
-                    time.sleep(1)
+                    time.sleep(5)
                     continue
                 else:
                     raise Exception(error)
 
                 response_str = str(updates)
-                # if u'emoji' in messages.keys():
+                # if 'emoji' in messages.keys():
                 #     print(response_str)
                 # else:
                 #     print(response_str.decode('unicode-escape').encode('utf8'))
@@ -682,7 +685,7 @@ class LongPollSession(Bot):
                         continue
 
                     blacklisted = False
-                    if command.was_appeal and re.match(u'^blacklist$', command.words[0].lower()):
+                    if command.was_appeal and re.match('blacklist$', command.words[0].lower()):
                         response_text, self.black_list = self.blacklist(command, self.black_list)
                     elif str(command.user_id) in self.black_list\
                             or (command.chat_id and str(command.chat_id + 2000000000)
@@ -726,7 +729,7 @@ class LongPollSession(Bot):
                                 protect=self.protect_custom_commands
                                 )
                             
-                        elif re.match(u'((выйти)|(exit)|\!)$',
+                        elif re.match('((stop)|\!)$',
                                 command.lower_text):
                             response_text = self._stop_bot_from_message(command)
 
@@ -742,6 +745,9 @@ class LongPollSession(Bot):
 
                         elif command.words[0].lower() == 'raise':
                             response_text = self._raise_debug_exception(command)
+
+                        elif command.words[0].lower() == 'restart':
+                            response_text = self.restart(command)
 
                         else:
                             response_text =\
@@ -842,6 +848,13 @@ class LongPollSession(Bot):
         self.use_custom_commands = use_custom_commands
         self.protect_custom_commands = protect_custom_commands
         return True
+
+    def restart(self, cmd):
+        if cmd.out:
+            self.need_restart = True
+            return u'Начинаю перезагрузку'
+        else:
+            return u'Отказано в доступе'
 
     def _stop_bot_from_message(self, command):
         if command.out:

@@ -26,6 +26,20 @@ bot.utils.update_paths()
 from bot.core import LongPollSession
 
 
+def update_params():
+    global activated
+
+    Config.read(bot.utils.SETTINGS_FILE_PATH)
+    appeals = Config.get('General', 'appeals')
+    activated = Config.get('General', 'bot_activated')
+    use_custom_commands = Config.get('General', 'use_custom_commands')
+    protect_custom_commands = Config.get('General', 'protect_cc')
+
+    session.load_params(appeals,
+                        activated=activated == 'True',
+                        use_custom_commands=use_custom_commands == 'True',
+                        protect_custom_commands=protect_custom_commands == 'True')
+                        
 def ping(*args):
     global session
     if session.running:
@@ -64,19 +78,8 @@ if __name__ == '__main__':
             send_error(error)
             exit()
 
-        Config.read(bot.utils.SETTINGS_FILE_PATH)
-        appials = Config.get('General', 'appeals')
-        activated = Config.get('General', 'bot_activated')
-        use_custom_commands = Config.get('General', 'use_custom_commands')
-        protect_custom_commands = Config.get('General', 'protect_cc')
+        update_params()
 
-    
-        session.load_params(
-    	            appials,
-    	            activated=activated == 'True',
-                use_custom_commands=use_custom_commands == 'True',
-                protect_custom_commands=protect_custom_commands == 'True'
-                )
         session.launch_bot()
 
         send_status('launched')
@@ -100,7 +103,12 @@ if __name__ == '__main__':
             if session.runtime_error != 1:
                 send_error(session.runtime_error)
             break
-        if not session.running:
+        if session.need_restart:
+            session.stop_bot()
+            update_params()
+            session.launch_bot()
+            session.need_restart = False
+        elif not session.running:
             break
         sleep(1)
     exit()
