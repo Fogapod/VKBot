@@ -25,7 +25,7 @@ source.include_exts = py,kv,jpg,png
 source.exclude_dirs = bin,data/images/screenshots
 
 # (list) List of exclusions using pattern matching
-source.exclude_patterns = .*
+source.exclude_patterns = license
 
 # (str) Application versioning (method 1)
 # version = 0.1
@@ -55,7 +55,7 @@ icon.filename = %(source.dir)s/data/images/icon.png
 orientation = portrait
 
 # (list) List of service to declare
-# services = VKBot:/service/main.py #,NAME2:ENTRYPOINT2_TO_PY
+# services = VKBot:/service/main.py,NAME2:ENTRYPOINT2_TO_PY
 
 #
 # OSX Specific
