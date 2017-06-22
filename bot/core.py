@@ -113,7 +113,7 @@ class Bot():
                 else:
                     blacklist.remove(chat_id)
                     save_blacklist(blacklist)
-                    return u'id {} удалён из чёрного спика'.format(chat_id),\
+                    return u'id {} удалён из чёрного списка'.format(chat_id),\
                            blacklist
             else:
                 if re.match('\d+', cmd.words[1]):
