@@ -3,10 +3,10 @@
 
 import time
 
-try:
-    from libs import vk
-except ImportError:
-    from .libs import vk
+from kivy.logger import Logger
+
+from libs import vk
+
 
 def error_catcher(request):
     def do_request(*args, **kwargs):
@@ -17,40 +17,14 @@ def error_catcher(request):
             raw_error = str(raw_error)
             error = raw_error.lower()
 
+            Logger.info(raw_error + ' ' + request.__name__)
+
             if 'too many requests' in error or 'timed out' in error:
-                print 'Too many requests/response time out'
-                time.sleep(0.33)
-                if request.__name__ == 'get_message_updates':
-                    return False, error
-                else:
-                    return do_request(*args, **kwargs) # TODO: add counter
-
-            elif '[errno 1]_ssl.c:503' in error:
-                if request.__name__ == '_create_session':
-                    print 'Sertificate verify failed. Trying unsafe request'
-                    vk.api.Session.need_verify_request_sert = False
+                time.sleep(1)
+                if request.__name__ != 'get_message_updates':
+                    Logger.info('Repeating request: ' + request.__name__)
                     return do_request(*args, **kwargs)
-                else:
-                    print 'Sertificate verify failed.'
 
-            elif 'connection' in error:
-                print 'Check your connection'
-
-            elif 'incorrect password' in error:
-                print 'Incorrect password'
-            
-            elif 'invalid access_token' in error:
-                print 'Invalid access_token'
-
-            elif 'captcha' in error:
-                print 'Capthca'
-                #TODO обработать капчу
-
-            elif 'auth check code is needed' in error:
-                print 'Auth code is needed'
-
-            else:
-                print('\nUnknown error: ' + raw_error + '\n')
             return False, error
         else:
             return response, error
