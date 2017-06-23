@@ -183,11 +183,12 @@
                 ActionOverflow:
                     mode: 'spinner'
                     ActionButton:
+                        minimum_width: '110sp'
                         text: 'Настройки'
-                        on_release: app.open_settings()                        
+                        on_release: app.open_settings()
                     ActionButton:
                         text: 'Авторизация'
-                        on_release:  
+                        on_release:
                             root.parent.show_auth_screen()
                     ActionButton:
                         text: 'Информация'
