@@ -112,6 +112,11 @@ class VKBotApp(App):
     def get_captcha_key(captcha_url):
         return 0
 
+    def _open_url(*args):
+        if not 'webbrowser' in globals():
+            import webbrowser
+        webbrowser.open(args[1][1])
+
     def on_pause(self):
         return True
 

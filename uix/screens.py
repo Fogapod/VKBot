@@ -13,6 +13,7 @@ from uix.customcommandblock import CustomCommandBlock, ListDropDown,\
     CommandButton
 from uix.editcommandpopup import EditCommandPopup
 
+from bot.core import __version__
 from bot.utils import toast_notification, load_custom_commands, \
     save_custom_commands, save_error, CUSTOM_COMMAND_OPTIONS_COUNT
 
@@ -75,6 +76,12 @@ class TwoFAKeyEnterPopup(ModalView):
             self.ids.code_textinput.text = ''
 
 
+class InfoPopup(ModalView):
+    def __init__(self, **kwargs):
+        super(InfoPopup, self).__init__(**kwargs)
+        self.ids.label.text = self.ids.label.text % __version__
+
+
 class MainScreen(Screen):
     def __init__(self, **kwargs):
         super(MainScreen, self).__init__(**kwargs)
@@ -90,10 +97,8 @@ class MainScreen(Screen):
             from bot.oscclient import OSCClient
             self.service = OSCClient(self)
 
-    def show_manual(self):
-        if not 'webbrowser' in globals():
-            import webbrowser
-        webbrowser.open('https://github.com/fogapod/vkbot/blob/master/README.md')
+    def show_info(self):
+        InfoPopup().open()
 
     def on_enter(self):
         pass

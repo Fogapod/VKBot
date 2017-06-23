@@ -156,6 +156,19 @@
         disabled: False
 
 
+<InfoPopup>:
+    size_hint: None, None
+    size: label.width + dp(40), label.height + dp(50)
+    Label:
+        id: label
+        size_hint: None, None
+        size: self.texture_size
+        markup: True
+        text: 'VKBot версии %s\nГруппа в ВК: [color=#199ac1][ref=https://vk.com/foga_prod]vk.com/foga_prod[/ref][/color]\n\n[color=#199ac1][ref=https://github.com/fogapod/vkbot/blob/master/README.md]Открыть мануал[/ref][/color]'
+        font_size: '18sp'
+        on_ref_press: app._open_url(args)
+
+
 <MainScreen>:
     name: 'main_screen'
 
@@ -174,9 +187,12 @@
                         on_release: app.open_settings()                        
                     ActionButton:
                         text: 'Авторизация'
-                        minimum_width: '110sp'
                         on_release:  
                             root.parent.show_auth_screen()
+                    ActionButton:
+                        text: 'Информация'
+                        on_release:
+                            root.show_info()
                     ActionButton:
                         text: 'Выйти'
                         on_release: root.logout()
@@ -208,13 +224,6 @@
                     pos_hint: {'center_x':.5, 'center_y':.1}
                     on_release: root.parent.show_custom_commands_screen()
                     background_color: 1, 0, 0, .8 # WIP feature
-
-            FloatLayout:
-                Apply:
-                    text: 'Мануал'
-                    size_hint_x: .5
-                    pos_hint: {'center_x':.5, 'center_y':.5}
-                    on_release: root.show_manual()
 
 
 <CustomCommandsScreen>:
