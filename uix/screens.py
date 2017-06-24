@@ -193,7 +193,6 @@ class CustomCommandsScreen(Screen):
         else:
             for key in sorted(self.custom_commands.keys()):
                 for item in sorted(self.custom_commands[key]):
-                    # FIXME do not work without sorted()
                     if type(item) is not list or len(item)\
                             < CUSTOM_COMMAND_OPTIONS_COUNT + 1:
                         self.custom_commands[key].remove(item)
@@ -493,17 +492,17 @@ class CustomCommandsScreen(Screen):
 
     def sort_blocks(self):
         for widget in sorted(self.ids.cc_list.children):
-            # FIXME do not work without sorted()
             self.included_keys.remove(widget.command)
             self.ids.cc_list.remove_widget(widget)
 
         self.on_enter()
 
 
-class Root(ScreenManager):
+class Manager(ScreenManager):
     def __init__(self, **kwargs):
-        super(Root, self).__init__(**kwargs)
+        super(Manager, self).__init__(**kwargs)
         self.transition = FadeTransition()
+        self.previous = None
 
     def show_auth_screen(self):
         if not 'auth_screen' in self.screen_names:

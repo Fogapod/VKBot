@@ -7,7 +7,7 @@ from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.settings import SettingsWithNoMenu
 
-from uix.screens import Root
+from uix.screens import Manager
 
 from bot.utils import SETTINGS_FILE_PATH, CUSTOM_COMMANDS_FILE_PATH, PATH
 from bot.core import LongPollSession, __version__
@@ -22,13 +22,13 @@ class VKBotApp(App):
         self.session = LongPollSession()
         self.load_kv_files()
 
-        self.root = Root()
+        self.manager = Manager()
 
-        self.root.show_main_screen()
+        self.manager.show_main_screen()
         if not self.session.authorization()[0]:
-            self.root.show_auth_screen()
+            self.manager.show_auth_screen()
 
-        return self.root
+        return self.manager
 
     def load_kv_files(self):
         directories = ['uix/kv/']
@@ -46,11 +46,11 @@ class VKBotApp(App):
     def build_config(self, config):
         config.setdefaults('General', 
                 {
-                    "show_bot_activity": "False",
-                    "appeals": u"/:бот,",
-                    "use_custom_commands": "False",
-                    "protect_cc": "True",
-                    "bot_activated": "False"
+                    'show_bot_activity': 'False',
+                    'appeals': u'/:бот,',
+                    'use_custom_commands': 'False',
+                    'protect_cc': 'True',
+                    'bot_activated': 'False'
                 }
             )
 
@@ -127,7 +127,6 @@ class VKBotApp(App):
         if os.path.exists('service/.kivy/logs/'):
             for file in os.listdir('service/.kivy/logs/'):
                 copyfile('service/.kivy/logs/' + file, PATH + '.service_logs/' + file)
-
 
     def _open_url(*args):
         if not 'webbrowser' in globals():

@@ -11,10 +11,10 @@
     states: (0, 1, 2)
     current_state: 0
 
-    font_size: '15sp'
+    font_size: '16sp'
     background_color: 1, 0, 0, .6
     size_hint: None, None
-    size: self.texture_size[0], self.texture_size[1]*2.3
+    size: self.texture_size[0], self.texture_size[1]*2
 
 
 <EditCommandPopup>:
@@ -39,12 +39,12 @@
             LowerTextInput:
                 id: command_textinput
                 size_hint_y: None
-                height: self.font_size*6
+                height: self.minimum_height
                 hint_text: 'Команда'.decode('utf8')
             TextInput:
                 id: response_textinput
                 size_hint_y: None
-                height: self.font_size*6
+                height: self.minimum_height
                 hint_text: 'Ответ'.decode('utf8')
             GridLayout:
                 cols: 6
