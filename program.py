@@ -9,7 +9,7 @@ from kivy.uix.settings import SettingsWithNoMenu
 
 from uix.screens import Root
 
-from bot.utils import SETTINGS_FILE_PATH, CUSTOM_COMMANDS_FILE_PATH
+from bot.utils import SETTINGS_FILE_PATH, CUSTOM_COMMANDS_FILE_PATH, PATH
 from bot.core import LongPollSession, __version__
 
 
@@ -111,6 +111,23 @@ class VKBotApp(App):
 
     def get_captcha_key(captcha_url):
         return 0
+
+    def _export_logs(self):
+        if not os.path.exists(PATH + '.logs/'):
+            os.makedirs(PATH + '.logs/')
+        if not os.path.exists(PATH + '.service_logs/'):
+            os.makedirs(PATH + '.service_logs/')
+
+        if not 'copyfile' in globals():
+            from shutil import copyfile
+
+        if os.path.exists('.kivy/logs/'):
+            for file in os.listdir('.kivy/logs/'):
+                copyfile('.kivy/logs/' + file, PATH + '.logs/' + file)
+        if os.path.exists('service/.kivy/logs/'):
+            for file in os.listdir('service/.kivy/logs/'):
+                copyfile('service/.kivy/logs/' + file, PATH + '.service_logs/' + file)
+
 
     def _open_url(*args):
         if not 'webbrowser' in globals():

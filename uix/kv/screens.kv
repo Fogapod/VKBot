@@ -226,6 +226,12 @@
                     on_release: root.parent.show_custom_commands_screen()
                     background_color: 1, 0, 0, .8 # WIP feature
 
+            FloatLayout:
+                Apply:
+                    text: 'Экспортировать логи'
+                    pos_hint: {'center_x':.5, 'center_y':.1}
+                    on_release: app._export_logs()
+
 
 <CustomCommandsScreen>:
     name: 'cc_screen'
