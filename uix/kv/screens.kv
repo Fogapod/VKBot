@@ -228,7 +228,16 @@
 
             FloatLayout:
                 Apply:
+                    text: 'Восстановить статус'
+                    width: self.texture_size[0] + dp(4)
+                    pos_hint: {'center_x':.5, 'pos_y': None}
+                    pos: self.pos[0], export_logs_btn.pos[1] + export_logs_btn.height*2
+                    disabled: True
+                    
+                Apply:
+                    id: export_logs_btn
                     text: 'Экспортировать логи'
+                    width: self.texture_size[0] + dp(4)
                     pos_hint: {'center_x':.5, 'center_y':.1}
                     on_release: app._export_logs()
 
