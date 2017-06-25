@@ -81,6 +81,19 @@ u'''--Страница 4--
 ''')
 
 
+def safe_format(s, *args, **kwargs):
+    '''
+    https://stackoverflow.com/questions/9955715/python-missing-arguments-in-string-formatting-lazy-eval
+    '''
+
+    while True:
+        try:
+            return s.format(*args, **kwargs)
+        except KeyError as e:
+            e=e.args[0]
+            kwargs[e] = "{%s}" % e
+
+
 class Bot():
     def blacklist(self, cmd, blacklist):
         if not cmd.out:
@@ -426,14 +439,14 @@ disabled: {}"""
             response = choice[0]
 
             pattern = re.compile(match, re.U + re.I)
+            groups = pattern.findall(cmd.text)
             groupdict = pattern.search(cmd.text).groupdict()
-            enterings = pattern.findall(cmd.text)
-            if groupdict:
-                response = response.format(**groupdict)
-            if enterings:
-                response = response.format(*enterings)
 
-        if not response:
+        elif response:
+            groups = []
+            groupdict = {}
+
+        else:
             return response_text, attachments, cmd
 
         if choice[5] == 2: # disabled
@@ -463,7 +476,7 @@ disabled: {}"""
         elif response.startswith('attach='):
             media_id = response[7:]
             if re.match('.*((photo)|(album)|(video)|(audio)|(doc)|(wall)|'
-                            '(market))\d+_\d+(_\d+)?$', media_id):
+                            '(market))-?\d+_\d+(_\d+)?$', media_id):
                 if re.match('.*album\d+_\d+', media_id):
                     album_id = re.search('album\d+_(\d+)', media_id).group(1)
                     album_len = vkr.get_album_size(album_id)[0]
@@ -483,8 +496,23 @@ disabled: {}"""
             else:
                 response_text =\
                     u'Не могу показать вложение. Неправильная ссылка'
+        elif response == 'pass':
+            response_text = None
         else:
+            random_nums_dict = {}
+            random_ranges = re.findall('{random(\d+)}', response)
+            random_nums_dict = {}
+            for r in random_ranges:
+                random_nums_dict['random%s' %r] = random.randrange(int(r) + 1)
+
+            final_dict = {}
+            final_dict.update(groupdict)
+            final_dict.update(random_nums_dict)
+            if '{time}' in response:
+                final_dict['time'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+            response = safe_format(response, *groups, **final_dict)
             response_text = response
+
         return response_text, attachments, cmd
 
     def activate_bot(self, cmd, activated):
@@ -766,7 +794,8 @@ class LongPollSession(Bot):
                     if custom_response or attachments:
                         response_text = custom_response
 
-                    if not (response_text or attachments):
+                    if not (response_text or attachments) or custom_response is None:
+                        custom_response = ''
                         continue
 
                     if not self.activated:
@@ -799,6 +828,7 @@ class LongPollSession(Bot):
                     custom_response = ''
                     self.reply_count += 1
                     last_msg_ids = last_msg_ids[1:] + [msg_id]
+                    time.sleep(1)
                 time.sleep(2)
         except:
             if not 'traceback' in globals():
