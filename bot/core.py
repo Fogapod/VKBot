@@ -92,6 +92,8 @@ def safe_format(s, *args, **kwargs):
         except KeyError as e:
             e=e.args[0]
             kwargs[e] = "{%s}" % e
+        except:
+            return s
 
 
 class Bot():
@@ -504,16 +506,7 @@ disabled: {}"""
         elif response == 'pass':
             response_text = None
         else:
-            random_nums_dict = {}
-            random_ranges = re.findall('{random(\d+)}', response)
-            random_nums_dict = {}
-            for r in random_ranges:
-                random_nums_dict['random%s' %r] = random.randrange(int(r) + 1)
-
-            final_dict = {}
-            final_dict.update(groupdict)
-            final_dict.update(random_nums_dict)
-            response = safe_format(response, *groups, **final_dict)
+            response = safe_format(response, *groups, **groupdict)
             response_text = response
 
         return response_text, attachments, cmd
@@ -805,6 +798,11 @@ class LongPollSession(Bot):
                             u'\n\nБот не активирован. По вопросам активации просьба обратиться к автору: {author}'
 
                     format_dict = {}
+
+                    random_ranges = re.findall('{random(\d{1,500})}', response_text)
+                    for r in random_ranges:
+                        format_dict['random%s' %r] = random.randrange(int(r) + 1)
+
                     if '{version}' in response_text:
                         format_dict['version'] = __version__
                     if '{author}' in response_text:
