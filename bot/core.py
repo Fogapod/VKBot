@@ -20,7 +20,7 @@ __author__ = 'Eugene Ershov - https://vk.com/id%d' % AUTHOR_VK_ID
 
 __help__ = (
 u'''--Страница 0--
-Версия: {v}
+Версия: {version}
 
 Обращения к боту: {appeals}
 
@@ -166,8 +166,7 @@ class Bot():
             except IndexError:
                 return u'Такой страницы не существует'
 
-        return response_text.format(v=__version__, author=__author__,
-                                    appeals=' '.join(cmd.appeals))
+        return response_text
 
     def say(self, cmd):
         words = cmd.words
@@ -303,6 +302,9 @@ class Bot():
             if not cmd.out:
                 return custom_commands, u'Отказано в доступе'
 
+        if custom_commands is None:
+            return custom_commands, u'Пользовательские команды отключены или повреждены'
+
         response_text =\
 u"""Команда выучена.
 Теперь на «{}» я буду отвечать «{}»
@@ -372,6 +374,9 @@ disabled: {}"""
         if protect:
             if not cmd.out:
                 return custom_commands, u'Отказано в доступе'
+
+        if custom_commands is None:
+            return custom_commands, u'Пользовательские команды отключены или повреждены'
 
         response_text = u'Команда забыта'
         words = cmd.words
@@ -508,12 +513,6 @@ disabled: {}"""
             final_dict = {}
             final_dict.update(groupdict)
             final_dict.update(random_nums_dict)
-            if '{time}' in response:
-                final_dict['time'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
-            if '{appeal}' in response:
-                final_dict['appeal'] = random.choice(cmd.appeals)
-            if '{appeals}' in response:
-                final_dict['appeals'] = ' '.join(cmd.appeals)
             response = safe_format(response, *groups, **final_dict)
             response_text = response
 
@@ -783,8 +782,7 @@ class LongPollSession(Bot):
 
                         else:
                             response_text =\
-                                u'Неизвестная команда. Вы можете использовать {} help для получения списка команд.'.format(
-                                    random.choice(self.appeals))
+                                u'Неизвестная команда. Вы можете использовать {appeal} help для получения списка команд.'
                             if self.use_custom_commands:
                                 custom_response, attachments, command=\
                                     self.custom_command(command, self.custom_commands)
@@ -804,7 +802,21 @@ class LongPollSession(Bot):
 
                     if not self.activated:
                         response_text +=\
-                            u'\n\nБот не активирован. По вопросам активации просьба обратиться к автору: %s' % __author__
+                            u'\n\nБот не активирован. По вопросам активации просьба обратиться к автору: {author}'
+
+                    format_dict = {}
+                    if '{version}' in response_text:
+                        format_dict['version'] = __version__
+                    if '{author}' in response_text:
+                        format_dict['author'] = __author__
+                    if '{time}' in response_text:
+                        format_dict['time'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+                    if '{appeal}' in response_text:
+                        format_dict['appeal'] = random.choice(self.appeals)
+                    if '{appeals}' in response_text:
+                        format_dict['appeals'] = ' '.join(self.appeals)
+
+                    response_text = safe_format(response_text, **format_dict)
 
                     if command.mark_msg:
                         response_text += "'"
