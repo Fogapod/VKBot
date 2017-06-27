@@ -510,6 +510,10 @@ disabled: {}"""
             final_dict.update(random_nums_dict)
             if '{time}' in response:
                 final_dict['time'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+            if '{appeal}' in response:
+                final_dict['appeal'] = random.choice(cmd.appeals)
+            if '{appeals}' in response:
+                final_dict['appeals'] = ' '.join(cmd.appeals)
             response = safe_format(response, *groups, **final_dict)
             response_text = response
 
