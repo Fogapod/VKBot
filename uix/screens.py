@@ -2,10 +2,12 @@
 
 
 import time
+import re
 
 from kivy.uix.screenmanager import Screen, ScreenManager, FadeTransition
 from kivy.uix.modalview import ModalView
 from kivy.clock import mainthread, Clock
+from kivy.core.clipboard import Clipboard
 from kivy.app import App
 from kivy import platform
 
@@ -24,10 +26,10 @@ class AuthScreen(Screen):
         self.hide_password_text = 'Скрыть пароль'
         super(AuthScreen, self).__init__(**kwargs)
         self.session = App.get_running_app().session
-        self.twofa_popup = None
         
     def on_enter(self):
         self.ids.pass_auth.disabled = not self.session.authorized
+        self.twofa_popup = TwoFAKeyEnterPopup(self)
 
     def log_in(self, twofa_key=''):
         login = self.ids.login_textinput.text
@@ -44,8 +46,6 @@ class AuthScreen(Screen):
                     return True
             elif error:
                 if 'code is needed' in error:
-                    if not self.twofa_popup:
-                        self.twofa_popup = TwoFAKeyEnterPopup(self)
                     self.twofa_popup.open()
                     return
                 elif 'incorrect password' in error:
@@ -68,6 +68,13 @@ class TwoFAKeyEnterPopup(ModalView):
     def __init__(self, auth_screen, **kwargs):
         super(TwoFAKeyEnterPopup, self).__init__(**kwargs)
         self.auth_screen = auth_screen
+
+    def paste_twofa_code(self, textinput):
+        clipboard_data = Clipboard.paste()
+        if type(clipboard_data) in (str, unicode) and re.match('\d+$', clipboard_data):
+            textinput.text = clipboard_data
+        else:
+            toast_notification(u'Ошибка при вставке')
 
     def twofa_auth(self, code):
         if code:

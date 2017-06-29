@@ -63,6 +63,12 @@
             size_hint_y: None
             height: self.minimum_height
 
+            Button:
+                text: ' Вставить код '
+                font_size: sp(20)
+                size_hint_x: None
+                width: self.texture_size[0]
+                on_release: root.paste_twofa_code(code_textinput)
             TextInput:
                 id: code_textinput
                 multiline: False
