@@ -46,13 +46,13 @@ requirements = kivy==master,android,openssl,requests
 # garden_requirements =
 
 # (str) Presplash of the application
-# presplash.filename = %(source.dir)s/data/presplash.png
+presplash.filename = %(source.dir)s/data/images/presplash.png
 
 # (str) Icon of the application
 icon.filename = %(source.dir)s/data/images/icon.png
 
 # (str) Supported orientation (one of landscape, portrait or all)
-orientation = portrait
+orientation = all
 
 # (list) List of service to declare
 # services = VKBot:/service/main.py,NAME2:ENTRYPOINT2_TO_PY
@@ -75,13 +75,13 @@ fullscreen = 0
 android.permissions = INTERNET
 
 # (int) Android API to use
-android.api = 19
+android.api = 20
 
 # (int) Minimum API required
-android.minapi = 9
+android.minapi = 14
 
 # (int) Android SDK version to use
-# android.sdk = 24
+android.sdk = 24
 
 # (str) Android NDK version to use
 # android.ndk = 9c
@@ -124,7 +124,7 @@ android.minapi = 9
 
 # (str) python-for-android branch to use, if not master, useful to try
 # not yet merged features.
-# android.branch = master
+p4a.branch = stable
 
 # (str) OUYA Console category. Should be one of GAME or APP
 # If you leave this blank, OUYA support will not be enabled
