@@ -7,7 +7,7 @@ from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.settings import SettingsWithNoMenu
 
-from uix.screens import Manager
+from uix.screens import Manager, TwoFAKeyEnterPopup, CaptchaPopup
 
 from bot.utils import SETTINGS_FILE_PATH, CUSTOM_COMMANDS_FILE_PATH, PATH
 from bot.core import LongPollSession, __version__
@@ -47,7 +47,7 @@ class VKBotApp(App):
         config.setdefaults('General', 
                 {
                     'show_bot_activity': 'False',
-                    'appeals': u'/:бот,',
+                    'appeals': '/:бот,',
                     'use_custom_commands': 'False',
                     'protect_cc': 'True',
                     'bot_activated': 'False'
@@ -109,8 +109,18 @@ class VKBotApp(App):
         ]''' % CUSTOM_COMMANDS_FILE_PATH
         )
 
-    def get_captcha_key(captcha_url):
-        return 0
+    def open_captcha_popup(self, capthca):
+        CaptchaPopup().open(capthca)
+
+    def open_twofa_popup(self, vk, auth_response_page):
+        TwoFAKeyEnterPopup().open(vk, auth_response_page)
+
+    def _get_captchas(self, service):
+        service.request_captchas()
+
+    def _show_captchas(self, captcha_requests):
+        for request in captcha_requests:
+            pass
 
     def _export_logs(self):
         if not os.path.exists(PATH + '.logs/'):
@@ -118,8 +128,7 @@ class VKBotApp(App):
         if not os.path.exists(PATH + '.service_logs/'):
             os.makedirs(PATH + '.service_logs/')
 
-        if not 'copyfile' in globals():
-            from shutil import copyfile
+        from shutil import copyfile
 
         if os.path.exists('.kivy/logs/'):
             for file in os.listdir('.kivy/logs/'):
@@ -129,16 +138,11 @@ class VKBotApp(App):
                 copyfile('service/.kivy/logs/' + file, PATH + '.service_logs/' + file)
 
     def _open_url(*args):
-        if not 'webbrowser' in globals():
-            import webbrowser
+        import webbrowser
         webbrowser.open(args[1][1])
 
     def on_pause(self):
         return True
-
-    def on_stop(self):
-        if self.session.running:
-            self.session.stop_bot()
 
 
 if __name__ == '__main__':

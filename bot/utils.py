@@ -57,6 +57,28 @@ def parse_input(string, replace_vkurl=True, replace_url=True):
 def toast_notification(text, length_long=True):
     toast(text, length_long=length_long)
 
+def load_token():
+    token = None
+    if not os.path.exists(TOKEN_FILE_PATH):
+        open(TOKEN_FILE_PATH, 'w').close()
+    else:
+        try:
+            with open(TOKEN_FILE_PATH, 'r') as f:
+                token = f.readlines()[0][:-1]
+        except:
+            return token
+
+    return token
+
+def save_token(token):
+    if not token:
+        token = ''
+
+    with open(TOKEN_FILE_PATH, 'w') as f:
+        f.write('{}\n{}'.format(
+            token, 'НИКОМУ НЕ ПОКАЗЫВАЙТЕ СОДЕРЖИМОЕ ЭТОГО ФАЙЛА')
+        )
+
 def load_custom_commands():
     if not os.path.exists(CUSTOM_COMMANDS_FILE_PATH):
         with open(CUSTOM_COMMANDS_FILE_PATH, 'w') as f:
@@ -90,8 +112,7 @@ def save_custom_commands(content):
 def load_blacklist():
     blacklist = []
     if not os.path.exists(BLACKLIST_FILE_PATH):
-        with open(BLACKLIST_FILE_PATH, 'w') as f:
-            pass
+        open(BLACKLIST_FILE_PATH, 'w').close()
     else:    
         with open(BLACKLIST_FILE_PATH, 'r') as f:
             for line in f.readlines():

@@ -16,8 +16,9 @@ from uix.customcommandblock import CustomCommandBlock, ListDropDown,\
 from uix.editcommandpopup import EditCommandPopup
 
 from bot.core import __version__
+from bot.oscclient import OSCClient
 from bot.utils import toast_notification, load_custom_commands, \
-    save_custom_commands, save_error, CUSTOM_COMMAND_OPTIONS_COUNT
+    save_custom_commands, save_error, CUSTOM_COMMAND_OPTIONS_COUNT, save_token
 
 
 class AuthScreen(Screen):
@@ -29,30 +30,26 @@ class AuthScreen(Screen):
         
     def on_enter(self):
         self.ids.pass_auth.disabled = not self.session.authorized
-        self.twofa_popup = TwoFAKeyEnterPopup(self)
 
-    def log_in(self, twofa_key=''):
+    def log_in(self):
         login = self.ids.login_textinput.text
         password = self.ids.pass_textinput.text
 
         if login and password:
-            authorized, error = self.session.authorization(
-                                login=login, password=password, key=twofa_key
-                                )
+            authorized, error = self.session.authorization(login=login,
+                                                           password=password)
             if authorized:
-                self.ids.pass_textinput.text = ''
                 self.parent.show_main_screen()
-                if twofa_key:
-                    return True
+                self.clear_pass_input_text()
             elif error:
-                if 'code is needed' in error:
-                    self.twofa_popup.open()
-                    return
-                elif 'incorrect password' in error:
+                error = str(error)
+                if 'password' in error:
                     toast_notification(u'Неправильный логин или пароль')
                 else:
                     toast_notification(error)
-                    return
+        return
+        
+    def clear_pass_input_text(self):
         self.ids.pass_textinput.text = ''
 
     def update_pass_input_status(self, button):
@@ -65,10 +62,6 @@ class AuthScreen(Screen):
 
 
 class TwoFAKeyEnterPopup(ModalView):
-    def __init__(self, auth_screen, **kwargs):
-        super(TwoFAKeyEnterPopup, self).__init__(**kwargs)
-        self.auth_screen = auth_screen
-
     def paste_twofa_code(self, textinput):
         clipboard_data = Clipboard.paste()
         if type(clipboard_data) in (str, unicode) and re.match('\d+$', clipboard_data):
@@ -77,10 +70,65 @@ class TwoFAKeyEnterPopup(ModalView):
             toast_notification(u'Ошибка при вставке')
 
     def twofa_auth(self, code):
-        if code:
-            if self.auth_screen.log_in(twofa_key=code):
-                self.dismiss()
-            self.ids.code_textinput.text = ''
+        if not code:
+            return
+
+        def auth_handler(*args):
+            return code, True
+
+        self.vk.error_handlers[-2] = auth_handler
+
+        try:
+            response = self.vk.twofactor(self.auth_response_page)
+        except Exception as e:
+            toast_notification(str(e))
+        else:
+            app = App.get_running_app()
+            app.session.authorized = True
+
+            self.vk.save_cookies()
+            self.vk.api_login()
+            save_token(token=self.vk.token['access_token'])
+
+            if app.manager.current_screen.name == 'auth_screen':
+                app.manager.show_main_screen()
+
+        self.dismiss()
+
+    def open(self, vk, auth_response_page, **kwargs):
+        self.vk = vk
+        self.auth_response_page = auth_response_page
+        super(TwoFAKeyEnterPopup, self).open(**kwargs)
+
+
+class CaptchaPopup(ModalView):
+    def open(self, captcha, **kwargs):
+        self.captcha = captcha
+        self.ids.image.source = captcha.get_url()
+        super(CaptchaPopup, self).open(**kwargs)
+
+    def retry_request(self, key):
+        if not key:
+            return
+        try:
+            response = self.captcha.try_again(key) # None
+        except Exception as e:
+            e = str(e)
+            if 'password' in e:
+                toast_notification(u'Неправильный логин или пароль')
+            else:
+                toast_notification(e)
+        else:
+            app = App.get_running_app()
+            app.session.authorized = True
+
+            self.captcha.vk.api_login()
+            save_token(token=self.captcha.vk.token['access_token'])
+
+            if app.manager.current_screen.name == 'auth_screen':
+                app.manager.show_main_screen()
+
+        self.dismiss()
 
 
 class InfoPopup(ModalView):
@@ -92,17 +140,14 @@ class InfoPopup(ModalView):
 class MainScreen(Screen):
     def __init__(self, **kwargs):
         super(MainScreen, self).__init__(**kwargs)
-        self.bot_check_event = Clock.schedule_interval(
-            self.check_if_bot_active, 1)
-        self.bot_check_event.cancel()
         self.session = App.get_running_app().session
         self.launch_bot_text = 'Включить бота'
         self.launching_bot_text = 'Запуск (отменить)' 
         self.stop_bot_text = 'Выключить бота'
         self.ids.main_btn.text = self.launch_bot_text
-        if platform == 'android':
-            from bot.oscclient import OSCClient
-            self.service = OSCClient(self)
+        self.service = OSCClient(self)
+        self.captcha_requests = {}
+        self.captcha_popups = []
 
     def show_info(self):
         InfoPopup().open()
@@ -110,52 +155,13 @@ class MainScreen(Screen):
     def on_enter(self):
         pass
 
-    @mainthread
     def on_main_btn_press(self):
-        config = App.get_running_app().config
-
         if self.ids.main_btn.text == self.launch_bot_text:
-            self.launch_bot(config)
-        else:
-            self.stop_bot(config)
-
-    def launch_bot(self, config):
-        if platform == 'android':
             self.ids.main_btn.text = self.launching_bot_text
             self.service.start()
         else:
-            appials = config.get('General', 'appeals')
-            self.activation_status = config.get('General', 'bot_activated')
-            use_custom_commands = config.get('General', 'use_custom_commands')
-            protect_custom_commands = config.get('General', 'protect_cc')
-
-            self.session.load_params(
-                       appials,
-                    activated=self.activation_status == 'True',
-                    use_custom_commands=use_custom_commands == 'True',
-                    protect_custom_commands=protect_custom_commands == 'True'
-                    )
-            self.session.launch_bot()
-            self.bot_check_event()
-
-            self.ids.main_btn.text = self.stop_bot_text
-
-    def stop_bot(self, config):
-        if platform == 'android':
             self.service.stop()
-        else:
-            self.bot_check_event.cancel()
-            bot_stopped = False
-
-            while not bot_stopped:
-                bot_stopped, new_activation_status = self.session.stop_bot()
-
-            if new_activation_status != self.activation_status:
-                config.set(
-                    'General', 'bot_activated', str(new_activation_status))
-                config.write()
-
-        self.ids.main_btn.text = self.launch_bot_text
+            self.ids.main_btn.text = self.launch_bot_text
 
     def update_answers_count(self, new_answers_count):
         self.ids.answers_count_lb.text = 'Ответов: {}'.format(
@@ -169,21 +175,6 @@ class MainScreen(Screen):
         error_text = error_text.decode('unicode-escape')
         toast_notification(error_text)
         save_error(error_text, from_bot=True)
-
-    def check_if_bot_active(self, tick):
-        self.update_answers_count(self.session.reply_count)
-        if self.ids.main_btn.text == self.stop_bot_text and\
-                not self.session.running:
-            self.bot_check_event.cancel()
-            self.ids.main_btn.text = self.launch_bot_text
-
-            if self.session.runtime_error:
-                error = self.session.runtime_error
-                try:
-                    error = error[error.index('Exception: '):]
-                    toast_notification(error)
-                except:
-                    raise Exception(error)
 
 
 class CustomCommandsScreen(Screen):

@@ -11,17 +11,22 @@ from bot.utils import SETTINGS_FILE_PATH
 
 if platform == 'android':
     from android import AndroidService
+else:
+    import subprocess
 
 
 class OSCClient():
     def __init__(self, mainscreen):
         if platform == 'android':
-            self.androidservice = AndroidService('VKBot', 'Бот работает')
+            self.subprocess = AndroidService('VKBot', 'Бот работает')
+        else:
+            self.subprocess = None
         self.mainscreen = mainscreen
         self.osc = osc
         self.osc.init()
         oscid = self.osc.listen(port=3002)
         self.osc.bind(oscid, self.pong, '/pong')
+        self.osc.bind(oscid, self.update_captcha_requests, '/captcha_request')
         self.osc.bind(oscid, self.read_status, '/status')
         self.osc.bind(oscid, self.set_answers_count, '/answers')
         self.osc.bind(oscid, self.return_error, '/error')
@@ -32,17 +37,28 @@ class OSCClient():
 
     def start(self):
         if platform == 'android':
-            self.androidservice.start('Сервис запущен')
+            self.subprocess.start('Сервис запущен')
+        else:
+            self.subprocess = subprocess.Popen(['python2.7', 'service/main.py'])
 
     def stop(self):
         if platform == 'android':
-            self.androidservice.stop()
+            self.subprocess.stop()
         else:
-            self.osc.sendMsg('/exit', [], port=3000)
+            if self.subprocess is None:
+                osc.sendMsg('/exit', [], port=3000)
+            else:
+                self.subprocess.kill()
         self.started = False
 
     def ping(self):
         self.osc.sendMsg('/ping', [], port=3000)
+
+    def request_captchas(self):
+        self.osc.sendMsg('/request_captchas', [], port=3000)
+
+    def solve_captcha(self, captcha):
+        pass
 
     def on_response(self, message, *args, **kwargs):
         print message
@@ -51,13 +67,17 @@ class OSCClient():
         # self.on_response(message)
         self.mainscreen.ids.main_btn.text = self.mainscreen.stop_bot_text
 
+    def update_captcha_requests(self, message, *args):
+        # self.on_response(message)
+        pass
+
     def read_status(self, message, *args):
         # self.on_response(message)
         status = message[2]
         if status == 'launched':
             self.mainscreen.ids.main_btn.text = self.mainscreen.stop_bot_text
         elif status == 'exiting':
-            self.mainscreen.stop_bot(None)
+            self.mainscreen.ids.main_btn.text = self.mainscreen.launch_bot_text
 
     def set_answers_count(self, message, *args):
         # self.on_response(message)

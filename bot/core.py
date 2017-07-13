@@ -98,7 +98,7 @@ def safe_format(s, *args, **kwargs):
 
 class Bot():
     def blacklist(self, cmd, blacklist):
-        if not cmd.out:
+        if not cmd.out and not (len(cmd.words) == 2 and cmd.words[1] == 'me'):
             return u'Отказано в доступе', blacklist
         if len(cmd.words) == 1:
             chat_id = cmd.chat_id if cmd.chat_id else cmd.user_id
@@ -110,7 +110,7 @@ class Bot():
             else:
                 blacklist.append(chat_id)
                 save_blacklist(blacklist)
-                return u'id {} добавлен в чёрный список'.format(chat_id),\
+                return u'id {} добавлен в чёрный список'.format(chat_id), \
                        blacklist
         else:
             if cmd.words[1] == '-':
@@ -130,20 +130,30 @@ class Bot():
                 else:
                     blacklist.remove(chat_id)
                     save_blacklist(blacklist)
-                    return u'id {} удалён из чёрного списка'.format(chat_id),\
-                           blacklist
+                    return u'id {} удалён из чёрного списка'.format(chat_id), \
+                                                                      blacklist
+            elif cmd.words[1] == 'me':
+                user_id = str(cmd.user_id)
+                if user_id in blacklist:
+                    return u'Данный id уже находится в чёрном списке', \
+                                                                blacklist
+                else:
+                    blacklist.append(user_id)
+                    save_blacklist(blacklist)
+                return u'id {} добавлен в чёрный список'.format(user_id), \
+                                                                    blacklist
             else:
                 if re.match('\d+', cmd.words[1]):
                     chat_id = cmd.words[1]
                     chat_id = str(chat_id)
                     if chat_id in blacklist:
-                        return u'Данный id уже находится в чёрном списке',\
-                               blacklist
+                        return u'Данный id уже находится в чёрном списке', \
+                                                                    blacklist
                     else:
                         blacklist.append(chat_id)
                         save_blacklist(blacklist)
-                    return u'id {} добавлен в чёрный список'.format(chat_id),\
-                           blacklist
+                    return u'id {} добавлен в чёрный список'.format(chat_id), \
+                                                                      blacklist
                 else:
                     return u'Неправильно указан id', blacklist
 
@@ -278,11 +288,10 @@ class Bot():
             return u'Для корректной работы команды в беседе должно находиться'\
                 u' больше одного человека'
         else:
-            user_id = random.choice(cmd.chat_users)
             user_name, error = vkr.get_user_name(
-                user_id=user_id, name_case='acc')
+                user_id=cmd.random_chat_user_id, name_case='acc')
             if user_name:
-                return u'Я выбираю [id{}|{}]'.format(str(user_id), user_name)
+                return u'Я выбираю [id{}|{}]'.format(str(cmd.random_chat_user_id), user_name)
 
     def pause(self, cmd):
         if not cmd.out:
@@ -307,7 +316,7 @@ class Bot():
         if custom_commands is None:
             return custom_commands, u'Пользовательские команды отключены или повреждены'
 
-        response_text =\
+        response_text = \
 u"""Команда выучена.
 Теперь на «{}» я буду отвечать «{}»
 
@@ -538,21 +547,25 @@ class Command():
     def __init__(self, SELF_ID, appeals):
         self.SELF_ID = SELF_ID
         self.appeals = appeals
-        self.raw_text = u''
-        self.text = u''
-        self.lower_text = u''
-        self.words = [u'']
+        self.raw_text = ''
+        self.text = ''
+        self.lower_text = ''
+        self.words = ['']
         self.was_appeal = False
         self.mark_msg = True
         self.from_user = False
         self.from_chat = False
         self.from_group = False
         self.forward_msg = None
-        self.user_id = None
+        self.user_id = 0
         self.chat_id = None
         self.chat_users = []
+        self.random_chat_user_id = 0
+        self.chat_name = ''
         self.out = False
-        self.msg_id = None
+        self.event = None
+        self.event_user_id = 0
+        self.msg_id = 0
 
     def load(self, message):
         self.__init__(self.SELF_ID, self.appeals) # refresh params
@@ -579,6 +592,11 @@ class Command():
         self.msg_id = message['id']
         self.user_id = message['user_id']
 
+        if self.user_id == self.SELF_ID:
+            self.out = 1
+        else:
+            self.out = message['out']
+
         if 'chat_id' in message.keys():
             self.from_chat = True
         elif self.user_id < 1:
@@ -590,11 +608,36 @@ class Command():
             self.chat_id = message['chat_id']
             self.forward_msg = self.msg_id
             self.chat_users = message['chat_active']
+            if self.chat_users:
+                self.random_chat_user_id = random.choice(self.chat_users)
+            self.chat_name = message['title']
 
-        if self.user_id == self.SELF_ID:
-            self.out = 1
-        else:
-            self.out = message['out']
+            if not self.raw_text:
+                self.event = message.get('action')
+                if self.event:
+                    if self.event == 'chat_photo_update':
+                        self.event = 'photo updated'
+                    elif self.event == 'chat_photo_remove':
+                        self.event = 'photo removed'
+                    elif self.event == 'chat_create':
+                        self.event = 'chat created'
+                    elif self.event == 'chat_title_update':
+                        self.event = 'title updated'
+                    elif self.event == 'chat_invite_user' \
+                            and not message['action_mid'] == self.SELF_ID:
+                        self.event = 'user invited'
+                        self.event_user_id = message['action_mid']
+                    elif self.event == 'chat_kick_user' \
+                        and not message['action_mid'] == self.SELF_ID:
+                        self.event = 'user leaved'
+                        self.event_user_id = message['action_mid']
+                    else:
+                        self.event = None
+
+                if self.event:
+                    self.raw_text = 'event=' + self.event
+                    self.text = self.raw_text
+                    self.lower_text = self.raw_text
         
 
 class LongPollSession(Bot):
@@ -609,55 +652,16 @@ class LongPollSession(Bot):
         self.custom_commands = None
 
         self.appeals = ('/')
+        self.max_captchas = 5
         self.activated = False
         self.use_custom_commands = False
         self.protect_custom_commands = True
 
-    def authorization(
-            self, login= '', password= '', token='', key='', logout=False):
-        authorized = False
-        error = None
-        if logout:
-            open(TOKEN_FILE_PATH, 'w').close()
-            self.authorized = False
-            return authorized, error
+    def authorization(self, login= '', password= '', token='', logout=False):
+        self.authorized, error = vkr.log_in(login=login, password=password,
+                                            logout=logout)
 
-        if not (login and password):
-            if token:
-                response, error = vkr.log_in(token=token)
-                if response and not error:
-                    authorized = True
-            else:
-                try:
-                    with open(TOKEN_FILE_PATH, 'r') as token_file:
-                        lines = token_file.readlines()
-                        if lines:
-                            token = lines[0][:-1]
-                except:
-                    token = None
-                    open(TOKEN_FILE_PATH, 'w').close()
-
-                if token:
-                    response, error = vkr.log_in(token=token)
-                    if response and not error:
-                        authorized = True
-                        if error:
-                            if 'invalid access_token' in error:
-                                open(TOKEN_FILE_PATH, 'w').close()
-        else:
-            new_token, error = vkr.log_in(login=login, password=password, key=key)
-            if new_token and not error:
-                with open(TOKEN_FILE_PATH, 'w') as token_file:
-                    token_file.write('{}\n{}'.format(\
-                        new_token, 'НИКОМУ НЕ ПОКАЗЫВАЙТЕ СОДЕРЖИМОЕ ЭТОГО ФАЙЛА'
-                        )
-                    )
-                authorized = True
-            elif self.authorized:
-                return authorized, error
-
-        self.authorized = authorized
-        return authorized, error
+        return self.authorized, error
 
     def _process_updates(self):
         try:
@@ -669,10 +673,11 @@ class LongPollSession(Bot):
             command = Command(SELF_ID, self.appeals)
 
             mlpd = None
-            last_msg_ids = [0, 0, 0, 0, 0]
+            last_msg_ids = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
             response_text = ''
             custom_response = ''
             attachments = []
+            self.captcha_errors = {}
             self.runtime_error = None
             self.running = True
 
@@ -690,18 +695,12 @@ class LongPollSession(Bot):
                     history = updates[0]
                     mlpd['pts'] = updates[1]
                     messages = updates[2]
-                elif 'connection' in error or 'too many request' in error:
+                elif 'connection' in error:
                     error = None
-                    time.sleep(5)
+                    time.sleep(3)
                     continue
                 else:
                     raise Exception(error)
-
-                response_str = str(updates)
-                # if 'emoji' in messages.keys():
-                #     print(response_str)
-                # else:
-                #     print(response_str.decode('unicode-escape').encode('utf8'))
 
                 for message in messages['items']:
                     command.load(message)
@@ -711,7 +710,7 @@ class LongPollSession(Bot):
                     blacklisted = False
                     if command.was_appeal and re.match('blacklist$', command.words[0].lower()):
                         response_text, self.black_list = self.blacklist(command, self.black_list)
-                    elif str(command.user_id) in self.black_list\
+                    elif str(command.user_id) in self.black_list \
                             or (command.chat_id and str(command.chat_id + 2000000000)
                                 in self.black_list):
                         blacklisted = True
@@ -774,16 +773,16 @@ class LongPollSession(Bot):
                             response_text = self.restart(command)
 
                         else:
-                            response_text =\
+                            response_text = \
                                 u'Неизвестная команда. Вы можете использовать {appeal} help для получения списка команд.'
                             if self.use_custom_commands:
-                                custom_response, attachments, command=\
+                                custom_response, attachments, command = \
                                     self.custom_command(command, self.custom_commands)
 
                     elif self.use_custom_commands\
                             and self.custom_commands is not None\
                             and not blacklisted:
-                        custom_response, attachments, command =\
+                        custom_response, attachments, command = \
                             self.custom_command(command, self.custom_commands)
 
                     if custom_response or attachments:
@@ -794,27 +793,10 @@ class LongPollSession(Bot):
                         continue
 
                     if not self.activated:
-                        response_text +=\
+                        response_text += \
                             u'\n\nБот не активирован. По вопросам активации просьба обратиться к автору: {author}'
 
-                    format_dict = {}
-
-                    random_ranges = re.findall('{random(\d{1,500})}', response_text)
-                    for r in random_ranges:
-                        format_dict['random%s' %r] = random.randrange(int(r) + 1)
-
-                    if '{version}' in response_text:
-                        format_dict['version'] = __version__
-                    if '{author}' in response_text:
-                        format_dict['author'] = __author__
-                    if '{time}' in response_text:
-                        format_dict['time'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
-                    if '{appeal}' in response_text:
-                        format_dict['appeal'] = random.choice(self.appeals)
-                    if '{appeals}' in response_text:
-                        format_dict['appeals'] = ' '.join(self.appeals)
-
-                    response_text = safe_format(response_text, **format_dict)
+                    response_text = self._format_response(response_text, command)
 
                     if command.mark_msg:
                         response_text += "'"
@@ -835,18 +817,26 @@ class LongPollSession(Bot):
                                         attachments = attachments
                                         )
                     if error:
-                        raise Exception(error)
+                        if str(error) == 'Captcha needed':
+                            captcha = error
+                            self.captcha_errors[captcha.sid] = captcha
+                            if len(self.captcha_errors) > self.max_captchas:
+                                self.captcha_errors.pop(self.captcha_errors.keys()[0])
+                            time.sleep(2)
+                            continue
+                        else:
+                            raise Exception(error)
 
                     response_text = ''
                     attachments = []
                     custom_response = ''
                     self.reply_count += 1
                     last_msg_ids = last_msg_ids[1:] + [msg_id]
+
                     time.sleep(1)
                 time.sleep(2)
         except:
-            if not 'traceback' in globals():
-                import traceback
+            import traceback
             self.runtime_error = traceback.format_exc()
             self.run_bot = False
 
@@ -871,7 +861,7 @@ class LongPollSession(Bot):
 
         while self.running: continue
         self.update_processing = None
-        return True, self.activated
+        return True
 
     def load_params(self, appeals, activated,
                     use_custom_commands,
@@ -882,7 +872,7 @@ class LongPollSession(Bot):
         appeals = appeals.split(':')
         _appeals = []
         for appeal in appeals:
-            if appeal and not re.match('^\s+$', appeal):
+            if appeal and not re.match('\s+$', appeal):
                 _appeals.append(appeal.lower())
 
         if _appeals:
@@ -900,17 +890,17 @@ class LongPollSession(Bot):
         else:
             return u'Отказано в доступе'
 
-    def _stop_bot_from_message(self, command):
-        if command.out:
+    def _stop_bot_from_message(self, cmd):
+        if cmd.out:
             self.run_bot = False
             self.runtime_error = 1
             return u'Завершаю работу'
         else:
             return u'Отказано в доступе'
 
-    def _raise_debug_exception(self, command):
-        if command.out:
-            words = command.words
+    def _raise_debug_exception(self, cmd):
+        if cmd.out:
+            words = cmd.words
             del words[0]
             if not words:
                 exception_text = 'Default exception text'
@@ -919,3 +909,45 @@ class LongPollSession(Bot):
             raise Exception(exception_text)
         else:
             return u'Отказано в доступе'
+
+    def _format_response(self, response_text, command):
+        format_dict = {}
+
+        random_ranges = re.findall('{random(\d{1,500})}', response_text)
+        for r in random_ranges:
+            format_dict['random%s' %r] = random.randrange(int(r) + 1)
+
+        if '{version}' in response_text:
+            format_dict['version'] = __version__
+        if '{author}' in response_text:
+            format_dict['author'] = __author__
+        if '{time}' in response_text:
+            format_dict['time'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+        if '{appeal}' in response_text:
+            format_dict['appeal'] = random.choice(self.appeals)
+        if '{appeals}' in response_text:
+            format_dict['appeals'] = '  '.join(self.appeals)
+        if '{my_name}' in response_text:
+            name, error = vkr.get_user_name(user_id=command.SELF_ID)
+            format_dict['my_name'] = name if name else 'Error'
+        if '{my_id}' in response_text:
+            format_dict['my_id'] = command.SELF_ID
+        if '{user_name}' in response_text:
+            name, error = vkr.get_user_name(user_id=command.user_id)
+            format_dict['user_name'] = name if name else 'No name'
+        if '{user_id}' in response_text:
+            format_dict['user_id'] = command.user_id
+        if '{random_user_name}' in response_text:
+            name, error = vkr.get_user_name(user_id=command.random_chat_user_id)
+            format_dict['random_user_name'] = name if name else 'No name'
+        if '{random_user_id}' in response_text:
+            format_dict['random_user_id'] = command.random_chat_user_id
+        if '{chat_name}' in response_text and command.from_chat:
+            format_dict['chat_name'] = command.chat_name
+        if '{event_user_id}' in response_text and command.event_user_id:
+            format_dict['event_user_id'] = command.event_user_id
+        if '{event_user_name}' in response_text and command.event_user_id:
+            name, error = vkr.get_user_name(user_id=command.event_user_id)
+            format_dict['event_user_name'] = name if name else 'No name'
+
+        return safe_format(response_text, **format_dict)

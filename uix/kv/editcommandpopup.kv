@@ -39,12 +39,12 @@
             LowerTextInput:
                 id: command_textinput
                 size_hint_y: None
-                height: self.minimum_height
+                height: max(self.line_height*3, self.minimum_height)
                 hint_text: 'Команда'.decode('utf8')
             TextInput:
                 id: response_textinput
                 size_hint_y: None
-                height: self.minimum_height
+                height: max(self.line_height*3, self.minimum_height)
                 hint_text: 'Ответ'.decode('utf8')
             GridLayout:
                 cols: 6

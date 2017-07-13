@@ -175,6 +175,48 @@
         on_ref_press: app._open_url(args)
 
 
+<CaptchaPopup>:
+    size_hint: None, None
+    size: content.width + dp(40), content.height + dp(50)
+
+    BoxLayout:
+        id: content
+        size_hint: None, None
+        size: self.minimum_size
+        orientation: 'vertical'
+        spacing: dp(8)
+
+        AsyncImage:
+            id: image
+            allow_stretch: True
+            size_hint: None, None
+            size: dp(260), dp(100)
+
+        TextInput:
+            id: textinput
+            multiline: False
+            size_hint_y: None
+            height: self.minimum_height
+
+        GridLayout:
+            cols: 3
+            size_hint: None, None
+            size: image.width, self.minimum_height
+            Button:
+                text: ' Принять '
+                font_size: '17sp'
+                size_hint: None, None
+                size: self.texture_size[0], self.texture_size[1]*2
+                on_release: root.retry_request(textinput.text)
+            Widget:
+            Button:
+                text: ' Отмена '
+                font_size: '17sp'
+                size_hint: None, None
+                size: self.texture_size[0], self.texture_size[1]*2
+                on_release: root.dismiss()
+
+
 <MainScreen>:
     name: 'main_screen'
 
@@ -237,9 +279,17 @@
                     text: 'Восстановить статус'
                     width: self.texture_size[0] + dp(4)
                     pos_hint: {'center_x':.5, 'pos_y': None}
-                    pos: self.pos[0], export_logs_btn.pos[1] + export_logs_btn.height*2
+                    pos: self.pos[0], get_captcha_btn.pos[1] + get_captcha_btn.height*2
                     disabled: True
                     
+                Apply:
+                    id: get_captcha_btn
+                    text: 'Получить капчу'
+                    width: self.texture_size[0] + dp(4)
+                    pos_hint: {'center_x':.5, 'pos_y': None}
+                    pos: self.pos[0], export_logs_btn.pos[1] + export_logs_btn.height*2
+                    on_release: app._get_captchas(root.service)
+
                 Apply:
                     id: export_logs_btn
                     text: 'Экспортировать логи'
@@ -265,31 +315,29 @@
                 height: self.minimum_size[1]
 
         GridLayout:
-            cols: 3
+            cols: 5
             size_hint_y: None
             height: self.minimum_height
 
-            GridLayout:
-                cols: 2
+            Button:
+                text: 'Добавить'
+                size_hint_x: None
+                width: self.texture_size[0] + dp(5)
+                on_release: root.open_new_command_popup()
 
-                Button:
-                    text: 'Добавить'
-                    size_hint_x: None
-                    width: self.texture_size[0] + dp(5)
-                    on_release: root.open_new_command_popup()
+            Widget:
 
-                Widget:
             Button:
                 text: 'Вернуться'
-                size_hint_y: None
+                size_hint: None, None
+                width: self.texture_size[0] + dp(5)
                 height: self.texture_size[1]*2.4 + dp(3)
                 on_release: root.leave()
-            GridLayout:
-                cols: 2
 
-                Widget:
-                Button:
-                    text: 'Сортировка'
-                    size_hint_x: None
-                    width: self.texture_size[0] + dp(5)
-                    on_release: root.sort_blocks()
+            Widget:
+
+            Button:
+                text: 'Сортировка'
+                size_hint_x: None
+                width: self.texture_size[0] + dp(5)
+                on_release: root.sort_blocks()
