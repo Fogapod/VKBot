@@ -50,7 +50,8 @@ class VKBotApp(App):
                     'appeals': '/:бот,',
                     'use_custom_commands': 'False',
                     'protect_cc': 'True',
-                    'bot_activated': 'False'
+                    'bot_activated': 'False',
+                    'openweathermap_api_key': '0'
                 }
             )
 

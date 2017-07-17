@@ -142,3 +142,8 @@ def get_user_name(user_id=None, name_case='nom'):
     response = api.users.get(user_ids=user_id, name_case=name_case)[0]
 
     return response['first_name'] + ' ' + response['last_name']
+
+
+@error_catcher
+def get_user_city(user_id=None):
+    return api.users.get(user_ids=user_id, fields='city')[0]['city']['title']

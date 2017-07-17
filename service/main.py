@@ -28,17 +28,21 @@ from bot.core import LongPollSession
 
 def update_params():
     global activated
+    global openweathermap_api_key
 
     Config.read(bot.utils.SETTINGS_FILE_PATH)
     appeals = Config.get('General', 'appeals')
     activated = Config.get('General', 'bot_activated')
     use_custom_commands = Config.get('General', 'use_custom_commands')
     protect_custom_commands = Config.get('General', 'protect_cc')
+    openweathermap_api_key = Config.get('General', 'openweathermap_api_key')
 
     session.load_params(appeals,
-                        activated=activated == 'True',
-                        use_custom_commands=use_custom_commands == 'True',
-                        protect_custom_commands=protect_custom_commands == 'True')
+        activated=activated == 'True',
+        use_custom_commands=use_custom_commands == 'True',
+        protect_custom_commands=protect_custom_commands == 'True',
+        openweathermap_api_key=openweathermap_api_key
+    )
                         
 def ping(*args):
     global session
@@ -101,6 +105,13 @@ if __name__ == '__main__':
             activated = session.activated
             Config.read(bot.utils.SETTINGS_FILE_PATH)
             Config.set('General', 'bot_activated', str(activated))
+            Config.write()
+        if session.openweathermap_api_key != openweathermap_api_key:
+            openweathermap_api_key = session.openweathermap_api_key
+            Config.read(bot.utils.SETTINGS_FILE_PATH)
+            Config.set(
+                'General', 'openweathermap_api_key', openweathermap_api_key
+            )
             Config.write()
         if session.runtime_error:
             if session.runtime_error != 1:

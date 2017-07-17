@@ -8,6 +8,8 @@ import random
 
 from threading import Thread
 
+import requests as r
+
 from utils import TOKEN_FILE_PATH, load_custom_commands,\
 save_custom_commands, load_blacklist, save_blacklist,\
 CUSTOM_COMMAND_OPTIONS_COUNT
@@ -37,19 +39,21 @@ u'''--Страница 0--
 (инфа|chance <вопрос>)
 -Выбрать участника беседы
 (кто|who <вопрос>)
+-Сообщить информацию о погоде
+(погода|weather <?город=город со страницы или Москва>|-)
 
 Автор: {author}
 
-В конце моих сообщений ставится знак верхней кавычки
-''',
+В конце моих сообщений ставится знак верхней кавычки''',
+
 u'''--Страница 1--
 
 Опциональные команды (доступ ограничивает владелец бота):
 -Выучить команду
 (выучи|learn <команда>::<ответ>::<?опции=00000>) +
 -Забыть команду
-(забудь|forgot <команда>::<?ответ>) -
-''',
+(забудь|forgot <команда>::<?ответ>) -''',
+
 u'''--Страница 2--
 
 Ограниченные команды (доступны только владельцу):
@@ -58,8 +62,8 @@ u'''--Страница 2--
 -Перезапустить бота (применение команд и настроек)
 (restart)
 -Выключить бота
-(stop) !
-''',
+(stop) !''',
+
 u'''--Страница 3--
 
 Отладочные команды (доступны только владельцу):
@@ -69,16 +73,15 @@ u'''--Страница 3--
 -Поставить бота на паузу (игнорирование сообщений)
 (pause <время (секунды)=5>)
 -Быстрая проверка активности бота (доступна всем)
-(ping)
-''',
+(ping)''',
 u'''--Страница 4--
 
 Закрытые команды (доступны только автору):
 -Активировать бота
 (activate)
 -Деактивировать бота
-(deactivate)
-''')
+(deactivate)'''
+)
 
 
 def safe_format(s, *args, **kwargs):
@@ -91,7 +94,7 @@ def safe_format(s, *args, **kwargs):
             return s.format(*args, **kwargs)
         except KeyError as e:
             e=e.args[0]
-            kwargs[e] = "{%s}" % e
+            kwargs[e] = '{%s}' % e
         except:
             return s
 
@@ -260,9 +263,9 @@ class Bot():
                                                   + luc_number, luc_number
                             
             if input_number != 0:
-                is_prime = True if (luc_number - 1) %\
-                                   input_number == 0 else False
-                result = u'Является простым числом'\
+                is_prime = True if (luc_number - 1) \
+                                % input_number == 0 else False
+                result = u'Является простым числом' \
                     if is_prime else u'Не является простым числом'
             else:
                 result = u'0 не является простым числом'
@@ -285,13 +288,90 @@ class Bot():
         if not cmd.from_chat:
             return u'Данная команда работает только в беседе'
         elif len(cmd.chat_users) < 2:
-            return u'Для корректной работы команды в беседе должно находиться'\
-                u' больше одного человека'
+            return u'Для корректной работы команды в беседе должно находитьс' \
+                   u'я больше одного человека'
         else:
             user_name, error = vkr.get_user_name(
                 user_id=cmd.random_chat_user_id, name_case='acc')
             if user_name:
-                return u'Я выбираю [id{}|{}]'.format(str(cmd.random_chat_user_id), user_name)
+                return u'Я выбираю [id%d|%s]' % (cmd.random_chat_user_id, user_name)
+
+    def weather(self, cmd, api_key):
+        api_key_not_confirmed = \
+u'''
+Команда не может функционировать. Для её активации необходим специальный ключ:
+ИНСТРУКЦИЯ_ПО_ПОЛУЧЕНИЮ_КЛЮЧА
+
+Скопируйте полученный ключ и повторите команду, добавив его, чтобы получилось
+/погода 9ld10763q10b2cc882a4a10fg90fc974
+
+[id{my_id}|НИКОМУ НЕ ПОКАЗЫВАЙТЕ ДАННЫЙ КЛЮЧ, ИНАЧЕ РИСКУЕТЕ ЕГО ПОТЕРЯТЬ!]'''
+
+        if len(cmd.words) > 1:
+            if ' '.join(cmd.words[1:]) == '-':
+                return u'Ключ сброшен', '0'
+
+            if api_key == '0':
+                if self._verify_openweathermap_api_key(cmd):
+                    return u'Ключ подтверждён', cmd.words[1]
+                else:
+                    return u'Неверный ключ (%s)' % cmd.words[1], api_key
+
+            city = ' '.join(cmd.words[1:])
+        else:
+            if api_key == '0':
+                return api_key_not_confirmed, api_key
+
+            city, error = vkr.get_user_city(user_id=cmd.user_id)
+            if not city:
+                city = u'Москва'
+
+        url = u'http://api.openweathermap.org/data/2.5/weather?APPID={api_key}&lang=ru&q={city}&units=metric'
+        url = url.format(api_key=api_key, city=city)
+
+        weather_data = r.get(url)
+        weather_json = weather_data.json()
+
+        if 'cod' in weather_json and weather_json['cod'] == '404':
+            return u'Город не найден (%s)' % city, api_key
+
+        format_dict = {}
+        format_dict['city'] = city
+        format_dict['country'] = weather_json['sys']['country']
+        format_dict.update(weather_json['main'])
+        format_dict.update(weather_json['weather'][0])
+        format_dict['temp'] = round(format_dict['temp'], 1)
+        format_dict['temp'] = format_dict['temp']
+        format_dict['cloud'] = weather_json['clouds']['all']
+        format_dict['time_since_calculation'] = time.strftime(
+            '%H:%M:%S', time.gmtime(time.time() - weather_json['dt'])
+        )
+
+        weather_response = \
+u'''
+Погода для: {city} ({country})
+
+Состояние погоды: {description}
+Температура: {temp}°C
+Облачность: {cloud}%
+Влажность: {humidity}%
+Давление: {pressure} hPa
+Прошло с момента последнего измерения: {time_since_calculation}'''.format(
+    **format_dict)
+
+        return weather_response, api_key
+
+    def _verify_openweathermap_api_key(self, cmd):
+        api_key = cmd.words[1]
+
+        test_url = 'http://api.openweathermap.org/data/2.5/weather?APPID=%s' % api_key
+        test_weather_json = r.get(test_url).json()
+
+        if 'cod' in test_weather_json:
+            if test_weather_json['cod'] == '401':
+                return False
+            elif test_weather_json['cod'] == '400':
+                return True
 
     def pause(self, cmd):
         if not cmd.out:
@@ -317,7 +397,7 @@ class Bot():
             return custom_commands, u'Пользовательские команды отключены или повреждены'
 
         response_text = \
-u"""Команда выучена.
+u'''Команда выучена.
 Теперь на «{}» я буду отвечать «{}»
 
 Опции:
@@ -325,7 +405,7 @@ use_regex: {}
 force_unmark: {}
 force_forward: {}
 appeal_only: {}
-disabled: {}"""
+disabled: {}'''
 
         words = cmd.words
         argument_required = self._is_argument_missing(words)
@@ -355,7 +435,7 @@ disabled: {}"""
             response_text = u'Неправильный синтаксис команды' 
         elif len(options) != CUSTOM_COMMAND_OPTIONS_COUNT:
             response_text = u'Неправильное количество опций'
-        elif command in custom_commands.keys() and response\
+        elif command in custom_commands.keys() and response \
                 in custom_commands[command]:
             response_text = u'Я уже знаю такой ответ'
         elif command in custom_commands.keys():
@@ -410,9 +490,8 @@ disabled: {}"""
                 response = ''
             elif len([x for x in custom_commands[command]\
                     if response == x[0]]) == 0:
-                response_text = u'В команде «{}» нет ключа «{}»'.format(
-                                command.lower(), response
-                                )
+                response_text = u'В команде «%s» нет ключа «%s»' \
+                                            % command.lower(), response
             else:
                 for response_list in custom_commands[command.lower()]:
                     if response_list[0] == response:
@@ -424,7 +503,7 @@ disabled: {}"""
                     response_text = u'Ключ для команды забыт'
 
         if not response and not custom_commands.pop(command, None):
-            response_text = u'Я не знаю такой команды ({})'.format(command)
+            response_text = u'Я не знаю такой команды (%s)' % command
         
         save_custom_commands(custom_commands)
         return custom_commands, response_text
@@ -497,7 +576,7 @@ disabled: {}"""
                     album_id = re.search('album\d+_(\d+)', media_id).group(1)
                     album_len = vkr.get_album_size(album_id)[0]
                     if album_len == 0:
-                        response_text =\
+                        response_text = \
                             u'Пустой альбом. Невозможно выбрать фото'
                         media_id = ''
                     else:
@@ -510,7 +589,7 @@ disabled: {}"""
                 if media_id:
                     attachments.append(media_id)
             else:
-                response_text =\
+                response_text = \
                     u'Не могу показать вложение. Неправильная ссылка'
         elif response == 'pass':
             response_text = None
@@ -625,11 +704,11 @@ class Command():
                         self.event = 'title updated'
                     elif self.event == 'chat_invite_user' \
                             and not message['action_mid'] == self.SELF_ID:
-                        self.event = 'user invited'
+                        self.event = 'user joined'
                         self.event_user_id = message['action_mid']
                     elif self.event == 'chat_kick_user' \
                         and not message['action_mid'] == self.SELF_ID:
-                        self.event = 'user leaved'
+                        self.event = 'user kicked'
                         self.event_user_id = message['action_mid']
                     else:
                         self.event = None
@@ -656,6 +735,7 @@ class LongPollSession(Bot):
         self.activated = False
         self.use_custom_commands = False
         self.protect_custom_commands = True
+        self.openweathermap_api_key = '0'
 
     def authorization(self, login= '', password= '', token='', logout=False):
         self.authorized, error = vkr.log_in(login=login, password=password,
@@ -675,7 +755,6 @@ class LongPollSession(Bot):
             mlpd = None
             last_msg_ids = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
             response_text = ''
-            custom_response = ''
             attachments = []
             self.captcha_errors = {}
             self.runtime_error = None
@@ -708,14 +787,27 @@ class LongPollSession(Bot):
                         continue
 
                     blacklisted = False
-                    if command.was_appeal and re.match('blacklist$', command.words[0].lower()):
-                        response_text, self.black_list = self.blacklist(command, self.black_list)
+                    if command.was_appeal and command.words[0] == 'blacklist':
+                        response_text, self.black_list = \
+                            self.blacklist(command, self.black_list)
                     elif str(command.user_id) in self.black_list \
-                            or (command.chat_id and str(command.chat_id + 2000000000)
+                            or (command.chat_id \
+                            and str(command.chat_id + 2000000000) \
                                 in self.black_list):
                         blacklisted = True
 
-                    if command.was_appeal and not blacklisted and not response_text:
+                    if not blacklisted \
+                            and not response_text \
+                            and self.custom_commands is not None \
+                            and self.use_custom_commands:
+                        response_text, attachments, command = \
+                            self.custom_command(command, self.custom_commands)
+
+                    if not blacklisted \
+                            and response_text is not None \
+                            and not attachments \
+                            and command.was_appeal:
+
                         if re.match('ping$', command.lower_text):
                             response_text, command = self.pong(command)
 
@@ -738,6 +830,12 @@ class LongPollSession(Bot):
                         elif re.match(u'((кто)|(кого)|(who)|(whom))$', command.words[0].lower()):
                             response_text = self.who(command)
 
+                        elif re.match(u'((погода)|(weather)),?$', command.words[0].lower()):
+                            response_text, self.openweathermap_api_key = \
+                                self.weather(
+                                    command, self.openweathermap_api_key
+                                )
+
                         elif re.match(u'((выучи)|(learn)|\+)$', command.words[0].lower()):
                             self.custom_commands, response_text = self.learn(
                                 command,
@@ -750,7 +848,7 @@ class LongPollSession(Bot):
                                 command,
                                 self.custom_commands,
                                 protect=self.protect_custom_commands
-                                )
+                            )
                             
                         elif re.match('((stop)|\!)$',
                                 command.lower_text):
@@ -775,26 +873,16 @@ class LongPollSession(Bot):
                         else:
                             response_text = \
                                 u'Неизвестная команда. Вы можете использовать {appeal} help для получения списка команд.'
-                            if self.use_custom_commands:
-                                custom_response, attachments, command = \
-                                    self.custom_command(command, self.custom_commands)
 
-                    elif self.use_custom_commands\
-                            and self.custom_commands is not None\
-                            and not blacklisted:
-                        custom_response, attachments, command = \
-                            self.custom_command(command, self.custom_commands)
-
-                    if custom_response or attachments:
-                        response_text = custom_response
-
-                    if not (response_text or attachments) or custom_response is None:
-                        custom_response = ''
+                    if not any((response_text, attachments)):
                         continue
 
                     if not self.activated:
                         response_text += \
                             u'\n\nБот не активирован. По вопросам активации просьба обратиться к автору: {author}'
+
+                    if response_text is None:
+                        response_text = ''
 
                     response_text = self._format_response(response_text, command)
 
@@ -803,6 +891,7 @@ class LongPollSession(Bot):
 
                     user_id = None
                     chat_id = None
+
                     if command.from_chat:
                         chat_id = command.chat_id
                     else:
@@ -829,7 +918,6 @@ class LongPollSession(Bot):
 
                     response_text = ''
                     attachments = []
-                    custom_response = ''
                     self.reply_count += 1
                     last_msg_ids = last_msg_ids[1:] + [msg_id]
 
@@ -865,7 +953,8 @@ class LongPollSession(Bot):
 
     def load_params(self, appeals, activated,
                     use_custom_commands,
-                    protect_custom_commands):
+                    protect_custom_commands,
+                    openweathermap_api_key):
         if use_custom_commands:
             self.custom_commands = load_custom_commands()
 
@@ -881,6 +970,7 @@ class LongPollSession(Bot):
         self.activated = activated
         self.use_custom_commands = use_custom_commands
         self.protect_custom_commands = protect_custom_commands
+        self.openweathermap_api_key = openweathermap_api_key
         return True
 
     def restart(self, cmd):
