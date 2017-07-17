@@ -830,7 +830,7 @@ class LongPollSession(Bot):
                         elif re.match(u'((кто)|(кого)|(who)|(whom))$', command.words[0].lower()):
                             response_text = self.who(command)
 
-                        elif re.match(u'((погода)|(weather)),?$', command.words[0].lower()):
+                        elif re.match(u'((погода)|(weather))$', command.words[0].lower()):
                             response_text, self.openweathermap_api_key = \
                                 self.weather(
                                     command, self.openweathermap_api_key
