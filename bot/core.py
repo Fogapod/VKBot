@@ -804,7 +804,7 @@ class LongPollSession(Bot):
                             self.custom_command(command, self.custom_commands)
 
                     if not blacklisted \
-                            and response_text is not None \
+                            and not response_text \
                             and not attachments \
                             and command.was_appeal:
 
