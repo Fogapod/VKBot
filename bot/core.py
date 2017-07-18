@@ -43,8 +43,7 @@ u'''--Страница 0--
 (погода|weather <?город=город со страницы или Москва>|-)
 
 Автор: {author}
-
-В конце моих сообщений ставится знак верхней кавычки''',
+''',
 
 u'''--Страница 1--
 
@@ -731,6 +730,8 @@ class LongPollSession(Bot):
         self.custom_commands = None
 
         self.appeals = ('/')
+        self.bot_name = u'(Бот)'
+        self.mark_type = 'кавычка'
         self.max_captchas = 5
         self.activated = False
         self.use_custom_commands = False
@@ -887,7 +888,12 @@ class LongPollSession(Bot):
                     response_text = self._format_response(response_text, command)
 
                     if command.mark_msg:
-                        response_text += "'"
+                        if self.mark_type == u'имя':
+                            response_text = self.bot_name + ' ' + response_text
+                        elif self.mark_type == u'кавычка':
+                            response_text += "'"
+                        else:
+                            raise Exception('Wrong mark type')
 
                     user_id = None
                     chat_id = None
@@ -952,6 +958,7 @@ class LongPollSession(Bot):
         return True
 
     def load_params(self, appeals, activated,
+                    bot_name, mark_type,
                     use_custom_commands,
                     protect_custom_commands,
                     openweathermap_api_key):
@@ -968,9 +975,12 @@ class LongPollSession(Bot):
             self.appeals = tuple(_appeals)
 
         self.activated = activated
+        self.bot_name = bot_name
+        self.mark_type = mark_type
         self.use_custom_commands = use_custom_commands
         self.protect_custom_commands = protect_custom_commands
         self.openweathermap_api_key = openweathermap_api_key
+
         return True
 
     def restart(self, cmd):
@@ -1017,6 +1027,8 @@ class LongPollSession(Bot):
             format_dict['appeal'] = random.choice(self.appeals)
         if '{appeals}' in response_text:
             format_dict['appeals'] = '  '.join(self.appeals)
+        if '{bot_name}' in response_text:
+            format_dict['bot_name'] = self.bot_name
         if '{my_name}' in response_text:
             name, error = vkr.get_user_name(user_id=command.SELF_ID)
             format_dict['my_name'] = name if name else 'Error'

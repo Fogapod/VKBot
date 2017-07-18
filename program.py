@@ -48,6 +48,8 @@ class VKBotApp(App):
                 {
                     'show_bot_activity': 'False',
                     'appeals': '/:бот,',
+                    'bot_name': '(Бот)',
+                    'mark_type': 'кавычка',
                     'use_custom_commands': 'False',
                     'protect_cc': 'True',
                     'bot_activated': 'False',
@@ -57,7 +59,7 @@ class VKBotApp(App):
 
     def build_settings(self, settings):
         settings.add_json_panel(
-            'Настройки бота. Версия {}'.format(__version__), self.config, data=
+            'Настройки бота. Версия %s' % __version__, self.config, data=
         '''[
             {
             "type": "bool",
@@ -74,6 +76,20 @@ class VKBotApp(App):
             "desc": "Обращения, на которые бот будет отзываться. Обращения разделяются символом :",
             "section": "General",
             "key": "appeals"
+            },
+            {
+            "type": "string",
+            "title": "Имя бота",
+            "desc": "Используется в случае выбора имени как способа отмечать сообщения",
+            "section": "General",
+            "key": "bot_name"
+            },
+            {
+            "type": "options",
+            "title": "Отметка сообщений бота",
+            "section": "General",
+            "key": "mark_type",
+            "options": ["кавычка", "имя"]
             },
             {
             "type": "title",

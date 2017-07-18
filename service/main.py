@@ -33,12 +33,15 @@ def update_params():
     Config.read(bot.utils.SETTINGS_FILE_PATH)
     appeals = Config.get('General', 'appeals')
     activated = Config.get('General', 'bot_activated')
+    bot_name = Config.get('General', 'bot_name')
+    mark_type = Config.get('General', 'mark_type')
     use_custom_commands = Config.get('General', 'use_custom_commands')
     protect_custom_commands = Config.get('General', 'protect_cc')
     openweathermap_api_key = Config.get('General', 'openweathermap_api_key')
 
     session.load_params(appeals,
         activated=activated == 'True',
+        bot_name=bot_name, mark_type=mark_type,
         use_custom_commands=use_custom_commands == 'True',
         protect_custom_commands=protect_custom_commands == 'True',
         openweathermap_api_key=openweathermap_api_key
