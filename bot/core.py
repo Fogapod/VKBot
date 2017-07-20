@@ -519,53 +519,54 @@ disabled: {}'''
         if not custom_commands:
             return response_text, attachments, cmd
 
-        matched = []
         response = ''
-        for key in custom_commands.keys():
+        for key in random.sample(custom_commands.keys(), \
+        	       len(custom_commands.keys())):
             if custom_commands[key][0][1] == 2: # use regex
                 pattern = re.compile(key, re.U + re.I)
                 if pattern.search(cmd.text):
-                    matched.append(key)
-            else:
-                if cmd.text.lower() in custom_commands.keys():
-                    choice = random.choice(custom_commands[cmd.text.lower()])
-                    response = choice[0]
+                    for resp in random.sample(custom_commands[key], \
+                            len(custom_commands[key])):
+                        if resp[5] == 2:
+                            continue
+                        else:
+                            choice = resp
+                            response = choice[0]
+                    if response:
+                        groups = pattern.findall(cmd.text)
+                        groupdict = pattern.search(cmd.text).groupdict()
+                        response = safe_format(response, *groups, **groupdict)
+                        break
+
+            elif cmd.text.lower() == key:
+                for resp in random.sample(custom_commands[key], \
+                        len(custom_commands[key])):
+                    if resp[5] == 2:
+                        continue
+                    else:
+                        choice = resp
+                        response = choice[0]
+                if response:
                     break
 
-        if matched:
-            match = random.choice(matched)
-            choice = random.choice(custom_commands[match])
-            response = choice[0]
-
-            pattern = re.compile(match, re.U + re.I)
-            groups = pattern.findall(cmd.text)
-            groupdict = pattern.search(cmd.text).groupdict()
-
-        elif response:
-            groups = []
-            groupdict = {}
-
-        else:
+        if not response:
             return response_text, attachments, cmd
 
-        if choice[5] == 2: # disabled
-            return response_text, attachments, cmd
-
-        if choice[4] == 1: # works only with appeal
+        if choice[4] == 1: # works only WITHOUT appeal
             if cmd.was_appeal:
                 return response_text, attachments, cmd
-        elif choice[4] == 2:
+        elif choice[4] == 2: # works only WITH appeal
             if not cmd.was_appeal:
                 return response_text, attachments, cmd
 
         if choice[3] == 2: # force forward
             cmd.forward_msg = cmd.msg_id
-        elif choice[3] == 1:
+        elif choice[3] == 1: # never forward
             cmd.forward_msg = None
             
-        if choice[2] == 1: # remove «'»
+        if choice[2] == 1: # always mark message
             cmd.mark_msg = True
-        elif choice[2] == 2:
+        elif choice[2] == 2: # never mark message
             cmd.mark_msg = False
 
         if response.startswith('self='):
@@ -598,7 +599,6 @@ disabled: {}'''
         elif response == 'pass':
             pass
         else:
-            response = safe_format(response, *groups, **groupdict)
             response_text = response
 
         return response_text, attachments, cmd
