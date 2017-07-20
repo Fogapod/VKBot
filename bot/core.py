@@ -765,7 +765,8 @@ class LongPollSession(Bot):
             command = Command(SELF_ID, self.appeals)
 
             mlpd = None
-            last_msg_ids = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            last_msg_ids = []
+            max_last_msg_ids = 30
             self.captcha_errors = {}
             self.runtime_error = None
             self.running = True
@@ -935,7 +936,10 @@ class LongPollSession(Bot):
                             raise Exception(error)
 
                     self.reply_count += 1
-                    last_msg_ids = last_msg_ids[1:] + [msg_id]
+
+                    if len(last_msg_ids) >= max_last_msg_ids:
+                        last_msg_ids = last_msg_ids[1:]
+                    last_msg_ids.append(msg_id)
 
                     time.sleep(1)
                 time.sleep(2)
