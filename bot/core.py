@@ -208,11 +208,11 @@ class Bot():
         else:
             del words[0]
         words = ''.join(words).lower()
-        if not re.match(u'[^\d+\-*/:().,^√πe]', words)\
-                or re.match('(sqrt\(.+\))|(pi)', words):
+        if re.match(u'^([\d+\-*/%:().,^√πe]|(sqrt)|(pi))+$', words):
             words = ' ' + words + ' '
             words = re.sub(u'(sqrt)|√', 'math.sqrt', words)
             words = re.sub(u'(pi)|π', 'math.pi', words)
+            words = re.sub('e', 'math.e', words)
             words = re.sub('\^', '**', words)
             words = re.sub(',', '.', words)
             words = re.sub(u':|÷', '/', words)
@@ -227,7 +227,7 @@ class Bot():
                 else:
                     break
             try:
-                result = str(eval(words))
+                result = eval(words)
             except SyntaxError:
                 result = u'Ошибка [0]'
             except NameError:
@@ -239,9 +239,15 @@ class Bot():
             except ZeroDivisionError:
                 result = u'Деление на 0'
             except OverflowError:
-                result = u'Слишком большой результат'
+                result = 'Infinite'
+            else:
+                if type(result) not in (int, long, float):
+                    result = u'Не математическая операция'
+                else:
+                    result = str(result)
         else:
             result = u'Не математическая операция'
+
         return result
 
     def prime(self, cmd):
@@ -760,8 +766,6 @@ class LongPollSession(Bot):
 
             mlpd = None
             last_msg_ids = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-            response_text = ''
-            attachments = []
             self.captcha_errors = {}
             self.runtime_error = None
             self.running = True
@@ -788,6 +792,9 @@ class LongPollSession(Bot):
                     raise Exception(error)
 
                 for message in messages['items']:
+                    response_text = ''
+                    attachments = []
+
                     command.load(message)
                     if not command.text or command.msg_id in last_msg_ids:
                         continue
@@ -922,11 +929,11 @@ class LongPollSession(Bot):
                                 self.captcha_errors.pop(self.captcha_errors.keys()[0])
                             time.sleep(2)
                             continue
+                        elif str(error) == 'response code 413':
+                            pass # message too long # TODO
                         else:
                             raise Exception(error)
 
-                    response_text = ''
-                    attachments = []
                     self.reply_count += 1
                     last_msg_ids = last_msg_ids[1:] + [msg_id]
 
