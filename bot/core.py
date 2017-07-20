@@ -21,7 +21,8 @@ AUTHOR_VK_ID = 180850898
 __author__ = 'Eugene Ershov - https://vk.com/id%d' % AUTHOR_VK_ID
 
 __help__ = (
-u'''--Страница 0--
+u'''
+--Страница 0--
 Версия: {version}
 
 Обращения к боту: {appeals}
@@ -45,7 +46,8 @@ u'''--Страница 0--
 Автор: {author}
 ''',
 
-u'''--Страница 1--
+u'''
+--Страница 1--
 
 Опциональные команды (доступ ограничивает владелец бота):
 -Выучить команду
@@ -53,7 +55,8 @@ u'''--Страница 1--
 -Забыть команду
 (забудь|forgot <команда>::<?ответ>) -''',
 
-u'''--Страница 2--
+u'''
+--Страница 2--
 
 Ограниченные команды (доступны только владельцу):
 -Игнорировать пользователя (лс), беседу или группу
@@ -63,7 +66,8 @@ u'''--Страница 2--
 -Выключить бота
 (stop) !''',
 
-u'''--Страница 3--
+u'''
+--Страница 3--
 
 Отладочные команды (доступны только владельцу):
 
@@ -73,7 +77,8 @@ u'''--Страница 3--
 (pause <время (секунды)=5>)
 -Быстрая проверка активности бота (доступна всем)
 (ping)''',
-u'''--Страница 4--
+u'''
+--Страница 4--
 
 Закрытые команды (доступны только автору):
 -Активировать бота
@@ -287,8 +292,8 @@ class Bot():
         if not cmd.from_chat:
             return u'Данная команда работает только в беседе'
         elif len(cmd.chat_users) < 2:
-            return u'Для корректной работы команды в беседе должно находитьс' \
-                   u'я больше одного человека'
+            return u'Для корректной работы команды, в беседе должно находить' \
+                   u'ся больше одного человека'
         else:
             user_name, error = vkr.get_user_name(
                 user_id=cmd.random_chat_user_id, name_case='acc')
@@ -591,7 +596,7 @@ disabled: {}'''
                 response_text = \
                     u'Не могу показать вложение. Неправильная ссылка'
         elif response == 'pass':
-            response_text = None
+            pass
         else:
             response = safe_format(response, *groups, **groupdict)
             response_text = response
@@ -875,15 +880,13 @@ class LongPollSession(Bot):
                             response_text = \
                                 u'Неизвестная команда. Вы можете использовать {appeal} help для получения списка команд.'
 
-                    if not any((response_text, attachments)):
+                    if re.match('\s*$', response_text) and not attachments:
+                        response_text = ''
                         continue
 
                     if not self.activated:
                         response_text += \
                             u'\n\nБот не активирован. По вопросам активации просьба обратиться к автору: {author}'
-
-                    if response_text is None:
-                        response_text = ''
 
                     response_text = self._format_response(response_text, command)
 
