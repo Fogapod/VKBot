@@ -114,51 +114,59 @@ class Bot(object):
 
         if len(cmd.words) == 1:
             chat_id = cmd.chat_id if cmd.from_chat else cmd.user_id
+
             if cmd.from_chat:
                 chat_id += 2000000000
+
             if chat_id in blacklist:
                 return u'Данный id уже находится в списке', blacklist
-            else:
-                blacklist.append(chat_id)
-                save_blacklist(blacklist)
-                return u'id %s добавлен в список' % chat_id, blacklist
+
+            blacklist.append(chat_id)
+            save_blacklist(blacklist)
+
+            return u'id %s добавлен в список' % chat_id, blacklist
+
         else:
             if cmd.words[1] == '-':
                 if len(cmd.words) == 2:
                     chat_id = cmd.chat_id if cmd.from_chat else cmd.user_id
                 else:
-                    if re.match('\d+$', cmd.words[2]):
-                        chat_id = int(cmd.words[2])
-                    else:
+                    if not re.match('\d+$', cmd.words[2]):
                         return u'Неправильно указан id', blacklist
+
+                    chat_id = int(cmd.words[2])
 
                 if chat_id not in blacklist:
                     return u'В списке нет данного id', blacklist
-                else:
-                    blacklist.remove(chat_id)
-                    save_blacklist(blacklist)
-                    return u'id %s удалён из списка' % chat_id, blacklist
+
+                blacklist.remove(chat_id)
+                save_blacklist(blacklist)
+
+                return u'id %s удалён из списка' % chat_id, blacklist
 
             elif cmd.words[1] == 'me':
                 user_id = cmd.user_id
                 if user_id in blacklist:
                     return u'Данный id уже находится в списке', blacklist
-                else:
-                    blacklist.append(user_id)
-                    save_blacklist(blacklist)
+
+                blacklist.append(user_id)
+                save_blacklist(blacklist)
+
                 return u'id %s добавлен в список' % user_id, blacklist
 
             else:
-                if re.match('\d+$', cmd.words[1]):
-                    chat_id = int(cmd.words[1])
-                    if chat_id in blacklist:
-                        return u'Данный id уже находится в списке', blacklist
-                    else:
-                        blacklist.append(chat_id)
-                        save_blacklist(blacklist)
-                    return u'id %s добавлен в список' % chat_id, blacklist
-                else:
+                if not re.match('\d+$', cmd.words[1]):
                     return u'Неправильно указан id', blacklist
+
+                chat_id = int(cmd.words[1])
+
+                if chat_id in blacklist:
+                    return u'Данный id уже находится в списке', blacklist
+
+                blacklist.append(chat_id)
+                save_blacklist(blacklist)
+
+                return u'id %s добавлен в список' % chat_id, blacklist
 
     def pong(self, cmd):
         cmd.forward_msg = None
