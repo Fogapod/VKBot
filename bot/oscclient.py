@@ -21,6 +21,8 @@ class OSCClient():
             self.subprocess = AndroidService('VKBot', 'Бот работает')
         else:
             self.subprocess = None
+
+        self.answers_count = '0'
         self.mainscreen = mainscreen
         self.osc = osc
         self.osc.init()
@@ -32,8 +34,6 @@ class OSCClient():
         self.osc.bind(oscid, self.return_error, '/error')
         self.read_event = Clock.schedule_interval(lambda *x: self.osc.readQueue(oscid), 0)
         self.ping()
-        self.answers_count = '0'
-        self.started = False
 
     def start(self):
         if platform == 'android':
@@ -45,11 +45,10 @@ class OSCClient():
         if platform == 'android':
             self.subprocess.stop()
         else:
-            if self.subprocess is None:
-                osc.sendMsg('/exit', [], port=3000)
-            else:
+            osc.sendMsg('/exit', [], port=3000)
+
+            if self.subprocess is not None:
                 self.subprocess.kill()
-        self.started = False
 
     def ping(self):
         self.osc.sendMsg('/ping', [], port=3000)

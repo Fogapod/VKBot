@@ -734,7 +734,7 @@ class LongPollSession(Bot):
     def __init__(self):
         self.authorized = False
         self.need_restart = False
-        self.update_processing = None
+        self.bot_thread = None
         self.run_bot = False
         self.running = False
         self.runtime_error = None
@@ -756,9 +756,9 @@ class LongPollSession(Bot):
 
         return self.authorized, error
 
-    def _process_updates(self):
+    def process_updates(self):
         try:
-            if not self.authorized: raise Exception('Not authorized')               
+            if not self.authorized: raise Exception('Not authorized')
 
             self.black_list = load_blacklist()
 
@@ -928,7 +928,7 @@ class LongPollSession(Bot):
                                 self.captcha_errors.pop(self.captcha_errors.keys()[0])
                             time.sleep(2)
                             continue
-                        elif str(error) == 'response code 413':
+                        elif error == 'response code 413':
                             pass # message too long # TODO
                         else:
                             raise Exception(error)
@@ -952,9 +952,8 @@ class LongPollSession(Bot):
 
     def launch_bot(self):
         self.run_bot = True
-
-        self.update_processing = Thread(target=self._process_updates)
-        self.update_processing.start()
+        self.bot_thread = Thread(target=self.process_updates)
+        self.bot_thread.start()
 
         while not self.running:
             time.sleep(0.1)
@@ -964,9 +963,8 @@ class LongPollSession(Bot):
 
     def stop_bot(self):
         self.run_bot = False
+        self.bot_thread.join()
 
-        while self.running: continue
-        self.update_processing = None
         return True
 
     def load_params(self, appeals, activated,
