@@ -521,10 +521,9 @@ disabled: {}'''
 
     def custom_command(self, cmd, custom_commands):
         response_text = ''
-        attachments = []
 
         if not custom_commands:
-            return response_text, attachments, cmd
+            return response_text, cmd
 
         response = ''
         for key in random.sample(custom_commands.keys(), \
@@ -557,14 +556,14 @@ disabled: {}'''
                     break
 
         if not response:
-            return response_text, attachments, cmd
+            return response_text, cmd
 
         if choice[4] == 1: # works only WITHOUT appeal
             if cmd.was_appeal:
-                return response_text, attachments, cmd
+                return response_text, cmd
         elif choice[4] == 2: # works only WITH appeal
             if not cmd.was_appeal:
-                return response_text, attachments, cmd
+                return response_text, cmd
 
         if choice[3] == 2: # force forward
             cmd.forward_msg = cmd.msg_id
@@ -578,37 +577,14 @@ disabled: {}'''
 
         if response.startswith('self='):
             cmd.text = '_' + response[5:]
-            return self.custom_command(cmd, custom_commands)
 
-        elif response.startswith('attach='):
-            media_id = response[7:]
-            if re.match('.*((photo)|(album)|(video)|(audio)|(doc)|(wall)|'
-                            '(market))-?\d+_\d+(_\d+)?$', media_id):
-                if re.match('.*album\d+_\d+', media_id):
-                    album_id = re.search('album\d+_(\d+)', media_id).group(1)
-                    album_len = vkr.get_album_size(album_id)[0]
-                    if album_len == 0:
-                        response_text = \
-                            u'Пустой альбом. Невозможно выбрать фото'
-                        media_id = ''
-                    else:
-                        media_id = vkr.get_photo_id(
-                                            album_id=album_id,
-                                            offset=random.randrange(album_len)
-                                            )[0]
-                else:
-                    media_id = media_id.split('/')[-1] # URGLY # FIXME
-                if media_id:
-                    attachments.append(media_id)
-            else:
-                response_text = \
-                    u'Не могу показать вложение. Неправильная ссылка'
+            return self.custom_command(cmd, custom_commands)
         elif response == 'pass':
             pass
         else:
             response_text = response
 
-        return response_text, attachments, cmd
+        return response_text, cmd
 
     def activate_bot(self, cmd, activated):
         if activated:
@@ -811,10 +787,10 @@ class LongPollSession(Bot):
                     if not response_text \
                             and self.use_custom_commands \
                             and self.custom_commands is not None:
-                        response_text, attachments, command = \
+                        response_text, command = \
                             self.custom_command(command, self.custom_commands)
 
-                    if not (response_text or attachments) and command.was_appeal:
+                    if not response_text and command.was_appeal:
 
                         if re.match('ping$', command.lower_text):
                             response_text, command = self.pong(command)
@@ -885,7 +861,7 @@ class LongPollSession(Bot):
                                 u'Неизвестная команда. Вы можете использоват' \
                                 u'ь {appeal} help для получения списка команд.'
 
-                    if re.match('\s*$', response_text) and not attachments:
+                    if re.match('\s*$', response_text):
                         response_text = ''
                         continue
 
@@ -894,7 +870,9 @@ class LongPollSession(Bot):
                             u'\n\nБот не активирован. По вопросам активации ' \
                             u'просьба обратиться к автору: {author}'
 
-                    response_text = self._format_response(response_text, command)
+                    response_text, attachments = self._format_response(
+                        response_text, command, attachments
+                    )
 
                     if command.mark_msg:
                         if self.mark_type == u'имя':
@@ -1020,7 +998,7 @@ class LongPollSession(Bot):
         else:
             return u'Отказано в доступе'
 
-    def _format_response(self, response_text, command):
+    def _format_response(self, response_text, command, attachments):
         format_dict = {}
 
         random_ranges = re.findall('{random(\d{1,500})}', response_text)
@@ -1032,7 +1010,9 @@ class LongPollSession(Bot):
         if '{author}' in response_text:
             format_dict['author'] = __author__
         if '{time}' in response_text:
-            format_dict['time'] = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
+            format_dict['time'] = time.strftime(
+                '%Y-%m-%d %H:%M:%S', time.localtime()
+            )
         if '{appeal}' in response_text:
             format_dict['appeal'] = random.choice(self.appeals)
         if '{appeals}' in response_text:
@@ -1062,4 +1042,29 @@ class LongPollSession(Bot):
             name, error = vkr.get_user_name(user_id=command.event_user_id)
             format_dict['event_user_name'] = name if name else 'No name'
 
-        return safe_format(response_text, **format_dict)
+        media_id_search_pattern = re.compile('{attach=.*?(((photo)|(album)|'
+            '(video)|(audio)|(doc)|(wall)|(market))-?\d+_\d+(_\d+)?)}'
+        )
+
+        for match in media_id_search_pattern.findall(response_text):
+            if len(attachments) >= 10: break
+
+            attachment_id = match[0]
+
+            if re.match('album\d+_\d+', attachment_id):
+                album_id = re.search('album\d+_(\d+)', attachment_id).group(1)
+                album_len = vkr.get_album_size(album_id)[0]
+                if album_len == 0:
+                    response_text = u'Пустой альбом. Невозможно выбрать фото'
+                    attachment_id = ''
+                else:
+                    attachment_id = vkr.get_photo_id(
+                                        album_id=album_id,
+                                        offset=random.randrange(album_len)
+                                        )[0]
+            if attachment_id:
+                attachments.append(attachment_id)
+
+        response_text = media_id_search_pattern.sub('', response_text)
+
+        return safe_format(response_text, **format_dict), attachments
