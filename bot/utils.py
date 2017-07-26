@@ -36,24 +36,6 @@ update_paths()
 CUSTOM_COMMAND_OPTIONS_COUNT = 5
 
 
-def parse_input(string, replace_vkurl=True, replace_url=True):
-    new_string = string
-
-    if replace_vkurl:
-        new_string = re.sub(r'\b(https?://)?m\.?vk\.com/?.*\b',
-			'__vkurl__', # поиск ссылок vk.com
-			new_string
-		)
-
-    if replace_url:
-        new_string = re.sub(
-		r'''(?i)\b((?:[a-z][\w-]+:(?:/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/?)(?:[^\s()<>]+|(([^\s()<>]+|(([^\s()<>]+)))*))+(?:(([^\s()<>]+|(([^\s()<>]+)))*)|[^\s`!()[]{};:'".,<>?«»“”‘’]))'''
-		, '__url__', # поиск всех остальных ссылок
-		new_string
-	)
-
-    return new_string
-
 def toast_notification(text, length_long=True):
     toast(text, length_long=length_long)
 
@@ -106,7 +88,9 @@ def save_custom_commands(content):
             f.truncate(0)
             f.write(json.dumps(last_content, indent=0, ensure_ascii=False).encode('utf8'))
             f.close()
+
             return False
+
     return True
 
 def load_blacklist():
