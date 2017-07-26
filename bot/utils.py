@@ -1,34 +1,42 @@
 # coding:utf8
 
 
-import re
-import time
-import os
 import json
+import re
+import os
+import time
 
 from kivy import platform
 
 from libs.toast import toast
 
+# GLOBALS
 
 PATH = '/sdcard/VKBot/' if platform == 'android' else ''
 DATA_PATH = 'data/'
 
+ERROR_FILE_PATH = ''
+TOKEN_FILE_PATH = ''
+SETTINGS_FILE_PATH = ''
+BLACKLIST_FILE_PATH = ''
+BOT_ERROR_FILE_PATH = ''
+CUSTOM_COMMANDS_FILE_PATH = ''
+
 
 def update_paths():
-    global SETTINGS_FILE_PATH
     global ERROR_FILE_PATH
-    global BOT_ERROR_FILE_PATH
     global TOKEN_FILE_PATH
-    global CUSTOM_COMMANDS_FILE_PATH
+    global SETTINGS_FILE_PATH
     global BLACKLIST_FILE_PATH
+    global BOT_ERROR_FILE_PATH
+    global CUSTOM_COMMANDS_FILE_PATH
 
-    SETTINGS_FILE_PATH = PATH + '.vkbot.ini'
     ERROR_FILE_PATH = PATH + 'error.log'
-    BOT_ERROR_FILE_PATH = PATH + 'bot_error.log'
     TOKEN_FILE_PATH = DATA_PATH + 'token.txt'
-    CUSTOM_COMMANDS_FILE_PATH = PATH + 'custom_commands.txt'
+    SETTINGS_FILE_PATH = PATH + '.vkbot.ini'
     BLACKLIST_FILE_PATH = PATH + 'blacklist.txt'
+    BOT_ERROR_FILE_PATH = PATH + 'bot_error.log'
+    CUSTOM_COMMANDS_FILE_PATH = PATH + 'custom_commands.txt'
 
 update_paths()
 
@@ -38,6 +46,7 @@ CUSTOM_COMMAND_OPTIONS_COUNT = 5
 
 def toast_notification(text, length_long=True):
     toast(text, length_long=length_long)
+
 
 def load_token():
     token = None
@@ -52,6 +61,7 @@ def load_token():
 
     return token
 
+
 def save_token(token):
     if not token:
         token = ''
@@ -60,6 +70,7 @@ def save_token(token):
         f.write('{}\n{}'.format(
             token, 'НИКОМУ НЕ ПОКАЗЫВАЙТЕ СОДЕРЖИМОЕ ЭТОГО ФАЙЛА')
         )
+
 
 def load_custom_commands():
     if not os.path.exists(CUSTOM_COMMANDS_FILE_PATH):
@@ -78,20 +89,24 @@ def load_custom_commands():
             else:
                 return False
 
+
 def save_custom_commands(content):
     last_content = load_custom_commands()
     with open(CUSTOM_COMMANDS_FILE_PATH, 'w') as f:
         try:
-            f.write(json.dumps(content, indent=0, ensure_ascii=False).encode('utf8'))
+            f.write(json.dumps(content, ensure_ascii=False).encode('utf8'))
         except (UnicodeEncodeError, UnicodeDecodeError):
             print('Error saving custom commands file. Reverting')
             f.truncate(0)
-            f.write(json.dumps(last_content, indent=0, ensure_ascii=False).encode('utf8'))
+            f.write(
+                json.dumps(last_content, ensure_ascii=False).encode('utf8')
+            )
             f.close()
 
             return False
 
     return True
+
 
 def load_blacklist():
     blacklist = []
@@ -100,15 +115,17 @@ def load_blacklist():
     else:    
         with open(BLACKLIST_FILE_PATH, 'r') as f:
             for line in f.readlines():
-                if line:
-                    blacklist.append(line.split()[0])
+                if re.match('\d+$', line):
+                    blacklist.append(int(line))
 
     return blacklist
 
+
 def save_blacklist(blacklist):
     with open(BLACKLIST_FILE_PATH, 'w') as f:
-        f.write('\n'.join(blacklist))
+        f.write('\n'.join(map(lambda x: str(x), blacklist)))
     return True
+
 
 def save_error(error_text, from_bot=False):
     if from_bot:

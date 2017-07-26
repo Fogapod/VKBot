@@ -11,7 +11,7 @@ from kivy.core.clipboard import Clipboard
 from kivy.app import App
 from kivy import platform
 
-from uix.customcommandblock import CustomCommandBlock, ListDropDown,\
+from uix.customcommandblock import CustomCommandBlock, ListDropDown, \
     CommandButton
 from uix.editcommandpopup import EditCommandPopup
 
@@ -151,9 +151,6 @@ class MainScreen(Screen):
 
     def show_info(self):
         InfoPopup().open()
-
-    def on_enter(self):
-        pass
 
     def on_main_btn_press(self):
         if self.ids.main_btn.text == self.launch_bot_text:
@@ -500,7 +497,7 @@ class Manager(ScreenManager):
     def __init__(self, **kwargs):
         super(Manager, self).__init__(**kwargs)
         self.transition = FadeTransition()
-        self.previous = None
+        self.last_screen = None
 
     def show_auth_screen(self):
         if not 'auth_screen' in self.screen_names:

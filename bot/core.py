@@ -103,64 +103,60 @@ def safe_format(s, *args, **kwargs):
             return s
 
 
-class Bot():
+class Bot(object):
+    '''
+    This class contains 'modules' for built-in commands
+    '''
+
     def blacklist(self, cmd, blacklist):
         if not cmd.out and not (len(cmd.words) == 2 and cmd.words[1] == 'me'):
             return u'Отказано в доступе', blacklist
+
         if len(cmd.words) == 1:
-            chat_id = cmd.chat_id if cmd.chat_id else cmd.user_id
+            chat_id = cmd.chat_id if cmd.from_chat else cmd.user_id
             if cmd.from_chat:
                 chat_id += 2000000000
-            chat_id = str(chat_id)
             if chat_id in blacklist:
-                return u'Данный id уже находится в чёрном списке', blacklist
+                return u'Данный id уже находится в списке', blacklist
             else:
                 blacklist.append(chat_id)
                 save_blacklist(blacklist)
-                return u'id {} добавлен в чёрный список'.format(chat_id), \
-                       blacklist
+                return u'id %s добавлен в список' % chat_id, blacklist
         else:
             if cmd.words[1] == '-':
                 if len(cmd.words) == 2:
-                    chat_id = cmd.chat_id if cmd.chat_id else cmd.user_id
+                    chat_id = cmd.chat_id if cmd.from_chat else cmd.user_id
                 else:
-                    if re.match('^\d+$', cmd.words[2]):
-                        chat_id = cmd.words[2]
+                    if re.match('\d+$', cmd.words[2]):
+                        chat_id = int(cmd.words[2])
                     else:
                         return u'Неправильно указан id', blacklist
-                if cmd.from_chat and chat_id < 2000000000:
-                    chat_id = int(chat_id)
-                    chat_id += 2000000000
-                chat_id = str(chat_id)
+
                 if chat_id not in blacklist:
-                    return u'В чёрном списке нет данного id', blacklist
+                    return u'В списке нет данного id', blacklist
                 else:
                     blacklist.remove(chat_id)
                     save_blacklist(blacklist)
-                    return u'id {} удалён из чёрного списка'.format(chat_id), \
-                                                                      blacklist
+                    return u'id %s удалён из списка' % chat_id, blacklist
+
             elif cmd.words[1] == 'me':
-                user_id = str(cmd.user_id)
+                user_id = cmd.user_id
                 if user_id in blacklist:
-                    return u'Данный id уже находится в чёрном списке', \
-                                                                blacklist
+                    return u'Данный id уже находится в списке', blacklist
                 else:
                     blacklist.append(user_id)
                     save_blacklist(blacklist)
-                return u'id {} добавлен в чёрный список'.format(user_id), \
-                                                                    blacklist
+                return u'id %s добавлен в список' % user_id, blacklist
+
             else:
-                if re.match('\d+', cmd.words[1]):
-                    chat_id = cmd.words[1]
-                    chat_id = str(chat_id)
+                if re.match('\d+$', cmd.words[1]):
+                    chat_id = int(cmd.words[1])
                     if chat_id in blacklist:
-                        return u'Данный id уже находится в чёрном списке', \
-                                                                    blacklist
+                        return u'Данный id уже находится в списке', blacklist
                     else:
                         blacklist.append(chat_id)
                         save_blacklist(blacklist)
-                    return u'id {} добавлен в чёрный список'.format(chat_id), \
-                                                                      blacklist
+                    return u'id %s добавлен в список' % chat_id, blacklist
                 else:
                     return u'Неправильно указан id', blacklist
 
@@ -632,7 +628,7 @@ disabled: {}'''
             return False
 
 
-class Command():
+class Command(object):
     def __init__(self, SELF_ID, appeals):
         self.SELF_ID = SELF_ID
         self.appeals = appeals
@@ -647,7 +643,7 @@ class Command():
         self.from_group = False
         self.forward_msg = None
         self.user_id = 0
-        self.chat_id = None
+        self.chat_id = 0
         self.chat_users = []
         self.random_chat_user_id = 0
         self.chat_name = ''
@@ -750,8 +746,8 @@ class LongPollSession(Bot):
         self.openweathermap_api_key = '0'
 
     def authorization(self, login= '', password= '', token='', logout=False):
-        self.authorized, error = vkr.log_in(login=login, password=password,
-                                            logout=logout)
+        self.authorized, error = \
+            vkr.log_in(login=login, password=password, logout=logout)
 
         return self.authorized, error
 
@@ -778,8 +774,8 @@ class LongPollSession(Bot):
                     if error:
                         raise Exception(error)
 
-                updates, error = vkr.get_message_updates(ts=mlpd['ts'],
-                                                         pts=mlpd['pts'])
+                updates, error = \
+                    vkr.get_message_updates(ts=mlpd['ts'], pts=mlpd['pts'])
                 
                 if updates:
                     history = updates[0]
@@ -800,27 +796,20 @@ class LongPollSession(Bot):
                     if not command.text or command.msg_id in last_msg_ids:
                         continue
 
-                    blacklisted = False
                     if command.was_appeal and command.words[0] == 'blacklist':
                         response_text, self.black_list = \
                             self.blacklist(command, self.black_list)
-                    elif str(command.user_id) in self.black_list \
-                            or (command.chat_id \
-                            and str(command.chat_id + 2000000000) \
-                                in self.black_list):
-                        blacklisted = True
+                    elif command.user_id in self.black_list \
+                            or command.chat_id+2000000000 in self.black_list:
+                        continue
 
-                    if not blacklisted \
-                            and not response_text \
-                            and self.custom_commands is not None \
-                            and self.use_custom_commands:
+                    if not response_text \
+                            and self.use_custom_commands \
+                            and self.custom_commands is not None:
                         response_text, attachments, command = \
                             self.custom_command(command, self.custom_commands)
 
-                    if not blacklisted \
-                            and not response_text \
-                            and not attachments \
-                            and command.was_appeal:
+                    if not (response_text or attachments) and command.was_appeal:
 
                         if re.match('ping$', command.lower_text):
                             response_text, command = self.pong(command)
@@ -873,10 +862,12 @@ class LongPollSession(Bot):
                             response_text = self.pause(command)
 
                         elif command.lower_text == 'activate':
-                            response_text, self.activated = self.activate_bot(command, self.activated)
+                            response_text, self.activated = \
+                                self.activate_bot(command, self.activated)
 
                         elif command.lower_text == 'deactivate':
-                            response_text, self.activated = self.deactivate_bot(command, self.activated)
+                            response_text, self.activated = \
+                                self.deactivate_bot(command, self.activated)
 
                         elif command.words[0].lower() == 'raise':
                             response_text = self._raise_debug_exception(command)
@@ -886,7 +877,8 @@ class LongPollSession(Bot):
 
                         else:
                             response_text = \
-                                u'Неизвестная команда. Вы можете использовать {appeal} help для получения списка команд.'
+                                u'Неизвестная команда. Вы можете использоват' \
+                                u'ь {appeal} help для получения списка команд.'
 
                     if re.match('\s*$', response_text) and not attachments:
                         response_text = ''
@@ -894,7 +886,8 @@ class LongPollSession(Bot):
 
                     if not self.activated:
                         response_text += \
-                            u'\n\nБот не активирован. По вопросам активации просьба обратиться к автору: {author}'
+                            u'\n\nБот не активирован. По вопросам активации ' \
+                            u'просьба обратиться к автору: {author}'
 
                     response_text = self._format_response(response_text, command)
 
@@ -915,12 +908,12 @@ class LongPollSession(Bot):
                         user_id = command.user_id
 
                     message_to_resend = command.forward_msg
-                    msg_id, error = vkr.send_message(
-                                        text = response_text,
-                                        uid = user_id,
-                                        gid = chat_id,
-                                        forward = message_to_resend,
-                                        attachments = attachments
+                    msg_id, error = \
+                        vkr.send_message(text = response_text,
+                                         uid = user_id,
+                                         gid = chat_id,
+                                         forward = message_to_resend,
+                                         attachments = attachments
                                         )
                     if error:
                         if str(error) == 'Captcha needed':
