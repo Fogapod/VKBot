@@ -7,11 +7,10 @@ from kivy.app import App
 from kivy.logger import Logger
 
 from libs import vk_api as vk
-
 from utils import load_token, save_token
 
 
-def error_catcher(request):
+def error_handler(request):
     def do_request(*args, **kwargs):
         error = None
 
@@ -47,7 +46,7 @@ def _save_token(token=None):
     save_token(token)
 
 
-@error_catcher
+@error_handler
 def log_in(login=None, password=None, logout=False):
     global api
 
@@ -74,17 +73,18 @@ def log_in(login=None, password=None, logout=False):
             return False
 
     session = vk.VkApi(**session_params)
-    session.auth(reauth=True if login and password else False)
+    session.auth(reauth=login and password)
     api = session.get_api()
 
     _save_token()
     return True
 
 
-@error_catcher
+@error_handler
 def send_message(text='', gid=None, uid=None, forward=None, attachments=[]):
     if gid:
         gid -= 2000000000
+
     if type(attachments) is list:
         attachments = ','.join(attachments)
 
@@ -97,55 +97,55 @@ def send_message(text='', gid=None, uid=None, forward=None, attachments=[]):
     return response
 
 
-@error_catcher
+@error_handler
 def get_self_id():
     return api.users.get()[0]['id']
 
 
-@error_catcher
+@error_handler
 def get_message_long_poll_data():
     return api.messages.getLongPollServer(need_pts=1)
 
 
-@error_catcher
+@error_handler
 def get_message_updates(ts, pts):
     response = api.messages.getLongPollHistory(ts=ts, pts=pts)
 
     return response['history'], response['new_pts'], response['messages']
 
 
-@error_catcher
+@error_handler
 def get_album_size(album_id):
     return api.photos.get(count=0, album_id=album_id)['count']
 
 
-@error_catcher
+@error_handler
 def get_photo_id(album_id, offset=0):
     photo = api.photos.get(offset=offset, album_id=album_id)['items'][0]
-    media_id = 'photo' + str(photo['owner_id']) + '_' + str(photo['id'])
+    media_id = 'photo%d_%d' % (photo['owner_id'], photo['id'])
 
     return media_id
 
 
-@error_catcher
+@error_handler
 def get_status():
     return api.status.get()
 
 
-@error_catcher
+@error_handler
 def set_status(text):
     api.status.set(text=text)
 
     return True
 
 
-@error_catcher
+@error_handler
 def get_user_name(user_id=None, name_case='nom'):
     response = api.users.get(user_ids=user_id, name_case=name_case)[0]
 
-    return response['first_name'] + ' ' + response['last_name']
+    return ' '.join(response['first_name'], response['last_name'])
 
 
-@error_catcher
+@error_handler
 def get_user_city(user_id=None):
     return api.users.get(user_ids=user_id, fields='city')[0]['city']['title']
