@@ -805,7 +805,7 @@ class LongPollSession(Bot):
                         response_text, self.black_list = \
                             self.blacklist(command, self.black_list)
                     elif command.user_id in self.black_list \
-                            or command.chat_id+2000000000 in self.black_list:
+                            or command.chat_id in self.black_list:
                         continue
 
                     if not response_text \

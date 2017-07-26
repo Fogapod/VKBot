@@ -83,6 +83,8 @@ def log_in(login=None, password=None, logout=False):
 
 @error_catcher
 def send_message(text='', gid=None, uid=None, forward=None, attachments=[]):
+    if gid:
+        gid -= 2000000000
     if type(attachments) is list:
         attachments = ','.join(attachments)
 
