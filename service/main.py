@@ -12,21 +12,19 @@ from kivy.logger import Logger
 from kivy.config import Config
 from kivy.lib import osc
 
-import bot.utils
-
-from bot.core import LongPollSession
-
-
 parent_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 parent_path += '\\' if platform == 'win' else '/'
 os.sys.path.append(parent_path)
 
+
+from bot import utils
+from bot.core import LongPollSession
+
 if platform != 'android':
-    bot.utils.PATH = parent_path + bot.utils.PATH
-bot.utils.DATA_PATH = parent_path + bot.utils.DATA_PATH
+    utils.PATH = parent_path + utils.PATH
+utils.DATA_PATH = parent_path + utils.DATA_PATH
 
-bot.utils.update_paths()
-
+utils.update_paths()
 
 logging.captureWarnings(True)
 
@@ -35,7 +33,7 @@ def update_params():
     global activated
     global openweathermap_api_key
 
-    Config.read(bot.utils.SETTINGS_FILE_PATH)
+    Config.read(utils.SETTINGS_FILE_PATH)
     appeals = Config.get('General', 'appeals')
     activated = Config.get('General', 'bot_activated')
     bot_name = Config.get('General', 'bot_name')
@@ -111,12 +109,12 @@ if __name__ == '__main__':
         send_answers_count()
         if session.activated != activated:
             activated = session.activated
-            Config.read(bot.utils.SETTINGS_FILE_PATH)
+            Config.read(utils.SETTINGS_FILE_PATH)
             Config.set('General', 'bot_activated', str(activated))
             Config.write()
         if session.openweathermap_api_key != openweathermap_api_key:
             openweathermap_api_key = session.openweathermap_api_key
-            Config.read(bot.utils.SETTINGS_FILE_PATH)
+            Config.read(utils.SETTINGS_FILE_PATH)
             Config.set(
                 'General', 'openweathermap_api_key', openweathermap_api_key
             )
