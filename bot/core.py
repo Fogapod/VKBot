@@ -115,9 +115,6 @@ class Bot(object):
         if len(cmd.words) == 1:
             chat_id = cmd.chat_id if cmd.from_chat else cmd.user_id
 
-            if cmd.from_chat:
-                chat_id += 2000000000
-
             if chat_id in blacklist:
                 return u'Данный id уже находится в списке', blacklist
 
@@ -698,7 +695,7 @@ class Command(object):
             self.from_user = True
 
         if self.from_chat:
-            self.chat_id = message['chat_id']
+            self.chat_id = message['chat_id'] + 2000000000
             self.forward_msg = self.msg_id
             self.chat_users = message['chat_active']
             if self.chat_users:
