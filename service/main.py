@@ -1,29 +1,34 @@
 # coding:utf8
 
+
 import os
-from time import sleep
 import sys
+import logging
+
+from time import sleep
 
 from kivy import platform
 from kivy.logger import Logger
 from kivy.config import Config
 from kivy.lib import osc
 
-import logging
-logging.captureWarnings(True)
+import bot.utils
+
+from bot.core import LongPollSession
+
 
 parent_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 parent_path += '\\' if platform == 'win' else '/'
 os.sys.path.append(parent_path)
 
-import bot.utils
 if platform != 'android':
     bot.utils.PATH = parent_path + bot.utils.PATH
 bot.utils.DATA_PATH = parent_path + bot.utils.DATA_PATH
 
 bot.utils.update_paths()
 
-from bot.core import LongPollSession
+
+logging.captureWarnings(True)
 
 
 def update_params():
