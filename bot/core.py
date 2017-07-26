@@ -1046,7 +1046,7 @@ class LongPollSession(Bot):
             format_dict['bot_name'] = self.bot_name
         if '{my_name}' in response_text:
             name, error = vkr.get_user_name(user_id=command.SELF_ID)
-            format_dict['my_name'] = name if name else 'Error'
+            format_dict['my_name'] = name if name else 'No name'
         if '{my_id}' in response_text:
             format_dict['my_id'] = command.SELF_ID
         if '{user_name}' in response_text:
