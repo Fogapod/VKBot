@@ -19,7 +19,7 @@ def error_handler(request):
         except Exception as raw_error:
             error = str(raw_error).lower()
 
-            if error == 'captcha needed':
+            if error == 'captcha needed' and request.__name__ == 'log_in':
                 return False, raw_error
             return False, error
         else:

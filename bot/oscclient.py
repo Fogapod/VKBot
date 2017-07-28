@@ -28,7 +28,6 @@ class OSCClient():
         self.osc.init()
         oscid = self.osc.listen(port=3002)
         self.osc.bind(oscid, self.pong, '/pong')
-        self.osc.bind(oscid, self.update_captcha_requests, '/captcha_request')
         self.osc.bind(oscid, self.read_status, '/status')
         self.osc.bind(oscid, self.set_answers_count, '/answers')
         self.osc.bind(oscid, self.return_error, '/error')
@@ -53,9 +52,6 @@ class OSCClient():
     def ping(self):
         self.osc.sendMsg('/ping', [], port=3000)
 
-    def request_captchas(self):
-        self.osc.sendMsg('/request_captchas', [], port=3000)
-
     def solve_captcha(self, captcha):
         pass
 
@@ -65,10 +61,6 @@ class OSCClient():
     def pong(self, message, *args):
         # self.on_response(message)
         self.mainscreen.ids.main_btn.text = self.mainscreen.stop_bot_text
-
-    def update_captcha_requests(self, message, *args):
-        # self.on_response(message)
-        pass
 
     def read_status(self, message, *args):
         # self.on_response(message)

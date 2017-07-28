@@ -132,13 +132,6 @@ class VKBotApp(App):
     def open_twofa_popup(self, vk, auth_response_page):
         TwoFAKeyEnterPopup().open(vk, auth_response_page)
 
-    def _get_captchas(self, service):
-        service.request_captchas()
-
-    def _show_captchas(self, captcha_requests):
-        for request in captcha_requests:
-            pass
-
     def _export_logs(self):
         if not os.path.exists(PATH + '.logs/'):
             os.makedirs(PATH + '.logs/')

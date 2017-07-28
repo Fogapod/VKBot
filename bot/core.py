@@ -720,7 +720,6 @@ class LongPollSession(Bot):
         self.appeals = ('/')
         self.bot_name = u'(Бот)'
         self.mark_type = 'кавычка'
-        self.max_captchas = 5
         self.activated = False
         self.use_custom_commands = False
         self.protect_custom_commands = True
@@ -744,7 +743,6 @@ class LongPollSession(Bot):
             mlpd = None
             last_msg_ids = []
             max_last_msg_ids = 30
-            self.captcha_errors = {}
             self.runtime_error = None
             self.running = True
 
@@ -899,13 +897,8 @@ class LongPollSession(Bot):
                                          attachments = attachments
                                         )
                     if error:
-                        if str(error) == 'Captcha needed':
-                            captcha = error
-                            self.captcha_errors[captcha.sid] = captcha
-                            if len(self.captcha_errors) > self.max_captchas:
-                                self.captcha_errors.pop(self.captcha_errors.keys()[0])
-                            time.sleep(2)
-                            continue
+                        if error == 'captcha needed':
+                            ctime.sleep(5)
                         elif error == 'response code 413':
                             pass # message too long # TODO
                         else:

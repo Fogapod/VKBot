@@ -55,9 +55,6 @@ def ping(*args):
     if session.running:
         osc.sendMsg('/pong', [], port=3002)
 
-def send_captcha_requests(*args):
-    pass
-
 def send_status(status):
     osc.sendMsg('/status', [status, ], port=3002)
 
@@ -80,7 +77,6 @@ if __name__ == '__main__':
     send_status('connected')
 
     osc.bind(oscid, ping, '/ping')
-    osc.bind(oscid, send_captcha_requests, '/request_captchas')
     osc.bind(oscid, exit, '/exit')
 
     try:
