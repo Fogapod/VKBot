@@ -143,9 +143,20 @@ def set_status(text):
 def get_user_name(user_id=None, name_case='nom'):
     response = api.users.get(user_ids=user_id, name_case=name_case)[0]
 
-    return ' '.join(response['first_name'], response['last_name'])
+    return ' '.join((response['first_name'], response['last_name']))
 
 
 @error_handler
 def get_user_city(user_id=None):
     return api.users.get(user_ids=user_id, fields='city')[0]['city']['title']
+
+
+@error_handler
+def get_real_user_id(user_short_link):
+    response = api.users.get(user_ids=user_short_link)
+    if type(response) is dict \
+            and 'error' in response.keys() \
+            and response['error'] == 113:
+        return None
+    else:
+        return response[0]['id']
