@@ -26,17 +26,17 @@ class AuthScreen(Screen):
         self.show_password_text = 'Показать пароль'
         self.hide_password_text = 'Скрыть пароль'
         super(AuthScreen, self).__init__(**kwargs)
-        self.session = App.get_running_app().session
+        self.bot = App.get_running_app().bot
         
     def on_enter(self):
-        self.ids.pass_auth.disabled = not self.session.authorized
+        self.ids.pass_auth.disabled = not self.bot.authorized
 
     def log_in(self):
         login = self.ids.login_textinput.text
         password = self.ids.pass_textinput.text
 
         if login and password:
-            authorized, error = self.session.authorization(login=login,
+            authorized, error = self.bot.authorization(login=login,
                                                            password=password)
             if authorized:
                 self.parent.show_main_screen()
@@ -84,7 +84,7 @@ class TwoFAKeyEnterPopup(ModalView):
             toast_notification(str(e))
         else:
             app = App.get_running_app()
-            app.session.authorized = True
+            app.bot.authorized = True
 
             self.vk.save_cookies()
             self.vk.api_login()
@@ -120,7 +120,7 @@ class CaptchaPopup(ModalView):
                 toast_notification(e)
         else:
             app = App.get_running_app()
-            app.session.authorized = True
+            app.bot.authorized = True
 
             self.captcha.vk.api_login()
             save_token(token=self.captcha.vk.token['access_token'])
@@ -140,7 +140,7 @@ class InfoPopup(ModalView):
 class MainScreen(Screen):
     def __init__(self, **kwargs):
         super(MainScreen, self).__init__(**kwargs)
-        self.session = App.get_running_app().session
+        self.bot = App.get_running_app().bot
         self.launch_bot_text = 'Включить бота'
         self.launching_bot_text = 'Запуск (отменить)' 
         self.stop_bot_text = 'Выключить бота'
@@ -165,7 +165,7 @@ class MainScreen(Screen):
             new_answers_count)
 
     def logout(self):
-        self.session.authorization(logout=True)
+        self.bot.authorization(logout=True)
         self.parent.show_auth_screen()
     
     def show_bot_error(self, error_text):

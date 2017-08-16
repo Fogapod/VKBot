@@ -18,7 +18,7 @@ os.sys.path.append(parent_path)
 
 
 from bot import utils
-from bot.core import LongPollSession
+from bot.core import Bot
 
 if platform != 'android':
     utils.PATH = parent_path + utils.PATH
@@ -39,20 +39,18 @@ def update_params():
     bot_name = Config.get('General', 'bot_name')
     mark_type = Config.get('General', 'mark_type')
     use_custom_commands = Config.get('General', 'use_custom_commands')
-    protect_custom_commands = Config.get('General', 'protect_cc')
     openweathermap_api_key = Config.get('General', 'openweathermap_api_key')
 
-    session.load_params(appeals,
+    bot.load_params(appeals,
         activated=activated == 'True',
         bot_name=bot_name, mark_type=mark_type,
         use_custom_commands=use_custom_commands == 'True',
-        protect_custom_commands=protect_custom_commands == 'True',
         openweathermap_api_key=openweathermap_api_key
     )
                         
 def ping(*args):
-    global session
-    if session.running:
+    global bot
+    if bot.running:
         osc.sendMsg('/pong', [], port=3002)
 
 def send_status(status):
@@ -62,11 +60,11 @@ def send_error(error):
     osc.sendMsg('/error', [error, ], port=3002)
 
 def send_answers_count():
-    osc.sendMsg('/answers', [session.reply_count, ], port=3002)
+    osc.sendMsg('/answers', [bot.reply_count, ], port=3002)
 
 def exit(*args):
-    global session
-    session.stop_bot()
+    global bot
+    bot.stop_bot()
     send_status('exiting')
     sys.exit()
 
@@ -80,8 +78,8 @@ if __name__ == '__main__':
     osc.bind(oscid, exit, '/exit')
 
     try:
-        session = LongPollSession()
-        authorized, error = session.authorization()
+        bot = Bot()
+        authorized, error = bot.authorization()
 
         if error:
             send_error(error)
@@ -89,7 +87,7 @@ if __name__ == '__main__':
 
         update_params()
 
-        session.launch_bot()
+        bot.launch_bot()
 
         send_status('launched')
     except SystemExit:
@@ -103,28 +101,28 @@ if __name__ == '__main__':
     while True:
         osc.readQueue(oscid)
         send_answers_count()
-        if session.activated != activated:
-            activated = session.activated
+        if bot.activated != activated:
+            activated = bot.activated
             Config.read(utils.SETTINGS_FILE_PATH)
             Config.set('General', 'bot_activated', str(activated))
             Config.write()
-        if session.openweathermap_api_key != openweathermap_api_key:
-            openweathermap_api_key = session.openweathermap_api_key
+        if bot.openweathermap_api_key != openweathermap_api_key:
+            openweathermap_api_key = bot.openweathermap_api_key
             Config.read(utils.SETTINGS_FILE_PATH)
             Config.set(
                 'General', 'openweathermap_api_key', openweathermap_api_key
             )
             Config.write()
-        if session.runtime_error:
-            if session.runtime_error != 1:
-                send_error(session.runtime_error)
+        if bot.runtime_error:
+            if bot.runtime_error != 1:
+                send_error(bot.runtime_error)
             break
-        if session.need_restart:
-            session.stop_bot()
+        if bot.need_restart:
+            bot.stop_bot()
             update_params()
-            session.launch_bot()
-            session.need_restart = False
-        elif not session.running:
+            bot.launch_bot()
+            bot.need_restart = False
+        elif not bot.running:
             break
         sleep(1)
     exit()

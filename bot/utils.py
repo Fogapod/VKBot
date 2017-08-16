@@ -18,6 +18,7 @@ DATA_PATH = 'data/'
 ERROR_FILE_PATH = ''
 TOKEN_FILE_PATH = ''
 SETTINGS_FILE_PATH = ''
+WHITELIST_FILE_PATH = ''
 BLACKLIST_FILE_PATH = ''
 BOT_ERROR_FILE_PATH = ''
 CUSTOM_COMMANDS_FILE_PATH = ''
@@ -27,6 +28,7 @@ def update_paths():
     global ERROR_FILE_PATH
     global TOKEN_FILE_PATH
     global SETTINGS_FILE_PATH
+    global WHITELIST_FILE_PATH
     global BLACKLIST_FILE_PATH
     global BOT_ERROR_FILE_PATH
     global CUSTOM_COMMANDS_FILE_PATH
@@ -34,6 +36,7 @@ def update_paths():
     ERROR_FILE_PATH = PATH + 'error.log'
     TOKEN_FILE_PATH = DATA_PATH + 'token.txt'
     SETTINGS_FILE_PATH = PATH + '.vkbot.ini'
+    WHITELIST_FILE_PATH = PATH + 'whitelist.txt'
     BLACKLIST_FILE_PATH = PATH + 'blacklist.txt'
     BOT_ERROR_FILE_PATH = PATH + 'bot_error.log'
     CUSTOM_COMMANDS_FILE_PATH = PATH + 'custom_commands.txt'
@@ -108,6 +111,29 @@ def save_custom_commands(content):
     return True
 
 
+def load_whitelist():
+    if not os.path.exists(WHITELIST_FILE_PATH):
+        open(WHITELIST_FILE_PATH, 'w').close()
+    else:    
+        with open(WHITELIST_FILE_PATH, 'r') as f:
+            content = f.read()
+
+        content = eval(content)
+        if type(content) is not dict:
+            return {}
+        else:
+            whitelist = content
+
+    return whitelist
+
+
+def save_whitelist(whitelist):
+    with open(WHITELIST_FILE_PATH, 'w') as f:
+        f.write(str(whitelist))
+
+    return True
+
+
 def load_blacklist():
     blacklist = []
     if not os.path.exists(BLACKLIST_FILE_PATH):
@@ -124,6 +150,7 @@ def load_blacklist():
 def save_blacklist(blacklist):
     with open(BLACKLIST_FILE_PATH, 'w') as f:
         f.write('\n'.join(map(lambda x: str(x), blacklist)))
+
     return True
 
 

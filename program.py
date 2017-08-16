@@ -10,7 +10,7 @@ from kivy.uix.settings import SettingsWithNoMenu
 from uix.screens import Manager, TwoFAKeyEnterPopup, CaptchaPopup
 
 from bot.utils import SETTINGS_FILE_PATH, CUSTOM_COMMANDS_FILE_PATH, PATH
-from bot.core import LongPollSession, __version__
+from bot.core import Bot, __version__
 
 
 class VKBotApp(App):
@@ -19,13 +19,13 @@ class VKBotApp(App):
 
     def build(self):
         self.title = 'VKBot'
-        self.session = LongPollSession()
+        self.bot = Bot()
         self.load_kv_files()
 
         self.manager = Manager()
 
         self.manager.show_main_screen()
-        if not self.session.authorization()[0]:
+        if not self.bot.authorization()[0]:
             self.manager.show_auth_screen()
 
         return self.manager
@@ -102,14 +102,6 @@ class VKBotApp(App):
             "section": "General",
             "key": "use_custom_commands",
             "values": ["False","True"]
-            },
-            {
-            "type": "bool",
-            "title": "Защитить пользовательские команды",
-            "desc": "Только владелец сможет настраивать пользовательские команды через сообщения",
-            "section": "General",
-            "key": "protect_cc",
-            "values": ["False", "True"]
             },
             {
             "type": "title",
