@@ -141,7 +141,7 @@ class VKBotApp(App):
 
     def _open_url(*args):
         import webbrowser
-        webbrowser.open(args[1][1])
+        webbrowser.open(args[1][1].encode('utf8'))
 
     def on_pause(self):
         return True
