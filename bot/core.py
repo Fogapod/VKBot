@@ -1028,7 +1028,7 @@ disabled: {}'''
             return u'Завершаю работу', cmd
 
     def whitelist_command(self, cmd):
-        default_permission_level = 1
+        default_access_level = 1
 
         argument_required = self._is_argument_missing(cmd.words)
         if argument_required:
@@ -1043,25 +1043,25 @@ disabled: {}'''
                 return u'Указан неверный id пользователя', cmd
 
         if len(cmd.words) == 2:
-            permission_level = default_permission_level
+            access_level = default_access_level
         else:
-            permission_level = cmd.words[2]
-            if not re.match('\d+$', permission_level) \
-                    or int(permission_level) not in range(4):
+            access_level = cmd.words[2]
+            if not re.match('\d+$', access_level) \
+                    or int(access_level) not in range(4):
                 return u'Указан неверный уровень доступа', cmd
             else:
-                permission_level = int(permission_level)
+                access_level = int(access_level)
 
-        if permission_level == 0:
+        if access_level == 0:
             if user_id in self.whitelist.keys():
                 self.whitelist.pop(user_id)
         else:
-            self.whitelist[user_id] = permission_level
+            self.whitelist[user_id] = access_level
 
         save_whitelist(self.whitelist)
 
         return u'Теперь {id%s_name} имеет доступ %d' \
-            % (user_id, permission_level), cmd
+            % (user_id, access_level), cmd
 
     def raise_exception(self, cmd):
         if cmd.out:
