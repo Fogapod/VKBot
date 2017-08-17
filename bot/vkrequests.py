@@ -153,10 +153,4 @@ def get_user_city(user_id=None):
 
 @error_handler
 def get_real_user_id(user_short_link):
-    response = api.users.get(user_ids=user_short_link)
-    if type(response) is dict \
-            and 'error' in response.keys() \
-            and response['error'] == 113:
-        return None
-    else:
-        return response[0]['id']
+    return api.users.get(user_ids=user_short_link)[0]['id']

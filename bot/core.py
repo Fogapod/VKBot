@@ -1036,9 +1036,7 @@ disabled: {}'''
         user_id = cmd.words[1]
         if not re.match('\d+$', user_id):
             user_id, error = vkr.get_real_user_id(user_id)
-            from kivy.logger import Logger
-            Logger.info(str(error))
-            if user_id is None:
+            if not user_id and '113' in error:
                 return u'Указан неверный id пользователя', cmd
 
         if len(cmd.words) == 2:
