@@ -316,11 +316,7 @@ class Bot(object):
 
                     if (command.real_user_id in self.blacklist \
                             or command.chat_id in self.blacklist) \
-                            and not (
-                                command.out \
-                                and command.was_appeal \
-                                and command.words[0] == 'blacklist'
-                                ):
+                            and not (command.was_appeal and command.words[0] == 'blacklist'):
                         continue
 
                     if self.use_custom_commands \
@@ -990,10 +986,13 @@ disabled: {}'''
                 if len(cmd.words) == 2:
                     chat_id = cmd.chat_id if cmd.from_chat else cmd.user_id
                 else:
-                    if not re.match('\d+$', cmd.words[2]):
-                        return u'Неправильно указан id', cmd
-
-                    chat_id = int(cmd.words[2])
+                    chat_id = cmd.words[2]
+                    if not re.match('\d+$', chat_id):
+                        chat_id, error = vkr.get_real_user_id(chat_id)
+                        if not chat_id and '113' in error:
+                            return u'Неправильно указан id', cmd
+                    else:
+                        chat_id = int(chat_id)
 
                 if chat_id not in self.blacklist:
                     return u'В списке нет данного id', cmd
@@ -1004,10 +1003,13 @@ disabled: {}'''
                 return u'id %s удалён из списка' % chat_id, cmd
 
             else:
-                if not re.match('\d+$', cmd.words[1]):
-                    return u'Неправильно указан id', cmd
-
-                chat_id = int(cmd.words[1])
+                chat_id = cmd.words[1]
+                if not re.match('\d+$', chat_id):
+                    chat_id, error = vkr.get_real_user_id(chat_id)
+                    if not chat_id and '113' in error:
+                        return u'Неправильно указан id', cmd
+                else:
+                    chat_id = int(chat_id)
 
                 if chat_id not in self.blacklist:
                     self.blacklist.append(chat_id)
