@@ -47,6 +47,8 @@ u'''
 погода|weather <?город=город со страницы или Москва>|-
 -Быстрая проверка активности бота
 ping
+-Игнорировать пользователя
+(ignore|игнор)
 
 Автор: {author}
 ''',
@@ -246,9 +248,10 @@ class Bot(object):
         self.who_access_level = 0
         self.weather_access_level = 0
         self.pong_access_level = 0
+        self.ignore_access_level = 0
         self.learn_access_level = 1
         self.forgot_access_level = 1
-        self.blacklist_access_level = 0 # blacklist me
+        self.blacklist_access_level = 2
         self.restart_access_level = 2
         self.stop_access_level = 3
         self.whitelist_access_level = 3
@@ -307,17 +310,20 @@ class Bot(object):
                     attachments = []
 
                     command.load(message)
+
                     if not command.text or command.msg_id in last_msg_ids:
                         continue
 
-                    if command.was_appeal and command.words[0] == 'blacklist':
-                        response_text, command = self.blacklist_command(command)
-                    elif command.real_user_id in self.blacklist \
-                            or command.chat_id in self.blacklist:
+                    if (command.real_user_id in self.blacklist \
+                            or command.chat_id in self.blacklist) \
+                            and not (
+                                command.out \
+                                and command.was_appeal \
+                                and command.words[0] == 'blacklist'
+                                ):
                         continue
 
-                    if not response_text \
-                            and self.use_custom_commands \
+                    if self.use_custom_commands \
                             and self.custom_commands is not None:
                         response_text, command = \
                             self.custom_command(command, self.custom_commands)
@@ -601,6 +607,8 @@ class Bot(object):
             return self.weather, self.weather_access_level
         elif s in ('ping'):
             return self.pong, self.pong_access_level
+        elif s in ('ignore', u'игнор'):
+            return self.ignore, self.ignore_access_level
         elif s in ('learn', u'выучи', '+'):
             return self.learn, self.learn_access_level
         elif s in ('forgot', u'забудь', '-'):
@@ -847,6 +855,14 @@ u'''
 
         return 'pong', cmd
 
+    def ignore(self, cmd):
+        user_id = cmd.real_user_id
+        if user_id not in self.blacklist:
+            self.blacklist.append(user_id)
+            save_blacklist(self.blacklist)
+
+        return u'id %s добавлен в чёрный список' % user_id, cmd
+
     def learn(self, cmd):
         if self.custom_commands is None:
             return u'Пользовательские команды отключены или повреждены', cmd
@@ -960,17 +976,12 @@ disabled: {}'''
         return response_text, cmd
 
     def blacklist_command(self, cmd):
-        if not cmd.out and not (len(cmd.words) == 2 and cmd.words[1] == 'me'):
-            return u'Отказано в доступе', cmd
-
         if len(cmd.words) == 1:
             chat_id = cmd.chat_id if cmd.from_chat else cmd.user_id
 
-            if chat_id in self.blacklist:
-                return u'Данный id уже находится в списке', cmd
-
-            self.blacklist.append(chat_id)
-            save_blacklist(self.blacklist)
+            if chat_id not in self.blacklist:
+                self.blacklist.append(chat_id)
+                save_blacklist(self.blacklist)
 
             return u'id %s добавлен в список' % chat_id, cmd
 
@@ -992,27 +1003,15 @@ disabled: {}'''
 
                 return u'id %s удалён из списка' % chat_id, cmd
 
-            elif cmd.words[1] == 'me':
-                user_id = cmd.user_id
-                if user_id in self.blacklist:
-                    return u'Данный id уже находится в списке', cmd
-
-                self.blacklist.append(user_id)
-                save_blacklist(self.blacklist)
-
-                return u'id %s добавлен в список' % user_id, cmd
-
             else:
                 if not re.match('\d+$', cmd.words[1]):
                     return u'Неправильно указан id', cmd
 
                 chat_id = int(cmd.words[1])
 
-                if chat_id in self.blacklist:
-                    return u'Данный id уже находится в списке', cmd
-
-                self.blacklist.append(chat_id)
-                save_blacklist(self.blacklist)
+                if chat_id not in self.blacklist:
+                    self.blacklist.append(chat_id)
+                    save_blacklist(self.blacklist)
 
                 return u'id %s добавлен в список' % chat_id, cmd
 
