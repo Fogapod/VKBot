@@ -146,15 +146,12 @@ class Command(object):
         self.lower_text = self.text.lower()
 
         if self.lower_text.startswith(self.appeals):
+            self.was_appeal = True
             self.text = self.text[len(next(
                 a for a in self.appeals if self.lower_text.startswith(a)
             )):]
             if self.text.startswith(' '):
                 self.text = self.text[1:]
-            self.was_appeal = True
-            if self.text.startswith('/'):
-                self.text = self.text[1:]
-                self.mark_msg = False
 
         if self.text:
             self.words = self.text.split(' ')
