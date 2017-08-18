@@ -158,13 +158,23 @@ def load_blacklist():
 
 def save_blacklist(blacklist):
     with open(BLACKLIST_FILE_PATH, 'w') as f:
-        f.write(unicode(blacklist))
+        f.write(str(blacklist))
 
     return True
 
 
 def save_error(error_text, from_bot=False):
     if from_bot:
-        open(BOT_ERROR_FILE_PATH, 'w').write(error_text.encode('utf8'))
+        try:
+            with open(BOT_ERROR_FILE_PATH, 'w') as f:
+                f.write(error_text.decode('utf8').encode('utf8'))
+        except UnicodeEncodeError:
+            with open(BOT_ERROR_FILE_PATH, 'w') as f:
+                f.write(error_text.encode('utf8'))
     else:
-        open(ERROR_FILE_PATH, 'w').write(error_text.encode('utf8'))
+        try:
+            with open(ERROR_FILE_PATH, 'w') as f:
+                f.write(error_text.decode('utf8').encode('utf8'))
+        except UnicodeEncodeError:
+            with open(ERROR_FILE_PATH, 'w') as f:
+                f.write(error_text.encode('utf8'))
