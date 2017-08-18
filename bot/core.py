@@ -50,8 +50,7 @@ ping
 -Игнорировать пользователя
 (ignore|игнор)
 
-Автор: {author}
-''',
+Автор: {author}''',
 u'''
 --Страница 1--
 
@@ -71,8 +70,7 @@ u'''
 -Игнорировать пользователя (лс), беседу или группу
 blacklist <?+|-> <?id> <?reason:причина>
 -Перезапустить бота (применение команд и настроек)
-restart
-''',
+restart''',
 u'''
 --Страница 3--
 
@@ -638,7 +636,7 @@ class Bot(object):
             page = 0
 
         if page == -1:
-            response_text = '\n'.join(__help__)
+            response_text = '\n\n'.join(__help__)
         else:
             try:
                 response_text = __help__[page]
@@ -978,7 +976,7 @@ disabled: {}'''
                 response = ''
                 for i, uid in enumerate(self.blacklist.keys()):
                     response += u'%d. {id%d_name} (%d) Причина: %s\n' % (i+1, uid, uid, self.blacklist[uid])
-            return response, cmd
+            return response[:-1], cmd
         else:
             if cmd.words[1] == '+':
                 blacklist_reason = ''
@@ -1058,7 +1056,7 @@ disabled: {}'''
                 for i, uid in enumerate(self.whitelist.keys()):
                     response += u'%d. {id%d_name} (%d) Доступ: %d\n' \
                         % (i+1, uid, uid, self.whitelist[uid])
-            return response, cmd
+            return response[:-1], cmd
 
         user_id = cmd.words[1]
         if not re.match('\d+$', user_id):
