@@ -118,11 +118,15 @@ def load_whitelist():
         with open(WHITELIST_FILE_PATH, 'r') as f:
             content = f.read()
 
-        content = eval(content)
+        try:
+            content = eval(content)
+        except:
+            content = {}
+
         if type(content) is not dict:
             return {}
         else:
-            whitelist = content
+            return content
 
     return whitelist
 
@@ -135,21 +139,26 @@ def save_whitelist(whitelist):
 
 
 def load_blacklist():
-    blacklist = []
     if not os.path.exists(BLACKLIST_FILE_PATH):
         open(BLACKLIST_FILE_PATH, 'w').close()
     else:    
         with open(BLACKLIST_FILE_PATH, 'r') as f:
-            for line in f.readlines():
-                if re.match('\d+$', line):
-                    blacklist.append(int(line))
+            content = f.read()
 
-    return blacklist
+        try:
+            content = eval(content)
+        except:
+            content = {}
+
+        if type(content) is not dict:
+            return {}
+        else:
+            return content
 
 
 def save_blacklist(blacklist):
     with open(BLACKLIST_FILE_PATH, 'w') as f:
-        f.write('\n'.join(map(lambda x: str(x), blacklist)))
+        f.write(unicode(blacklist))
 
     return True
 

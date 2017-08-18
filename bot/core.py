@@ -69,7 +69,7 @@ u'''
 Необходимый уровень доступа: 2
 
 -Игнорировать пользователя (лс), беседу или группу
-blacklist <?me> <?-> <?id=id_диалога>
+blacklist <?+|-> <?id> <?reason:причина>
 -Перезапустить бота (применение команд и настроек)
 restart
 ''',
@@ -82,7 +82,7 @@ u'''
 -Выключить бота (!)
 stop
 -Изменить уровень доступа пользователя
-whitelist <id пользователя> <уровень доступа=1>
+whitelist <?id пользователя> <?уровень доступа=1>
 -Спровоцировать ошибку бота
 raise <?сообщение=Default exception text>
 -Поставить бота на паузу (игнорирование сообщений)
@@ -314,8 +314,8 @@ class Bot(object):
                     if not command.text or command.msg_id in last_msg_ids:
                         continue
 
-                    if (command.real_user_id in self.blacklist \
-                            or command.chat_id in self.blacklist) \
+                    if (command.real_user_id in self.blacklist.keys() \
+                            or command.chat_id in self.blacklist.keys()) \
                             and not (command.was_appeal and command.words[0] == 'blacklist'):
                         continue
 
@@ -464,17 +464,17 @@ class Bot(object):
         if '{bot_name}' in response_text:
             format_dict['bot_name'] = self.bot_name
         if '{my_name}' in response_text:
-            name, error = vkr.get_user_name(user_id=command.SELF_ID)
+            name, error = vkr.get_name_by_id(object_id=command.SELF_ID)
             format_dict['my_name'] = name if name else 'No name'
         if '{my_id}' in response_text:
             format_dict['my_id'] = command.SELF_ID
         if '{user_name}' in response_text:
-            name, error = vkr.get_user_name(user_id=command.real_user_id)
+            name, error = vkr.get_name_by_id(object_id=command.real_user_id)
             format_dict['user_name'] = name if name else 'No name'
         if '{user_id}' in response_text:
             format_dict['user_id'] = command.real_user_id
         if '{random_user_name}' in response_text:
-            name, error = vkr.get_user_name(user_id=command.random_chat_user_id)
+            name, error = vkr.get_name_by_id(object_id=command.random_chat_user_id)
             format_dict['random_user_name'] = name if name else 'No name'
         if '{random_user_id}' in response_text:
             format_dict['random_user_id'] = command.random_chat_user_id
@@ -483,12 +483,12 @@ class Bot(object):
         if '{event_user_id}' in response_text and command.event_user_id:
             format_dict['event_user_id'] = command.event_user_id
         if '{event_user_name}' in response_text and command.event_user_id:
-            name, error = vkr.get_user_name(user_id=command.event_user_id)
+            name, error = vkr.get_name_by_id(object_id=command.event_user_id)
             format_dict['event_user_name'] = name if name else 'No name'
 
-        for match in re.findall('{id(\d+)_name}', response_text):
+        for match in re.findall('{id(-?\d+)_name}', response_text):
             user_id = match
-            name, error = vkr.get_user_name(user_id=user_id)
+            name, error = vkr.get_name_by_id(object_id=user_id)
             format_dict['id%s_name' % user_id] = name if name else 'No name'
 
         media_id_search_pattern = re.compile(
@@ -761,7 +761,7 @@ class Bot(object):
             return u'Для корректной работы команды, в беседе должно находить' \
                    u'ся больше одного человека', cmd
         else:
-            user_name, error = vkr.get_user_name(
+            user_name, error = vkr.get_name_by_id(
                 user_id=cmd.random_chat_user_id, name_case='acc')
             if user_name:
                 return u'Я выбираю [id%d|%s]' % (cmd.random_chat_user_id, user_name), cmd
@@ -837,7 +837,7 @@ u'''
     def _verify_openweathermap_api_key(self, cmd):
         api_key = cmd.words[1]
 
-        test_url = 'http://api.openweathermap.org/data/2.5/weather?APPID=%s' % api_key
+        test_url = 'https://api.openweathermap.org/data/2.5/weather?APPID=%s' % api_key
         test_weather_json = r.get(test_url).json()
 
         if 'cod' in test_weather_json:
@@ -853,11 +853,10 @@ u'''
 
     def ignore(self, cmd):
         user_id = cmd.real_user_id
-        if user_id not in self.blacklist:
-            self.blacklist.append(user_id)
-            save_blacklist(self.blacklist)
+        self.blacklist[user_id] = u'По собственному желанию'
+        save_blacklist(self.blacklist)
 
-        return u'id %s добавлен в чёрный список' % user_id, cmd
+        return u'id %s добавлен в чёрный список по собственному желанию' % user_id, cmd
 
     def learn(self, cmd):
         if self.custom_commands is None:
@@ -973,49 +972,69 @@ disabled: {}'''
 
     def blacklist_command(self, cmd):
         if len(cmd.words) == 1:
-            chat_id = cmd.chat_id if cmd.from_chat else cmd.user_id
-
-            if chat_id not in self.blacklist:
-                self.blacklist.append(chat_id)
-                save_blacklist(self.blacklist)
-
-            return u'id %s добавлен в список' % chat_id, cmd
-
+            if not self.blacklist:
+                response = u'Список пуст'
+            else:
+                response = ''
+                for i, uid in enumerate(self.blacklist.keys()):
+                    response += u'%d. {id%d_name} (%d) Причина: %s\n' % (i+1, uid, uid, self.blacklist[uid])
+            return response, cmd
         else:
-            if cmd.words[1] == '-':
+            if cmd.words[1] == '+':
+                blacklist_reason = ''
+
                 if len(cmd.words) == 2:
                     chat_id = cmd.chat_id if cmd.from_chat else cmd.user_id
                 else:
-                    chat_id = cmd.words[2]
-                    if not re.match('\d+$', chat_id):
+                    blacklist_reason = re.search(u'.*?((причина)|(reason)):(.*)', cmd.lower_text)
+                    if blacklist_reason:
+                        blacklist_reason = blacklist_reason.group(4)
+                        if len(cmd.words) == 3:
+                            chat_id = cmd.chat_id if cmd.from_chat else cmd.user_id
+                        else:
+                            if cmd.words[2].lower().startswith(('reason:', u'причина')):
+                                chat_id = cmd.chat_id if cmd.from_chat else cmd.user_id
+                            else:
+                                chat_id = cmd.words[2]
+                    else:
+                        chat_id = cmd.words[2]
+
+                    if not (type(chat_id) is int or re.match('\d+$', chat_id)):
                         chat_id, error = vkr.get_real_user_id(chat_id)
                         if not chat_id and '113' in error:
                             return u'Неправильно указан id', cmd
                     else:
                         chat_id = int(chat_id)
 
-                if chat_id not in self.blacklist:
+                if not blacklist_reason:
+                    blacklist_reason = u'Причина не указана'
+                self.blacklist[chat_id] = blacklist_reason
+                save_blacklist(self.blacklist)
+
+                return u'id %s добавлен в список по причине: %s' % (chat_id, blacklist_reason), cmd
+
+            elif cmd.words[1] == '-':
+                if len(cmd.words) == 2:
+                    chat_id = cmd.chat_id if cmd.from_chat else cmd.user_id
+                else:
+                    chat_id = cmd.words[2]
+                    if not re.match('-?\d+$', chat_id):
+                        chat_id, error = vkr.get_real_user_id(chat_id)
+                        if not chat_id and '113' in error:
+                            return u'Неправильно указан id', cmd
+                    else:
+                        chat_id = int(chat_id)
+
+                if chat_id not in self.blacklist.keys():
                     return u'В списке нет данного id', cmd
 
-                self.blacklist.remove(chat_id)
+                self.blacklist.pop(chat_id)
                 save_blacklist(self.blacklist)
 
                 return u'id %s удалён из списка' % chat_id, cmd
 
             else:
-                chat_id = cmd.words[1]
-                if not re.match('\d+$', chat_id):
-                    chat_id, error = vkr.get_real_user_id(chat_id)
-                    if not chat_id and '113' in error:
-                        return u'Неправильно указан id', cmd
-                else:
-                    chat_id = int(chat_id)
-
-                if chat_id not in self.blacklist:
-                    self.blacklist.append(chat_id)
-                    save_blacklist(self.blacklist)
-
-                return u'id %s добавлен в список' % chat_id, cmd
+                return u'Неизвестная опция', cmd
 
     def restart(self, cmd):
         if cmd.out:
@@ -1031,9 +1050,15 @@ disabled: {}'''
     def whitelist_command(self, cmd):
         default_access_level = 1
 
-        argument_required = self._is_argument_missing(cmd.words)
-        if argument_required:
-            return argument_required, cmd
+        if len(cmd.words) == 1:
+            if len(self.whitelist.keys()) == 0:
+                response = u'Список пуст'
+            else:
+                response = ''
+                for i, uid in enumerate(self.whitelist.keys()):
+                    response += u'%d. {id%d_name} (%d) Доступ: %d\n' \
+                        % (i+1, uid, uid, self.whitelist[uid])
+            return response, cmd
 
         user_id = cmd.words[1]
         if not re.match('\d+$', user_id):

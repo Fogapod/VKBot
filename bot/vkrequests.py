@@ -140,11 +140,23 @@ def set_status(text):
 
 
 @error_handler
-def get_user_name(user_id=None, name_case='nom'):
-    response = api.users.get(user_ids=user_id, name_case=name_case)[0]
+def get_name_by_id(object_id=None, name_case='nom'):
+    if object_id is not None:
+        object_id = int(object_id)
 
-    return ' '.join((response['first_name'], response['last_name']))
+    if object_id is None or 0 < object_id < 2000000000: # user
+        response = api.users.get(user_ids=object_id, name_case=name_case)[0]
+        name = ' '.join((response['first_name'], response['last_name']))
+    elif int(object_id) > 2000000000: # chat
+        response = api.messages.getChat(chat_id=object_id-2000000000)
+        name = response['title']
+    elif int(object_id) < 1: # group
+        response = api.groups.getById(group_id=abs(object_id))[0]
+        name = response['name']
+    else:
+        name = 'Unknown object'
 
+    return name
 
 @error_handler
 def get_user_city(user_id=None):
