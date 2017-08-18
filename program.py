@@ -93,7 +93,7 @@ class VKBotApp(App):
             },
             {
             "type": "title",
-            "title": "Пользовательские команды (WIP)"
+            "title": "Пользовательские команды"
             },
             {
             "type": "bool",

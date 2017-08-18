@@ -228,6 +228,9 @@
             ActionView:
                 ActionPrevious:
                     app_icon: 'data/images/icon.png'
+                ActionButton:
+                    text: 'Мои команды'
+                    on_release: root.parent.show_custom_commands_screen()
                 ActionOverflow:
                     mode: 'spinner'
                     ActionButton:
@@ -266,29 +269,14 @@
                     pos_hint: {'center_x':.5}
                     pos_hint_y: None
                     pos: self.pos[0], main_btn.pos[1]-actionbar.height*1.3
-                Apply:
-                    id: open_cc_screen_btn
-                    text: 'Настройки пользовательских команд'
-                    width: self.texture_size[0] + dp(4)
-                    pos_hint: {'center_x':.5, 'center_y':.1}
-                    on_release: root.parent.show_custom_commands_screen()
-                    background_color: 1, 0, 0, .8 # WIP feature
 
             FloatLayout:
                 Apply:
                     text: 'Восстановить статус'
                     width: self.texture_size[0] + dp(4)
                     pos_hint: {'center_x':.5, 'pos_y': None}
-                    pos: self.pos[0], get_captcha_btn.pos[1] + get_captcha_btn.height*2
-                    disabled: True
-                    
-                Apply:
-                    id: get_captcha_btn
-                    text: 'Получить капчу'
-                    width: self.texture_size[0] + dp(4)
-                    pos_hint: {'center_x':.5, 'pos_y': None}
                     pos: self.pos[0], export_logs_btn.pos[1] + export_logs_btn.height*2
-                    on_release: app._get_captchas(root.service)
+                    disabled: True
 
                 Apply:
                     id: export_logs_btn
