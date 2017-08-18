@@ -976,7 +976,8 @@ disabled: {}'''
                 response = ''
                 for i, uid in enumerate(self.blacklist.keys()):
                     response += u'%d. {id%d_name} (%d) Причина: %s\n' % (i+1, uid, uid, self.blacklist[uid])
-            return response[:-1], cmd
+                response = response[:-1]
+            return response, cmd
         else:
             if cmd.words[1] == '+':
                 blacklist_reason = ''
@@ -1056,7 +1057,8 @@ disabled: {}'''
                 for i, uid in enumerate(self.whitelist.keys()):
                     response += u'%d. {id%d_name} (%d) Доступ: %d\n' \
                         % (i+1, uid, uid, self.whitelist[uid])
-            return response[:-1], cmd
+                response = response[:-1]
+            return response, cmd
 
         user_id = cmd.words[1]
         if not re.match('\d+$', user_id):
