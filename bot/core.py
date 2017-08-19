@@ -1062,6 +1062,8 @@ disabled: {}'''
             if not user_id and '113' in error:
                 return u'Указан неверный id пользователя', cmd
 
+        user_id = int(user_id)
+
         if len(cmd.words) == 2:
             access_level = default_access_level
         else:
