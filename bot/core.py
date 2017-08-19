@@ -982,7 +982,7 @@ disabled: {}'''
                 if len(cmd.words) == 2:
                     chat_id = cmd.chat_id if cmd.from_chat else cmd.user_id
                 else:
-                    blacklist_reason = re.search(u'.*?((причина)|(reason)):(.*)', cmd.lower_text)
+                    blacklist_reason = re.search(u'.*?((причина)|(reason)):(.*)', cmd.text, re.I)
                     if blacklist_reason:
                         blacklist_reason = blacklist_reason.group(4)
                         if len(cmd.words) == 3:
