@@ -1033,9 +1033,8 @@ disabled: {}'''
                 return u'Неизвестная опция', cmd
 
     def restart(self, cmd):
-        if cmd.out:
-            self.need_restart = True
-            return u'Начинаю перезагрузку', cmd
+        self.need_restart = True
+        return u'Начинаю перезагрузку', cmd
 
     def stop_bot_from_message(self, cmd):
         if cmd.out:
