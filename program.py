@@ -50,8 +50,8 @@ class VKBotApp(App):
                     'appeals': '/:бот,',
                     'bot_name': '(Бот)',
                     'mark_type': 'кавычка',
+                    'stable_mode': 'True',
                     'use_custom_commands': 'False',
-                    'protect_cc': 'True',
                     'bot_activated': 'False',
                     'openweathermap_api_key': '0'
                 }
@@ -87,9 +87,19 @@ class VKBotApp(App):
             {
             "type": "options",
             "title": "Отметка сообщений бота",
+            "desc": "Нужно для того, чтобы отличать сообщения бота от ваших",
             "section": "General",
             "key": "mark_type",
             "options": ["кавычка", "имя"]
+            },
+            {
+            "type": "bool",
+            "title": "Устойчивый режим",
+            "desc": "При возникновении ошибки, бот будет продолжать работу",
+            "section": "General",
+            "key": "stable_mode",
+            "values": ["False","True"],
+            "disabled": 1
             },
             {
             "type": "title",
