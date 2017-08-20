@@ -53,11 +53,16 @@ align="center"/>
 
 > Каждая из опций может находиться в двух (0, 2) или трёх (0, 1, 2) состояниях. 0 - красный цевт, 1 - синий, 2 - зелёный.
 
-* r - использовать для определения команды синтаксис регулярных выражений (нет, да)
-* !' - убрать кавычку в конце ответа (обычное поведение, никогда не убирать, убирать всегда)
-* f - пересылать сообщения (обычное поведение, никогда не пересылать, пересылать всегда)
-* / - отвечать на команду только при (в любом случае, только без обращения, только при обращении (`бот, команда`))
-* откл - отключить команду (нет, да)
+<img height="25" src="https://github.com/Fogapod/VKBot/blob/0.1.0dev/data/images/screenshots/button_use_regex_option.png" align="left"/>
+Использовать для определения команды синтаксис регулярных выражений (нет, да)
+<img height="25" src="https://github.com/Fogapod/VKBot/blob/0.1.0dev/data/images/screenshots/button_force_unmark_option.png" align="left"/>
+Убрать отметку бота в сообщении (обычное поведение, никогда не убирать, убирать всегда)
+<img height="25" src="https://github.com/Fogapod/VKBot/blob/0.1.0dev/data/images/screenshots/button_force_forward_option.png" align="left"/>
+Пересылать сообщения (обычное поведение, никогда не пересылать, пересылать всегда)
+<img height="25" src="https://github.com/Fogapod/VKBot/blob/0.1.0dev/data/images/screenshots/button_appeal_only_option.png" align="left"/>
+Отвечать на команду только при (в любом случае, только без обращения, только при обращении (`бот, команда`))
+<img height="25" src="https://github.com/Fogapod/VKBot/blob/0.1.0dev/data/images/screenshots/button_disable_option.png" align="left"/>
+Отключить команду (нет, да)
 
 > Язык регулярных выражений - поиск совпадений в тексте по определённым правилам.  
 Документация по регулярным выражениям: <https://docs.python.org/2/library/re.html>  
