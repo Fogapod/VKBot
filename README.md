@@ -63,8 +63,9 @@ align="center"/>
 Пересылать сообщения (обычное поведение, никогда не пересылать, пересылать всегда)
 <img height="25" src="https://github.com/Fogapod/VKBot/blob/0.1.0dev/data/images/screenshots/button_force_forward_option.png" align="left"/>
 
-Отвечать на команду только при (в любом случае, только без обращения, только при обращении (`бот, команда`))
 <img height="25" src="https://github.com/Fogapod/VKBot/blob/0.1.0dev/data/images/screenshots/button_appeal_only_option.png" align="left"/>
+
+Отвечать на команду только при (в любом случае, только без обращения, только при обращении (`бот, команда`))
 
 Отключить команду (нет, да)
 <img height="25" src="https://github.com/Fogapod/VKBot/blob/0.1.0dev/data/images/screenshots/button_disable_option.png" align="left"/>
