@@ -3,19 +3,26 @@
 
 import time
 
-from kivy.app import App
 from kivy.lib import osc
 from kivy.clock import Clock
 from kivy import platform
 
+from bot.utils import SETTINGS_FILE_PATH
+
 if platform == 'android':
     from android import AndroidService
+else:
+    import subprocess
 
 
 class OSCClient():
     def __init__(self, mainscreen):
         if platform == 'android':
-            self.androidservice = AndroidService('VKBot', 'Бот работает')
+            self.subprocess = AndroidService('VKBot', 'Бот работает')
+        else:
+            self.subprocess = None
+
+        self.answers_count = '0'
         self.mainscreen = mainscreen
         self.osc = osc
         self.osc.init()
@@ -24,25 +31,29 @@ class OSCClient():
         self.osc.bind(oscid, self.read_status, '/status')
         self.osc.bind(oscid, self.set_answers_count, '/answers')
         self.osc.bind(oscid, self.return_error, '/error')
-        self.osc.bind(oscid, self.activation_changed, '/activation_changed')
         self.read_event = Clock.schedule_interval(lambda *x: self.osc.readQueue(oscid), 0)
         self.ping()
-        self.answers_count = '0'
-        self.started = False
 
     def start(self):
         if platform == 'android':
-            self.androidservice.start('Сервис запущен')
+            self.subprocess.start('Сервис запущен')
+        else:
+            self.subprocess = subprocess.Popen(['python2.7', 'service/main.py'])
 
     def stop(self):
         if platform == 'android':
-            self.androidservice.stop()
+            self.subprocess.stop()
         else:
-            self.osc.sendMsg('/exit', [], port=3000)
-        self.started = False
+            osc.sendMsg('/exit', [], port=3000)
+
+            if self.subprocess is not None:
+                self.subprocess.kill()
 
     def ping(self):
         self.osc.sendMsg('/ping', [], port=3000)
+
+    def solve_captcha(self, captcha):
+        pass
 
     def on_response(self, message, *args, **kwargs):
         print message
@@ -54,12 +65,10 @@ class OSCClient():
     def read_status(self, message, *args):
         # self.on_response(message)
         status = message[2]
-        if status == 'got params':
+        if status == 'launched':
             self.mainscreen.ids.main_btn.text = self.mainscreen.stop_bot_text
-        elif status == 'listening':
-            pass
         elif status == 'exiting':
-            self.mainscreen.stop_bot(None)
+            self.mainscreen.ids.main_btn.text = self.mainscreen.launch_bot_text
 
     def set_answers_count(self, message, *args):
         # self.on_response(message)
@@ -71,10 +80,3 @@ class OSCClient():
         # self.on_response(message)
         error = message[2]
         self.mainscreen.show_bot_error(error)
-
-    def activation_changed(self, message, *args):
-        # self.on_response(message)
-        new_activation_status = message[2]
-        config = App.get_running_app().config
-        config.set('General', 'bot_activated', new_activation_status)
-        config.write()

@@ -1,53 +1,71 @@
 # coding:utf8
 
+
 import os
-from time import sleep
 import sys
+import logging
+
+from time import sleep
 
 from kivy import platform
 from kivy.logger import Logger
 from kivy.config import Config
 from kivy.lib import osc
 
-import logging
-logging.captureWarnings(True)
-
 parent_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 parent_path += '\\' if platform == 'win' else '/'
 os.sys.path.append(parent_path)
 
-import bot.utils
+
+from bot import utils
+from bot.core import Bot
+
 if platform != 'android':
-    bot.utils.PATH = parent_path + bot.utils.PATH
-bot.utils.DATA_PATH = parent_path + bot.utils.DATA_PATH
+    utils.PATH = parent_path + utils.PATH
+utils.DATA_PATH = parent_path + utils.DATA_PATH
 
-bot.utils.update_paths()
+utils.update_paths()
 
-from bot.core import LongPollSession
+logging.captureWarnings(True)
 
 
+def update_params():
+    global activated
+    global openweathermap_api_key
+
+    Config.read(utils.SETTINGS_FILE_PATH)
+    appeals = Config.get('General', 'appeals')
+    activated = Config.get('General', 'bot_activated')
+    bot_name = Config.get('General', 'bot_name')
+    mark_type = Config.get('General', 'mark_type')
+    use_custom_commands = Config.get('General', 'use_custom_commands')
+    openweathermap_api_key = Config.get('General', 'openweathermap_api_key')
+
+    bot.load_params(appeals,
+        activated=activated == 'True',
+        bot_name=bot_name, mark_type=mark_type,
+        use_custom_commands=use_custom_commands == 'True',
+        openweathermap_api_key=openweathermap_api_key
+    )
+                        
 def ping(*args):
-    global session
-    if session.running:
+    global bot
+    if bot.running:
         osc.sendMsg('/pong', [], port=3002)
-
-def send_text(text):
-    osc.sendMsg('/text', [text, ], port=3002)
 
 def send_status(status):
     osc.sendMsg('/status', [status, ], port=3002)
 
 def send_error(error):
-    error_text = unicode(error)
-    osc.sendMsg('/error', [error_text, ], port=3002)
-    Logger.info(error_text)
+    osc.sendMsg('/error', [error, ], port=3002)
 
 def send_answers_count():
-    osc.sendMsg('/answers', [session.reply_count, ], port=3002)
+    osc.sendMsg('/answers', [bot.reply_count, ], port=3002)
 
 def exit(*args):
+    global bot
+    bot.stop_bot()
     send_status('exiting')
-    session.runtime_error = 1
     sys.exit()
 
 
@@ -59,40 +77,52 @@ if __name__ == '__main__':
     osc.bind(oscid, ping, '/ping')
     osc.bind(oscid, exit, '/exit')
 
-    session = LongPollSession()
-    authorized, error = session.authorization()
+    try:
+        bot = Bot()
+        authorized, error = bot.authorization()
 
-    if error:
+        if error:
+            send_error(error)
+            exit()
+
+        update_params()
+
+        bot.launch_bot()
+
+        send_status('launched')
+    except SystemExit:
+        raise
+    except:
+        import traceback
+        error = traceback.format_exc()
         send_error(error)
         exit()
-
-    Config.read(bot.utils.PATH + '.vkbot.ini')
-    appials = Config.get('General', 'appeals')
-    activated = Config.get('General', 'bot_activated')
-    use_custom_commands = Config.get('General', 'use_custom_commands')
-    protect_custom_commands = Config.get('General', 'protect_cc')
-
-    
-    session.load_params(
-    	            appials,
-    	            activated=activated == 'True',
-                use_custom_commands=use_custom_commands == 'True',
-                protect_custom_commands=protect_custom_commands == 'True'
-                )
-    send_status('got params')
-    session.launch_bot()
 
     while True:
         osc.readQueue(oscid)
         send_answers_count()
-        if session.activated != activated:
-            activated = session.activated
-            osc.sendMsg('/activation_changed', [str(activated), ], port=3002)
-        if session.runtime_error:
-            if session.runtime_error != 1:
-                send_error(session.runtime_error)
+        if bot.activated != activated:
+            activated = bot.activated
+            Config.read(utils.SETTINGS_FILE_PATH)
+            Config.set('General', 'bot_activated', str(activated))
+            Config.write()
+        if bot.openweathermap_api_key != openweathermap_api_key:
+            openweathermap_api_key = bot.openweathermap_api_key
+            Config.read(utils.SETTINGS_FILE_PATH)
+            Config.set(
+                'General', 'openweathermap_api_key', openweathermap_api_key
+            )
+            Config.write()
+        if bot.runtime_error:
+            if bot.runtime_error != 1:
+                send_error(bot.runtime_error)
             break
-        if not session.running:
+        if bot.need_restart:
+            bot.stop_bot()
+            update_params()
+            bot.launch_bot()
+            bot.need_restart = False
+        elif not bot.running:
             break
         sleep(1)
     exit()

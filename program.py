@@ -7,10 +7,10 @@ from kivy.app import App
 from kivy.lang import Builder
 from kivy.uix.settings import SettingsWithNoMenu
 
-from uix.screens import Root
+from uix.screens import Manager, TwoFAKeyEnterPopup, CaptchaPopup
 
-from bot.utils import PATH, CUSTOM_COMMANDS_FILE_PATH
-from bot.core import LongPollSession
+from bot.utils import SETTINGS_FILE_PATH, CUSTOM_COMMANDS_FILE_PATH, PATH
+from bot.core import Bot, __version__
 
 
 class VKBotApp(App):
@@ -19,16 +19,16 @@ class VKBotApp(App):
 
     def build(self):
         self.title = 'VKBot'
-        self.session = LongPollSession()
+        self.bot = Bot()
         self.load_kv_files()
 
-        self.root = Root()
+        self.manager = Manager()
 
-        self.root.show_main_screen()
-        if not self.session.authorization()[0]:
-            self.root.show_auth_screen()
+        self.manager.show_main_screen()
+        if not self.bot.authorization()[0]:
+            self.manager.show_auth_screen()
 
-        return self.root
+        return self.manager
 
     def load_kv_files(self):
         directories = ['uix/kv/']
@@ -41,21 +41,25 @@ class VKBotApp(App):
                     continue
 
     def get_application_config(self):
-        return '{}.vkbot.ini'.format(PATH)
+        return SETTINGS_FILE_PATH
 
     def build_config(self, config):
         config.setdefaults('General', 
                 {
-                    "show_bot_activity": "False",
-                    "appeals": u"/:бот,",
-                    "use_custom_commands": "False",
-                    "protect_cc": "True",
-                    "bot_activated": "False"
+                    'show_bot_activity': 'False',
+                    'appeals': '/:бот,',
+                    'bot_name': '(Бот)',
+                    'mark_type': 'кавычка',
+                    'stable_mode': 'True',
+                    'use_custom_commands': 'False',
+                    'bot_activated': 'False',
+                    'openweathermap_api_key': '0'
                 }
             )
 
     def build_settings(self, settings):
-        settings.add_json_panel("Настройки бота", self.config, data=
+        settings.add_json_panel(
+            'Настройки бота. Версия %s' % __version__, self.config, data=
         '''[
             {
             "type": "bool",
@@ -74,8 +78,32 @@ class VKBotApp(App):
             "key": "appeals"
             },
             {
+            "type": "string",
+            "title": "Имя бота",
+            "desc": "Используется в случае выбора имени как способа отмечать сообщения",
+            "section": "General",
+            "key": "bot_name"
+            },
+            {
+            "type": "options",
+            "title": "Отметка сообщений бота",
+            "desc": "Нужно для того, чтобы отличать сообщения бота от ваших",
+            "section": "General",
+            "key": "mark_type",
+            "options": ["кавычка", "имя"]
+            },
+            {
+            "type": "bool",
+            "title": "Устойчивый режим",
+            "desc": "При возникновении ошибки, бот будет продолжать работу",
+            "section": "General",
+            "key": "stable_mode",
+            "values": ["False","True"],
+            "disabled": 1
+            },
+            {
             "type": "title",
-            "title": "Пользовательские команды (WIP)"
+            "title": "Пользовательские команды"
             },
             {
             "type": "bool",
@@ -84,14 +112,6 @@ class VKBotApp(App):
             "section": "General",
             "key": "use_custom_commands",
             "values": ["False","True"]
-            },
-            {
-            "type": "bool",
-            "title": "Защитить пользовательские команды",
-            "desc": "Только владелец сможет настраивать пользовательские команды через сообщения",
-            "section": "General",
-            "key": "protect_cc",
-            "values": ["False", "True"]
             },
             {
             "type": "title",
@@ -108,15 +128,33 @@ class VKBotApp(App):
         ]''' % CUSTOM_COMMANDS_FILE_PATH
         )
 
-    def get_captcha_key(captcha_url):
-        return 0
+    def open_captcha_popup(self, capthca):
+        CaptchaPopup().open(capthca)
+
+    def open_twofa_popup(self, vk, auth_response_page):
+        TwoFAKeyEnterPopup().open(vk, auth_response_page)
+
+    def _export_logs(self):
+        if not os.path.exists(PATH + '.logs/'):
+            os.makedirs(PATH + '.logs/')
+        if not os.path.exists(PATH + '.service_logs/'):
+            os.makedirs(PATH + '.service_logs/')
+
+        from shutil import copyfile
+
+        if os.path.exists('.kivy/logs/'):
+            for file in os.listdir('.kivy/logs/'):
+                copyfile('.kivy/logs/' + file, PATH + '.logs/' + file)
+        if os.path.exists('service/.kivy/logs/'):
+            for file in os.listdir('service/.kivy/logs/'):
+                copyfile('service/.kivy/logs/' + file, PATH + '.service_logs/' + file)
+
+    def _open_url(*args):
+        import webbrowser
+        webbrowser.open(args[1][1].encode('utf8'))
 
     def on_pause(self):
         return True
-
-    def on_stop(self):
-        if self.session.running:
-            self.session.stop_bot()
 
 
 if __name__ == '__main__':

@@ -10,8 +10,10 @@ __pycache__/
 *.log
 *.txt
 *.ini
+*.json
 
 .buildozer
 requests
 data/*
 !data/images
+!fonts/LICENSE.txt
