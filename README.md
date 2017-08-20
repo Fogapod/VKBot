@@ -5,24 +5,24 @@
 Приложение написано на языке python версии 2.7 с использованием фреймворка [Kivy](https://kivy.org) и является мультиплатформенным.
 Предполагается использование на OC android, но работа возможна и на других платформах.
 
-<img height="600" src="https://github.com/Fogapod/ChatBot_UI/blob/master/data/images/screenshots/login_screen.png" 
+<img height="600" src="https://github.com/Fogapod/ChatBot_UI/blob/0.1.0dev/data/images/screenshots/login_screen.png" 
 align="left"/>
-<img height="600" src="https://github.com/Fogapod/ChatBot_UI/blob/master/data/images/screenshots/main_screen.png" 
+<img height="600" src="https://github.com/Fogapod/ChatBot_UI/blob/0.1.0dev/data/images/screenshots/main_screen.png" 
 align="center"/>
 
 ## Использованы библиотеки и модули:
-* [vk](https://github.com/dimka665/vk)
+* [vk](https://github.com/python273/vk_api)
 * [kivy-toaster](https://github.com/knappador/kivy-toaster)
 ***
 ## Руководство к использованию
 
-> Руководство написано для версии [0.0.9](https://github.com/Fogapod/VKBot/releases/tag/0.0.9) и может не соответствовать функционалу других версий
+> Руководство написано для версии 0.1.0dev и может не соответствовать функционалу других версий
 
 ### Начало работы
 Для начала необходимо войти в аккаунт (на данный момент существует поддержка двухфакторной авторизации, капча не поддерживается)  
 Приложение имеет открытый исходный код. Сохранность данных авторизации гарантирована.
 
-<img height="140" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/options_dropdown.png" align="right"/>
+<img height="140" src="https://github.com/Fogapod/VKBot/blob/0.1.0dev/data/images/screenshots/options_dropdown.png" align="right"/>
 
 После входа будет открыт главный экран приложения. Рекомендуется сразу перейти в настройки  установить обращение(я) к боту. Обращения разделяются двоеточием `:`  
 
@@ -46,7 +46,7 @@ align="center"/>
 Регистр команды не учитывается.
 
 ##### Интерфейс
-<img height="300" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/command_edit_popup.png"/>
+<img height="300" src="https://github.com/Fogapod/VKBot/blob/0.1.0dev/data/images/screenshots/command_edit_popup.png"/>
 
 Для работы с пользовательскими командами в интерефейсе необходимо перейти на экран их настройки из главного экрана приложения. Изначально никаких команд нет. Это можно исправить, добавив несколько.
 Каждая команда содержит 5 опций, переключаемых кнопками ниже поля `ответ`
@@ -75,8 +75,8 @@ align="center"/>
 Удаление всей команды производится командой `/forgot команда`. Удаление ответа производится через `/forgot команда::Ответ`
 
 ##### Вложения
-Пользовательские команды поддерживают вложения. Для их отправки в ответе необходимо указать `attach=https://vk.com/photo12345_6789` или `attach=photo12345_6789` 
-Указывать подобным образом можно только на свои вложения из вк. Так же можно указать ссылку на альбом. В этом случае будет выбрана случайная фотография из альбома.
+Пользовательские команды поддерживают вложения. Для их отправки в ответе необходимо указать `{attach=https://vk.com/photo12345_6789}` или `{attach=photo12345_6789}` 
+Указывать подобным образом можно только на свои вложения из вк. Так же можно указать ссылку на альбом. В этом случае будет выбрана случайная фотография из альбома. Поддерживаются до 10 вложений для одного сообщения.
 
 ##### Ссылки на команды
 Пользовательские команды могут вызывать другие команды. Для этого в ответе нужно указать `self=привет` (будет использован ответ и опции команды `_привет`)
