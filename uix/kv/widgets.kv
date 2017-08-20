@@ -1,0 +1,26 @@
+<Widget>:
+    font_name: 'fonts/Roboto-BoldItalic'
+
+
+<FontelloButton>:
+    font_name: 'fonts/fontello.ttf'
+    font_size: '25sp'
+
+
+<ColoredScreen>:
+    canvas.before:
+        # Color: 
+            # rgba: .85, .66, .01, 1
+        Rectangle:
+            source: 'data/images/background.jpg'
+            pos: self.pos
+            size: self.size
+
+
+<Apply>:
+    text: 'Принять'
+    font_size: '16sp'
+    background_normal: ''
+    background_color: 0, .2, .4, 1
+    size_hint: None, None
+    size: self.texture_size[0]*2.3, self.texture_size[1]*2.3

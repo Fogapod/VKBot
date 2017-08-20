@@ -14,6 +14,7 @@ class EditCommandPopup(Popup):
         self.title = title
         self.ids.command_textinput.text = command_button.command
         self.ids.response_textinput.text = command_button.response
+        self.options = command_button.options
 
         self.switch_option_state(self.ids.regex_btn,
                                  self.ids.regex_btn.states,
@@ -97,15 +98,15 @@ class EditCommandPopup(Popup):
         elif option_button.current_state == 2:
             option_button.background_color = [0, 1, 0, .6]
 
-        if option_button.text == '    r    ':
+        if option_button.text == 'G':
             self.ids.command_textinput.regex_activated =\
                 option_button.current_state == 2
             self.options[0] = option_button.current_state
-        elif option_button.text == '    !\'   ':
+        elif option_button.text == 'F':
             self.options[1] = option_button.current_state
-        elif option_button.text == '    f    ':
+        elif option_button.text == 'M':
             self.options[2] = option_button.current_state
-        elif option_button.text == '    /    ':
+        elif option_button.text == 'A':
             self.options[3] = option_button.current_state
-        elif option_button.text == '  откл  ':
+        elif option_button.text == 'D':
             self.options[4] = option_button.current_state

@@ -4,7 +4,7 @@
 import time
 import re
 
-from kivy.uix.screenmanager import Screen, ScreenManager, FadeTransition
+from kivy.uix.screenmanager import ScreenManager, FadeTransition
 from kivy.uix.modalview import ModalView
 from kivy.clock import mainthread, Clock
 from kivy.core.clipboard import Clipboard
@@ -14,6 +14,7 @@ from kivy import platform
 from uix.customcommandblock import CustomCommandBlock, ListDropDown, \
     CommandButton
 from uix.editcommandpopup import EditCommandPopup
+from uix.widgets import ColoredScreen
 
 from bot.core import __version__
 from bot.oscclient import OSCClient
@@ -21,7 +22,7 @@ from bot.utils import toast_notification, load_custom_commands, \
     save_custom_commands, save_error, CUSTOM_COMMAND_OPTIONS_COUNT, save_token
 
 
-class AuthScreen(Screen):
+class AuthScreen(ColoredScreen):
     def __init__(self, **kwargs):
         self.show_password_text = 'Показать пароль'
         self.hide_password_text = 'Скрыть пароль'
@@ -137,7 +138,7 @@ class InfoPopup(ModalView):
         self.ids.label.text = self.ids.label.text % __version__
 
 
-class MainScreen(Screen):
+class MainScreen(ColoredScreen):
     def __init__(self, **kwargs):
         super(MainScreen, self).__init__(**kwargs)
         self.bot = App.get_running_app().bot
@@ -174,11 +175,12 @@ class MainScreen(Screen):
         save_error(error_text, from_bot=True)
 
 
-class CustomCommandsScreen(Screen):
+class CustomCommandsScreen(ColoredScreen):
     def __init__(self, **kwargs):
         super(CustomCommandsScreen, self).__init__(**kwargs)
         self.edit_popup = EditCommandPopup()
         self.included_keys = []
+        self.max_command_preview_text_len = 47
 
     def on_enter(self):
         self.custom_commands = load_custom_commands()
@@ -207,8 +209,8 @@ class CustomCommandsScreen(Screen):
         self.parent.show_main_screen()
 
     def open_edit_popup(self, command_button, command_block):
-        max_title_len = 30
-        title = command_button.command.replace('\n', ' ')
+        max_title_len = 27
+        title = command_button.command.replace('\n', '  ')
         if len(title) > max_title_len:
             title = title[:max_title_len] + '...'
 
@@ -317,7 +319,12 @@ class CustomCommandsScreen(Screen):
                 for button in block.dropdown.container.children:
                     button.command = command
 
-            block.ids.dropdown_btn.text = command
+            command_preview = command
+            command_preview = command_preview.replace('\n', '  ')
+            if len(command_preview) > self.max_command_preview_text_len:
+                command_preview = \
+                    command_preview[:self.max_command_preview_text_len] + '...'
+            block.ids.dropdown_btn.text = command_preview
 
             self.custom_commands[command] = []
             for r in self.custom_commands[button_command]:
@@ -330,10 +337,22 @@ class CustomCommandsScreen(Screen):
             block.responses.remove(command_button.response)
 
             command_button.response = response
-            command_button.text = response
+
+            response_preview = response
+            response_preview = response_preview.replace('\n', '  ')
+            if len(response_preview) > self.max_command_preview_text_len:
+                response_preview = \
+                    response_preview[:self.max_command_preview_text_len] + '...'
+            command_button.text = response_preview
+
             block.responses.append(response)
 
-            block.ids.dropdown_btn.text = command
+            command_preview = command
+            command_preview = command_preview.replace('\n', '  ')
+            if len(command_preview) > self.max_command_preview_text_len:
+                command_preview = \
+                    command_preview[:self.max_command_preview_text_len] + '...'
+            block.ids.dropdown_btn.text = command_preview
 
             self.custom_commands[command].append([response] + options)
 
@@ -378,6 +397,7 @@ class CustomCommandsScreen(Screen):
         self.edit_popup.dismiss()
 
     def create_command(self, command, response):
+        from kivy.logger import Logger
         if not (self.edit_popup.ids.command_textinput.text
                 and self.edit_popup.ids.response_textinput.text):
             toast_notification(
@@ -403,7 +423,7 @@ class CustomCommandsScreen(Screen):
                 del block.ids.dropdown_btn.command
                 del block.ids.dropdown_btn.response
 
-                old_command_button.options = options
+                old_command_button.options = block.ids.dropdown_btn.options
 
                 callback = lambda x: self.open_edit_popup(x, block)
                 old_command_button.callback = callback
@@ -418,7 +438,12 @@ class CustomCommandsScreen(Screen):
 
                 block.dropdown.add_widget(old_command_button)
 
-            command_button = CommandButton(text=response)
+            response_preview = response
+            response_preview = response_preview.replace('\n', '  ')
+            if len(response_preview) > self.max_command_preview_text_len:
+                response_preview = \
+                    response_preview[:self.max_command_preview_text_len] + '...'
+            command_button = CommandButton(text=response_preview)
             command_button.command = command
             command_button.response = response
             command_button.options = options
@@ -459,7 +484,12 @@ class CustomCommandsScreen(Screen):
         
         for item in response:
             if len(response) > 1:
-                command_button = CommandButton(text=item[0])
+                response_preview = item[0]
+                response_preview = response_preview.replace('\n', '  ')
+                if len(response_preview) > self.max_command_preview_text_len:
+                    response_preview = \
+                        response_preview[:self.max_command_preview_text_len] + '...'
+                command_button = CommandButton(text=response_preview)
             else:
                 command_button = block.ids.dropdown_btn
 
@@ -476,7 +506,13 @@ class CustomCommandsScreen(Screen):
             block.responses.append(item[0])
         block.command = command
 
-        block.ids.dropdown_btn.text = command
+        command_preview = command
+        command_preview = command_preview.replace('\n', '  ')
+        if len(command_preview) > self.max_command_preview_text_len:
+            command_preview = \
+                command_preview[:self.max_command_preview_text_len] + '...'
+        block.ids.dropdown_btn.text = command_preview
+
         if len(response) > 1:
             dropdown_callback = block.dropdown.open
             block.ids.dropdown_btn.callback = dropdown_callback

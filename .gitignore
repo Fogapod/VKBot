@@ -16,3 +16,4 @@ __pycache__/
 requests
 data/*
 !data/images
+!fonts/LICENSE.txt

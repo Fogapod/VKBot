@@ -1,20 +1,14 @@
-#: import LowerTextInput uix.lowertextinput
-
-<Button>:
-    font_name: 'Roboto-BoldItalic'
-
-<TextInput>:
-    font_name: 'Roboto-BoldItalic'
+#: import LowerTextInput uix.widgets
+#: import Widget uix.widgets
+#: import FontelloButton uix.widgets
 
 
-<OptionButton@Button>:
+<OptionButton@FontelloButton>:
     states: (0, 1, 2)
     current_state: 0
 
-    font_size: '16sp'
     background_color: 1, 0, 0, .6
-    size_hint: None, None
-    size: self.texture_size[0], self.texture_size[1]*2
+    size_hint: 1.5, None
 
 
 <EditCommandPopup>:
@@ -39,15 +33,19 @@
             LowerTextInput:
                 id: command_textinput
                 size_hint_y: None
-                height: max(self.line_height*3, self.minimum_height)
+                height:
+                    min((self.line_height+dp(1))*6, max((self.line_height+dp(1))*3, self.minimum_height))
                 hint_text: 'Команда'.decode('utf8')
+
             TextInput:
                 id: response_textinput
                 size_hint_y: None
-                height: max(self.line_height*3, self.minimum_height)
+                height:
+                    min((self.line_height+dp(1))*6, max((self.line_height+dp(1))*3, self.minimum_height))
                 hint_text: 'Ответ'.decode('utf8')
+
             GridLayout:
-                cols: 6
+                cols: 9
                 size_hint_y: None
                 height: self.minimum_height
                 spacing: dp(5)
@@ -55,53 +53,58 @@
                 OptionButton:
                     states: (0, 2)
                     id: regex_btn
-                    text: '    r    '
+                    text: 'G'
                     on_release: root.switch_option_state(self, self.states)
+
+                Widget
 
                 OptionButton:
                     states: (0, 1, 2)
                     id: force_unmark_btn
-                    text: '    !\'   '
+                    text: 'F'
                     on_release: root.switch_option_state(self, self.states)
+
+                Widget
 
                 OptionButton:
                     states: (0, 1, 2)
                     id: force_forward_btn
-                    text: '    f    '
+                    text: 'M'
                     on_release: root.switch_option_state(self, self.states)
+
+                Widget
 
                 OptionButton:
                     states: (0, 1, 2)
                     id: appeal_only_btn
-                    text: '    /    '
+                    text: 'A'
                     on_release: root.switch_option_state(self, self.states)
+
+                Widget
 
                 OptionButton:
                     states: (0, 2)
                     id: disable_btn
-                    text: '  откл  '
+                    text: 'D'
                     on_release: root.switch_option_state(self, self.states)
-
-                Widget:
 
         GridLayout:
             cols: 3
             size_hint_y: None
-            height: self.minimum_height
             spacing: dp(5)
 
             Button:
                 id: apply_btn
                 _callback: None
                 text: 'Применить'
-            Button:
+
+            FontelloButton:
                 id: delete_command_btn
                 _callback: None
-                text: '      X      '
-                font_size: '16sp'
+                text: 'C'
+                size_hint_x: None
                 background_color: 1, 0, 0, 1
-                size_hint: None, None
-                size: self.texture_size[0], self.texture_size[1]*2.3
+
             Button:
                 text: 'Отмена'
                 on_release: root.dismiss()
