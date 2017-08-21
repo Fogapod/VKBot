@@ -18,7 +18,7 @@ import vkrequests as vkr
 
 __version__ = '0.1.0dev'
 AUTHOR_VK_ID = 180850898
-__author__ = 'Eugene Ershov - https://vk.com/id%d' % AUTHOR_VK_ID
+AUTHOR = u'[id%d|Евгений Ершов]' % AUTHOR_VK_ID
 
 __help__ = (
 u'''
@@ -447,7 +447,7 @@ class Bot(object):
         if '{version}' in response_text:
             format_dict['version'] = __version__
         if '{author}' in response_text:
-            format_dict['author'] = __author__
+            format_dict['author'] = AUTHOR
         if '{time}' in response_text:
             format_dict['time'] = time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime()
