@@ -8,6 +8,7 @@ from kivy.uix.screenmanager import ScreenManager, FadeTransition
 from kivy.uix.modalview import ModalView
 from kivy.clock import mainthread, Clock
 from kivy.core.clipboard import Clipboard
+from kivy.config import Config
 from kivy.app import App
 from kivy import platform
 
@@ -16,7 +17,6 @@ from uix.customcommandblock import CustomCommandBlock, ListDropDown, \
 from uix.editcommandpopup import EditCommandPopup
 from uix.widgets import ColoredScreen
 
-from bot.core import __version__
 from bot.oscclient import OSCClient
 from bot.utils import toast_notification, load_custom_commands, \
     save_custom_commands, save_error, CUSTOM_COMMAND_OPTIONS_COUNT, save_token
@@ -133,9 +133,7 @@ class CaptchaPopup(ModalView):
 
 
 class InfoPopup(ModalView):
-    def __init__(self, **kwargs):
-        super(InfoPopup, self).__init__(**kwargs)
-        self.ids.label.text = self.ids.label.text % __version__
+    pass
 
 
 class MainScreen(ColoredScreen):
@@ -146,33 +144,48 @@ class MainScreen(ColoredScreen):
         self.launching_bot_text = 'Запуск (отменить)' 
         self.stop_bot_text = 'Выключить бота'
         self.ids.main_btn.text = self.launch_bot_text
+        self.logging_level = int(
+            App.get_running_app().config.getdefault(
+                'General', 'logging_level', 1
+            )
+        )
+        self.max_log_lines = int(
+            App.get_running_app().config.getdefault(
+                'General', 'max_log_lines', 50
+            )
+        )
         self.service = OSCClient(self)
-        self.captcha_requests = {}
-        self.captcha_popups = []
 
     def show_info(self):
         InfoPopup().open()
 
     def on_main_btn_press(self):
         if self.ids.main_btn.text == self.launch_bot_text:
+            self.put_log_line(u'Начинаю запуск бота', 1)
             self.ids.main_btn.text = self.launching_bot_text
             self.service.start()
         else:
             self.service.stop()
+            self.put_log_line(u'Бот полностью остановлен', 2)
             self.ids.main_btn.text = self.launch_bot_text
 
     def update_answers_count(self, new_answers_count):
-        self.ids.answers_count_lb.text = 'Ответов: {}'.format(
-            new_answers_count)
+        self.ids.actionprevious.title = 'Ответов: %s' % new_answers_count
+
+    def put_log_line(self, line, log_importance):
+        if log_importance >= self.logging_level:
+            new_line = time.strftime('\n[%H:%M:%S] ', time.localtime()) + line
+            self.ids.logging_textinput.text += new_line
+
+            while self.ids.logging_textinput.text.count('\n') > self.max_log_lines:
+                self.ids.logging_textinput.text = \
+                    self.ids.logging_textinput.text[
+                        self.ids.logging_textinput.text.index('\n') + 1:
+                    ]
 
     def logout(self):
         self.bot.authorization(logout=True)
         self.parent.show_auth_screen()
-    
-    def show_bot_error(self, error_text):
-        error_text = error_text.decode('unicode-escape')
-        toast_notification(error_text)
-        save_error(error_text, from_bot=True)
 
 
 class CustomCommandsScreen(ColoredScreen):
@@ -309,7 +322,7 @@ class CustomCommandsScreen(ColoredScreen):
 
         if button_command != command:
             if command in self.included_keys:
-                toast_notification(u'Такая команда уже есть')
+                toast_notification(u'Такая команда уже существует')
                 return
             self.included_keys.remove(button_command)
             self.included_keys.append(command)

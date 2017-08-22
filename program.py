@@ -52,6 +52,8 @@ class VKBotApp(App):
                     'mark_type': 'кавычка',
                     'stable_mode': 'True',
                     'use_custom_commands': 'False',
+                    'logging_level': '1',
+                    'max_log_lines': '50',
                     'bot_activated': 'False',
                     'openweathermap_api_key': '0'
                 }
@@ -98,8 +100,7 @@ class VKBotApp(App):
             "desc": "При возникновении ошибки, бот будет продолжать работу",
             "section": "General",
             "key": "stable_mode",
-            "values": ["False","True"],
-            "disabled": 1
+            "values": ["False","True"]
             },
             {
             "type": "title",
@@ -115,6 +116,26 @@ class VKBotApp(App):
             },
             {
             "type": "title",
+            "title": "Логгирование"
+            },
+            {
+            "type": "options",
+            "title": "Уровень логгирования",
+            "desc": "Чем больше значение, тем меньше информации будет выведено",
+            "section": "General",
+            "key": "logging_level",
+            "options": ["0", "1", "2"]
+            },
+            {
+            "type": "options",
+            "title": "Максимальное количество строк лога",
+            "desc": "Уменьшите значение, если у вас проблемы с производительностью",
+            "section": "General",
+            "key": "max_log_lines",
+            "options": ["10", "30", "50", "100", "200"]
+            },
+            {
+            "type": "title",
             "title": "Активация бота"
             },
             {
@@ -127,6 +148,16 @@ class VKBotApp(App):
             }
         ]''' % CUSTOM_COMMANDS_FILE_PATH
         )
+
+    def on_config_change(self, config, section, key, value):
+        if config is self.config:
+            if section == 'General':
+                if key == 'max_log_lines':
+                    self.manager.get_screen('main_screen').max_log_lines = \
+                        int(value)
+                elif key == 'logging_level':
+                    self.manager.get_screen('main_screen').logging_level = \
+                        int(value)
 
     def open_captcha_popup(self, capthca):
         CaptchaPopup().open(capthca)

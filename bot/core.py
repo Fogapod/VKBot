@@ -5,6 +5,7 @@ import time
 import re
 import math
 import random
+import traceback
 
 from threading import Thread
 
@@ -16,9 +17,11 @@ load_blacklist, save_blacklist, CUSTOM_COMMAND_OPTIONS_COUNT
 
 import vkrequests as vkr
 
-__version__ = '0.1.0dev'
+
 AUTHOR_VK_ID = 180850898
 AUTHOR = u'[id%d|Евгений Ершов]' % AUTHOR_VK_ID
+
+__version__ = '0.1.0dev'
 
 __help__ = (
 u'''
@@ -114,8 +117,8 @@ def safe_format(s, *args, **kwargs):
 
 
 class Command(object):
-    def __init__(self, SELF_ID, appeals):
-        self.SELF_ID = SELF_ID
+    def __init__(self, self_id, appeals):
+        self.self_id = self_id
         self.appeals = appeals
         self.raw_text = ''
         self.text = ''
@@ -139,7 +142,7 @@ class Command(object):
         self.msg_id = 0
 
     def load(self, message):
-        self.__init__(self.SELF_ID, self.appeals) # refresh params
+        self.__init__(self.self_id, self.appeals) # refresh params
 
         self.raw_text = message['body']
         self.text = self.raw_text
@@ -161,7 +164,7 @@ class Command(object):
         self.user_id = message['user_id']
         self.real_user_id = self.user_id
 
-        if self.user_id == self.SELF_ID:
+        if self.user_id == self.self_id:
             self.out = 1
         else:
             self.out = message['out']
@@ -193,11 +196,11 @@ class Command(object):
                     elif self.event == 'chat_title_update':
                         self.event = 'title updated'
                     elif self.event == 'chat_invite_user' \
-                            and not message['action_mid'] == self.SELF_ID:
+                            and not message['action_mid'] == self.self_id:
                         self.event = 'user joined'
                         self.event_user_id = message['action_mid']
                     elif self.event == 'chat_kick_user' \
-                        and not message['action_mid'] == self.SELF_ID:
+                        and not message['action_mid'] == self.self_id:
                         self.event = 'user kicked'
                         self.event_user_id = message['action_mid']
                     else:
@@ -210,7 +213,7 @@ class Command(object):
 
         if self.from_user:
             if self.out:
-                self.real_user_id = self.SELF_ID
+                self.real_user_id = self.self_id
 
 
 class Bot(object):
@@ -266,13 +269,12 @@ class Bot(object):
             if not self.authorized:
                 raise Exception('Not authorized')
 
-            SELF_ID = vkr.get_self_id()[0]
-            command = Command(SELF_ID, self.appeals)
+            self_id = vkr.get_self_id()[0]
+            command = Command(self_id, self.appeals)
 
             last_msg_ids = []
             max_last_msg_ids = 30
 
-            self.mlpd = None
             self.runtime_error = None
             self.running = True
 
@@ -327,7 +329,10 @@ class Bot(object):
                             elif command.real_user_id in self.whitelist.keys():
                                 user_access_level = self.whitelist[command.real_user_id]
                             if user_access_level < required_access_level:
-                                response_text = u'Для использования команды необходим уровень доступа: %d. Ваш уровень доступа: %d' % (required_access_level, user_access_level)
+                                response_text = u'Для использования команды ' \
+                                    u'необходим уровень доступа: %d. Ваш уро' \
+                                    u'вень доступа: %d' % \
+                                    (required_access_level, user_access_level)
                             else:
                                 response_text, command = func(command)
                         else:
@@ -389,12 +394,10 @@ class Bot(object):
                     time.sleep(1)
                 time.sleep(2)
         except:
-            import traceback
             self.runtime_error = traceback.format_exc()
             self.run_bot = False
 
         self.running = False
-        self.reply_count = 0
 
     def launch_bot(self):
         self.run_bot = True
@@ -440,10 +443,6 @@ class Bot(object):
     def _format_response(self, response_text, command, attachments):
         format_dict = {}
 
-        random_ranges = re.findall('{random(\d{1,500})}', response_text)
-        for r in random_ranges:
-            format_dict['random%s' %r] = random.randrange(int(r) + 1)
-
         if '{version}' in response_text:
             format_dict['version'] = __version__
         if '{author}' in response_text:
@@ -459,10 +458,10 @@ class Bot(object):
         if '{bot_name}' in response_text:
             format_dict['bot_name'] = self.bot_name
         if '{my_name}' in response_text:
-            name, error = vkr.get_name_by_id(object_id=command.SELF_ID)
+            name, error = vkr.get_name_by_id(object_id=command.self_id)
             format_dict['my_name'] = name if name else 'No name'
         if '{my_id}' in response_text:
-            format_dict['my_id'] = command.SELF_ID
+            format_dict['my_id'] = command.self_id
         if '{user_name}' in response_text:
             name, error = vkr.get_name_by_id(object_id=command.real_user_id)
             format_dict['user_name'] = name if name else 'No name'
@@ -480,6 +479,9 @@ class Bot(object):
         if '{event_user_name}' in response_text and command.event_user_id:
             name, error = vkr.get_name_by_id(object_id=command.event_user_id)
             format_dict['event_user_name'] = name if name else 'No name'
+
+        for r in re.findall('{random(\d{1,500})}', response_text):
+            format_dict['random%s' %r] = random.randrange(int(r) + 1)
 
         for match in re.findall('{id(-?\d+)_name}', response_text):
             user_id = match
