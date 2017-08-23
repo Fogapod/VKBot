@@ -30,6 +30,7 @@ class VKBotApp(App):
 
         return self.manager
 
+
     def load_kv_files(self):
         directories = ['uix/kv/']
 
@@ -40,8 +41,10 @@ class VKBotApp(App):
                 else:
                     continue
 
+
     def get_application_config(self):
         return SETTINGS_FILE_PATH
+
 
     def build_config(self, config):
         config.setdefaults('General', 
@@ -58,6 +61,7 @@ class VKBotApp(App):
                     'openweathermap_api_key': '0'
                 }
             )
+
 
     def build_settings(self, settings):
         settings.add_json_panel(
@@ -149,6 +153,7 @@ class VKBotApp(App):
         ]''' % CUSTOM_COMMANDS_FILE_PATH
         )
 
+
     def on_config_change(self, config, section, key, value):
         if config is self.config:
             if section == 'General':
@@ -159,11 +164,14 @@ class VKBotApp(App):
                     self.manager.get_screen('main_screen').logging_level = \
                         int(value)
 
+
     def open_captcha_popup(self, capthca):
         CaptchaPopup().open(capthca)
 
+
     def open_twofa_popup(self, vk, auth_response_page):
         TwoFAKeyEnterPopup().open(vk, auth_response_page)
+
 
     def _export_logs(self):
         if not os.path.exists(PATH + '.logs/'):
@@ -180,9 +188,11 @@ class VKBotApp(App):
             for file in os.listdir('service/.kivy/logs/'):
                 copyfile('service/.kivy/logs/' + file, PATH + '.service_logs/' + file)
 
+
     def _open_url(*args):
         import webbrowser
         webbrowser.open(args[1][1].encode('utf8'))
+
 
     def on_pause(self):
         return True
