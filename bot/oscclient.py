@@ -31,8 +31,7 @@ class OSCClient():
         self.oscid = self.osc.listen(port=3002)
         self.osc.bind(self.oscid, self.pong, '/pong')
         self.osc.bind(self.oscid, self.read_status, '/status')
-        self.osc.bind(self.oscid, self.set_answers_count, '/answers')
-        self.osc.bind(self.oscid, self.return_error, '/error')
+        self.osc.bind(self.oscid, self.set_answers_count, '/answers count')
         self.osc.bind(self.oscid, self.return_log, '/log')
         self.osc_read_event = None
         self.answers_request_event = None
@@ -87,21 +86,30 @@ class OSCClient():
         self.stop_reading_osc_queque()
 
     def ping(self):
-        self.mainscreen.put_log_line(u'Проверяю, запущен ли бот...', 1)
+        self.mainscreen.put_log_to_queue(
+            u'Проверяю, запущен ли бот...', 1, time.time()
+        )
         self.osc.sendMsg('/ping', [], port=3000)
 
     def pong(self, message, *args):
-        self.mainscreen.put_log_line(u'Бот уже запущен! Переподключаюсь', 2)
+        self.mainscreen.put_log_to_queue(
+            u'Бот уже запущен! Переподключаюсь',
+            2, time.time()
+        )
         self.start_requesting_answers_count()
         self.mainscreen.ids.main_btn.text = self.mainscreen.stop_bot_text
 
     def read_status(self, message, *args):
         status = message[2]
         if status == 'launched':
-            self.mainscreen.put_log_line(u'Бот запущен', 2)
+            self.mainscreen.put_log_to_queue(
+                u'Бот запущен', 2, time.time()
+            )
             self.mainscreen.ids.main_btn.text = self.mainscreen.stop_bot_text
         elif status == 'exiting':
-            self.mainscreen.put_log_line(u'Бот полностью остановлен', 2)
+            self.mainscreen.put_log_to_queue(
+                u'Бот полностью остановлен', 2, time.time()
+            )
             self.mainscreen.ids.main_btn.text = self.mainscreen.launch_bot_text
 
     def set_answers_count(self, message, *args):
@@ -109,18 +117,7 @@ class OSCClient():
         if self.mainscreen:
             self.mainscreen.update_answers_count(self.answers_count)
 
-    def return_error(self, message, *args):
-        error = message[2]
-        self.mainscreen.put_log_line(
-            u'Во время работы произошла непредвиденная ошибка!\nТекст ошибки: ' \
-                + error.decode('unicode-escape'), 2
-        )
-
-        save_error(error, from_bot=True)
-
-        self.mainscreen.put_log_line(
-            u'Ошибка сохранена в файле %s' % BOT_ERROR_FILE_PATH, 2
-        )
-
     def return_log(self, message, *args):
-        self.mainscreen.put_log_line(*literal_eval(message[2]))
+        # from kivy.logger import Logger
+        # Logger.info(str(message[2]))
+        self.mainscreen.put_log_to_queue(*literal_eval(message[2]))

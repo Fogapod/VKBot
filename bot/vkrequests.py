@@ -1,10 +1,10 @@
 # coding:utf8
 
 
-import time, traceback
+import time
+import traceback
 
 from kivy.app import App
-from kivy.logger import Logger
 
 from libs import vk_api as vk
 from utils import load_token, save_token
@@ -15,12 +15,19 @@ def error_handler(request):
         error = None
 
         try:
+            send_log_line(u'Вызов: %s' % request.__name__, 0)
             response = request(*args, **kwargs)
         except Exception as raw_error:
+            send_log_line(u'Возникла ошибка: %s' % traceback.format_exc(), 0)
             error = str(raw_error).lower()
 
             if error == 'captcha needed' and request.__name__ == 'log_in':
                 return False, raw_error
+
+            elif 'timed out' in error:
+                send_log_line(u'Ошибка timed out. Повторяю запрос...', 1)
+                return do_request(*args, **kwargs)
+
             return False, error
         else:
             return response, error
@@ -46,6 +53,15 @@ def _save_token(token=None):
     save_token(token)
 
 
+def set_new_logger_function(func):
+    global send_log_line
+    send_log_line = func
+
+
+def send_log_line(line, log_importance):
+    pass
+
+
 @error_handler
 def log_in(login=None, password=None, logout=False):
     global api
@@ -67,16 +83,23 @@ def log_in(login=None, password=None, logout=False):
     if login and password:
         session_params['login'] = login
         session_params['password'] = password
+
+        session = vk.VkApi(**session_params)
+        session.auth()
+        _save_token()
     else:
-        session_params['token'] = token
         if not token:
             return False
 
-    session = vk.VkApi(**session_params)
-    session.auth(reauth=login and password)
+        session_params['token'] = token
+
+        session = vk.VkApi(**session_params)
+
+        if not session.check_token():
+            return False
+
     api = session.get_api()
 
-    _save_token()
     return True
 
 

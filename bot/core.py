@@ -258,7 +258,7 @@ class Bot(object):
         self.activate_access_level = 0
         self.deactivate_access_level = 0
 
-    def authorization(self, login= '', password= '', token='', logout=False):
+    def authorization(self, login= '', password= '', logout=False):
         self.authorized, error = \
             vkr.log_in(login=login, password=password, logout=logout)
 
@@ -269,6 +269,7 @@ class Bot(object):
             if not self.authorized:
                 raise Exception('Not authorized')
 
+            self.send_log_line(u'Инициализация переменных бота...', 0)
             self_id = vkr.get_self_id()[0]
             command = Command(self_id, self.appeals)
 
@@ -278,7 +279,15 @@ class Bot(object):
             self.runtime_error = None
             self.running = True
 
+            self.send_log_line(
+                u'Загрузка файла whitelist\'а из %(whitelist_file)s...',
+                0
+            )
             self.whitelist = load_whitelist()
+            self.send_log_line(
+                u'Загрузка файла blacklist\'а из %(blacklist_file)s...',
+                0
+            )
             self.blacklist = load_blacklist()
 
             while self.run_bot:
@@ -287,16 +296,23 @@ class Bot(object):
                     if error:
                         raise Exception(error)
 
-                updates, error = \
-                    vkr.get_message_updates(ts=self.mlpd['ts'], pts=self.mlpd['pts'])
+                updates, error = vkr.get_message_updates(
+                    ts=self.mlpd['ts'],
+                    pts=self.mlpd['pts']
+                )
                 
                 if updates:
                     history = updates[0]
                     self.mlpd['pts'] = updates[1]
                     messages = updates[2]
-                elif 'connection' in error:
+                    self.send_log_line(
+                        u'Получено сообщений: %d' % messages['count'],
+                        0
+                    )
+                elif '[errno 7]' in error or '[errno 8]' in error:
+                    self.send_log_line(u'Ошибка соединения. Жду 6 секунд...', 2)
                     error = None
-                    time.sleep(3)
+                    time.sleep(6)
                     continue
                 else:
                     raise Exception(error)
@@ -327,7 +343,8 @@ class Bot(object):
                             if command.out:
                                 user_access_level = 3
                             elif command.real_user_id in self.whitelist.keys():
-                                user_access_level = self.whitelist[command.real_user_id]
+                                user_access_level = \
+                                    self.whitelist[command.real_user_id]
                             if user_access_level < required_access_level:
                                 response_text = u'Для использования команды ' \
                                     u'необходим уровень доступа: %d. Ваш уро' \
@@ -379,11 +396,23 @@ class Bot(object):
                                         )
                     if error:
                         if error == 'captcha needed':
-                            ctime.sleep(5)
+                            self.send_log_line(u'Капча! Жду 5 секунд...', 1)
+                            time.sleep(5)
                         elif error == 'response code 413':
-                            pass # message too long # TODO
+                            self.send_log_line(
+                                u'Сообщение слишком длинное для отправки',
+                                # u'Разделяю сообщение', # TODO
+                                2
+                            )
+                            continue
                         else:
+                            self.send_log_line(
+                                u'Неизвестная ошибка при отправке сообщения',
+                                1
+                            )
                             raise Exception(error)
+
+                    self.send_log_line(u'Сообщение доставлено (%d)' % msg_id, 1)
 
                     self.reply_count += 1
 
@@ -392,8 +421,9 @@ class Bot(object):
                     last_msg_ids.append(msg_id)
 
                     time.sleep(1)
-                time.sleep(2)
+                time.sleep(3)
         except:
+            self.send_log_line(u'Ошибка бота перехвачена', 0)
             self.runtime_error = traceback.format_exc()
             self.run_bot = False
 
@@ -401,19 +431,26 @@ class Bot(object):
 
     def launch_bot(self):
         self.run_bot = True
+        self.send_log_line(u'Создание отдельного потока для бота...', 0)
         self.bot_thread = Thread(target=self.process_updates)
+        self.send_log_line(u'Запуск потока...', 0)
         self.bot_thread.start()
 
         while not self.running:
             time.sleep(0.1)
             if self.runtime_error:
                 raise Exception(self.runtime_error)
+
+        self.send_log_line(u'Отдельный поток бота запущен и работает', 1)
         return True
 
     def stop_bot(self):
+        self.send_log_line(u'Остановка потока...', 0)
         self.run_bot = False
-        self.bot_thread.join()
+        if self.bot_thread:
+            self.bot_thread.join()
 
+        self.send_log_line(u'Отдельный поток бота отключён', 1)
         return True
 
     def load_params(self, appeals, activated,
@@ -1009,6 +1046,11 @@ disabled: {}'''
                 self.blacklist[chat_id] = blacklist_reason
                 save_blacklist(self.blacklist)
 
+                self.send_log_line(
+                    u'id %s добавлен в чёрный список по причине: %s' % \
+                        (chat_id, blacklist_reason),
+                    1
+                )
                 return u'id %s добавлен в список по причине: %s' % (chat_id, blacklist_reason), cmd
 
             elif cmd.words[1] == '-':
@@ -1029,22 +1071,27 @@ disabled: {}'''
                 self.blacklist.pop(chat_id)
                 save_blacklist(self.blacklist)
 
+                self.send_log_line(
+                    u'id %s удалён из чёрного списка' % chat_id, 1
+                )
                 return u'id %s удалён из списка' % chat_id, cmd
 
             else:
                 return u'Неизвестная опция', cmd
 
     def restart(self, cmd):
+        self.send_log_line(u'Вызов функции перезагрузки', 0)
         self.need_restart = True
         return u'Начинаю перезагрузку', cmd
 
     def stop_bot_from_message(self, cmd):
-        if cmd.out:
-            self.run_bot = False
-            self.runtime_error = 1
-            return u'Завершаю работу', cmd
+        self.send_log_line(u'Вызов функции остановки', 0)
+        self.run_bot = False
+        self.runtime_error = 1
+        return u'Завершаю работу', cmd
 
     def whitelist_command(self, cmd):
+        self.send_log_line(u'Вызов функции whitelist', 0)
         default_access_level = 1
 
         if len(cmd.words) == 1:
@@ -1084,10 +1131,16 @@ disabled: {}'''
 
         save_whitelist(self.whitelist)
 
+        self.send_log_line(
+            u'id %s добавлен в whitelist. Доступ: %d' % (user_id, access_level),
+            2
+        )
+
         return u'Теперь {id%s_name} имеет доступ %d' \
             % (user_id, access_level), cmd
 
     def raise_exception(self, cmd):
+        self.send_log_line(u'Вызов искуственной ошибки', 1)
         if cmd.out:
             words = cmd.words
             del words[0]
@@ -1106,7 +1159,9 @@ disabled: {}'''
         else:
             delay = 5
 
+        self.send_log_line(u'Начало паузы длиной в (%s) секунд' % delay, 1)
         time.sleep(delay)
+        self.send_log_line(u'Окончание паузы длиной в (%s) секунд' % delay, 1)
         self.mlpd = None
 
         return u'Пауза окончена', cmd
@@ -1114,6 +1169,7 @@ disabled: {}'''
     def activate_bot(self, cmd):
         if cmd.real_user_id == AUTHOR_VK_ID:
             self.activated = True
+            self.send_log_line(u'Произошла активация бота', 2)
             return u'Активация прошла успешно', cmd
         else:
             return u'Отказано в доступе', cmd
@@ -1121,6 +1177,7 @@ disabled: {}'''
     def deactivate_bot(self, cmd):
         if cmd.real_user_id == AUTHOR_VK_ID:
             self.activated = False
+            self.send_log_line(u'Произошла деактивация бота', 2)
             return u'Деактивация прошла успешно', cmd
         else:
             return u'Отказано в доступе', cmd
@@ -1130,3 +1187,12 @@ disabled: {}'''
             return u'Команду необходимо использовать с аргументом'
         else:
             return False
+
+    def set_new_logger_function(self, func):
+        self.send_log_line = func
+        self.send_log_line(u'Подключена функция логгирования для ядра бота', 0)
+        vkr.set_new_logger_function(func)
+        self.send_log_line(u'Подключена функция логгирования для vkrequests', 0)
+
+    def send_log_line(self, line, log_importance):
+        pass

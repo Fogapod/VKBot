@@ -1,6 +1,6 @@
 #: import Widget uix.widgets
 #: import FontelloButton uix.widgets
-#: import Apply uix.widgets
+#: import ColoredLabel uix.widgets
 #: import ScrollEffect kivy.effects.scroll.ScrollEffect
 
 #: import __version__ bot.core.__version__
@@ -275,20 +275,18 @@
                 ScrollView:
                     effect_cls: ScrollEffect
 
-                    TextInput:
-                        id: logging_textinput
-                        default_text: 'Добро пожаловать в приложение VKBot версии %s !\n' % __version__
+                    ColoredLabel:
+                        id: logging_panel
+                        default_text: 'Добро пожаловать в приложение VKBot версии %s !\n'.decode('utf8') % __version__
                         text: self.default_text
                         text_size: self.width, None
-                        foreground_color: 1, 1, 1, .8
-                        font_name: 'Roboto-Bold'
-                        font_size: sp(11)
-                        background_normal: ''
-                        background_active: ''
-                        background_color: .46, .46, .46, 1
-                        readonly: True
+                        color: 1, 1, 1, .8
+                        font_name: 'RobotoMono-Regular'
+                        font_size: sp(10)
+                        markup: True
+                        padding: dp(2), dp(2)
                         size_hint_y: None
-                        height: self.minimum_height
+                        height: self.texture_size[1]
 
 
 <CustomCommandsScreen>:

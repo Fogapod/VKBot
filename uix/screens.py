@@ -4,6 +4,8 @@
 import time
 import re
 
+from threading import Thread
+
 from kivy.uix.screenmanager import ScreenManager, FadeTransition
 from kivy.uix.modalview import ModalView
 from kivy.clock import mainthread, Clock
@@ -19,7 +21,8 @@ from uix.widgets import ColoredScreen
 
 from bot.oscclient import OSCClient
 from bot.utils import toast_notification, load_custom_commands, \
-    save_custom_commands, save_error, CUSTOM_COMMAND_OPTIONS_COUNT, save_token
+    save_custom_commands, save_error, CUSTOM_COMMAND_OPTIONS_COUNT, save_token, \
+    WHITELIST_FILE_PATH, BLACKLIST_FILE_PATH, BOT_ERROR_FILE_PATH
 
 
 class AuthScreen(ColoredScreen):
@@ -154,6 +157,9 @@ class MainScreen(ColoredScreen):
                 'General', 'max_log_lines', 50
             )
         )
+        self.log_queue = []
+        self.log_check_thread = Thread(target=self.read_log_queue)
+        self.log_check_thread.start()
         self.service = OSCClient(self)
 
     def show_info(self):
@@ -161,27 +167,54 @@ class MainScreen(ColoredScreen):
 
     def on_main_btn_press(self):
         if self.ids.main_btn.text == self.launch_bot_text:
-            self.put_log_line(u'Начинаю запуск бота', 1)
+            self.put_log_to_queue(u'Начинаю запуск бота', 1, time.time())
             self.ids.main_btn.text = self.launching_bot_text
             self.service.start()
         else:
             self.service.stop()
-            self.put_log_line(u'Бот полностью остановлен', 2)
+            self.put_log_to_queue(u'Бот полностью остановлен', 2, time.time())
             self.ids.main_btn.text = self.launch_bot_text
 
     def update_answers_count(self, new_answers_count):
         self.ids.actionprevious.title = 'Ответов: %s' % new_answers_count
 
-    def put_log_line(self, line, log_importance):
-        if log_importance >= self.logging_level:
-            new_line = time.strftime('\n[%H:%M:%S] ', time.localtime()) + line
-            self.ids.logging_textinput.text += new_line
+    def read_log_queue(self):
+        while True:
+            if not self.log_queue:
+                continue
 
-            while self.ids.logging_textinput.text.count('\n') > self.max_log_lines:
-                self.ids.logging_textinput.text = \
-                    self.ids.logging_textinput.text[
-                        self.ids.logging_textinput.text.index('\n') + 1:
-                    ]
+            _log_queue = sorted(self.log_queue, cmp=lambda x,y: cmp(x[2], y[2]))
+            new_lines = ''
+
+            for message in _log_queue:
+                self.log_queue.remove(message)
+
+                if message[1] >= self.logging_level:
+                    new_lines += time.strftime(
+                        '\n[%H:%M:%S] ', time.localtime(message[2])
+                    ) + message[0]
+
+            new_lines = new_lines % \
+                {
+                'whitelist_file': WHITELIST_FILE_PATH,
+                'blacklist_file': BLACKLIST_FILE_PATH,
+                'bot_error_file': BOT_ERROR_FILE_PATH
+                }
+
+            log_text = self.ids.logging_panel.text
+            new_log_text = log_text + new_lines
+            indent_num = new_log_text.count('\n')
+
+            while indent_num > self.max_log_lines:
+                new_log_text = new_log_text[new_log_text.index('\n') + 1:]
+                indent_num -= 1
+
+            self.ids.logging_panel.text = new_log_text
+
+            time.sleep(0.33)
+
+    def put_log_to_queue(self, line, log_importance, time):
+        self.log_queue.append((line, log_importance, time))
 
     def logout(self):
         self.bot.authorization(logout=True)
@@ -410,7 +443,6 @@ class CustomCommandsScreen(ColoredScreen):
         self.edit_popup.dismiss()
 
     def create_command(self, command, response):
-        from kivy.logger import Logger
         if not (self.edit_popup.ids.command_textinput.text
                 and self.edit_popup.ids.response_textinput.text):
             toast_notification(
