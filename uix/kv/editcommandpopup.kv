@@ -1,6 +1,5 @@
 #: import LowerTextInput uix.widgets
 #: import Widget uix.widgets
-#: import ShadeButton uix.widgets
 #: import FontelloButton uix.widgets
 
 
@@ -96,10 +95,10 @@
             size_hint_y: None
             spacing: dp(5)
 
-            ShadeButton:
+            Button:
                 id: apply_btn
-                _callback: None
                 text: 'Применить'
+                _callback: None
 
             FontelloButton:
                 id: delete_command_btn
@@ -108,6 +107,7 @@
                 size_hint_x: None
                 background_color: 1, 0, 0, 1
 
-            ShadeButton:
+            Button:
                 text: 'Отмена'
+
                 on_release: root.dismiss()

@@ -3,8 +3,7 @@ from kivy.uix.button import Button
 from kivy.uix.screenmanager import Screen
 from kivy.uix.textinput import TextInput
 
-from kivy.properties import BooleanProperty
-from kivy.graphics import Color, Rectangle
+from kivy.graphics import Color, Rectangle, RoundedRectangle
 from kivy.metrics import dp
 
 
@@ -12,42 +11,71 @@ class Widget(Widget):
     pass
 
 
-class ShadeButton(Button):
+class ButtonWithShadow(Button):
     def __init__(self, **kwargs):
-        self.use_shade = BooleanProperty(True)
-        super(ShadeButton, self).__init__(**kwargs)
-        self.redraw_shade()
+        self.disable_shadow = False
+        self.shadow_visibility = .3
+        self.shadow_shift_x = dp(3)
+        self.shadow_shift_y = dp(3)
+        self.drawing_shape = Rectangle
+        super(ButtonWithShadow, self).__init__(**kwargs)
 
-    def redraw_shade(self):
-        if self.disabled or not self.use_shade:
-            return
 
-        if self.canvas.before:
+    def redraw_all(self):
+        if self.canvas:
             self.canvas.before.clear()
 
-        with self.canvas.before:
-            Color(rgba=(0, 0, 0, 0.7))
+        self.redraw_shadow()
+        self.redraw_background()
 
-            Rectangle(
-                pos=(self.pos[0] + dp(4), self.pos[1] - dp(4)), 
+
+    def redraw_background(self):
+        with self.canvas.before:
+            Color(rgba=(self.background_color[:3] + [1]))
+            self.drawing_shape(pos=self.pos, size=self.size)
+
+
+    def redraw_shadow(self):
+        if self.disable_shadow:
+            return
+
+        with self.canvas.before:
+            Color(rgba=(0, 0, 0, self.shadow_visibility))
+
+            self.drawing_shape(
+                pos=(
+                    self.pos[0] + self.shadow_shift_x,
+                    self.pos[1] - self.shadow_shift_y
+                ),
                 size=self.size
             )
 
+
     def on_size(self, *args):
-        self.redraw_shade()
+        self.redraw_all()
+
 
     def on_pos(self, *args):
-        self.redraw_shade()
+        self.redraw_all()
+
 
     def on_press(self):
         self.canvas.before.clear()
+        self.redraw_background()
+
 
     def on_touch_up(self, touch):
-        self.redraw_shade()
-        super(ShadeButton, self).on_touch_up(touch)
+        self.redraw_all()
+        super(ButtonWithShadow, self).on_touch_up(touch)
 
 
-class BlueButton(ShadeButton):
+class RoundedButtonWithShadow(ButtonWithShadow):
+    def __init__(self, **kwargs):
+        super(RoundedButtonWithShadow, self).__init__(**kwargs)
+        self.drawing_shape = RoundedRectangle
+
+
+class BlueButton(RoundedButtonWithShadow):
     pass
 
 
@@ -60,7 +88,7 @@ class ColoredScreen(Screen):
 
 
 class LowerTextInput(TextInput):
-    lower_mode = BooleanProperty(False)
+    lower_mode = False
 
     def insert_text(self, s, from_undo=False):
         if self.lower_mode:

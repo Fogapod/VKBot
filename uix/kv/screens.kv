@@ -1,4 +1,5 @@
 #: import Widget uix.widgets
+#: import RoundedButtonWithShadow uix.widgets
 #: import BlueButton uix.widgets
 #: import FontelloButton uix.widgets
 #: import ScrollEffect kivy.effects.scroll.ScrollEffect
@@ -116,10 +117,11 @@
 
             Widget
 
-    Button:
+    RoundedButtonWithShadow:
         id: pass_auth
         text: 'Пропустить'
         font_size: '16sp'
+        background_color: .2, .2, .2, 0
         size_hint: None, None
         size: self.texture_size[0]*2.3, self.texture_size[1]*2.3
         pos_hint: {'center_x':.5}
