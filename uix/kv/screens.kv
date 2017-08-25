@@ -116,7 +116,7 @@
 
             Widget
 
-    BlueButton:
+    Button:
         id: pass_auth
         text: 'Пропустить'
         font_size: '16sp'
@@ -346,12 +346,13 @@
             FontelloButton:
                 text: 'P'
                 size_hint_x: 1.5
+                background_color: 0, 0, 0, 0
 
                 on_release: root.open_new_command_popup()
 
             Widget
 
-            Button:
+            BlueButton:
                 text: 'Вернуться'
                 size_hint: 1, None
 
@@ -362,5 +363,6 @@
             FontelloButton:
                 text: 'U'
                 size_hint_x: 1.5
+                background_color: 0, 0, 0, 0
 
                 on_release: root.sort_blocks()

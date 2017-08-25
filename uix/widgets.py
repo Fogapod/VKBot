@@ -4,13 +4,48 @@ from kivy.uix.screenmanager import Screen
 from kivy.uix.textinput import TextInput
 
 from kivy.properties import BooleanProperty
+from kivy.graphics import Color, Rectangle
+from kivy.metrics import dp
 
 
 class Widget(Widget):
     pass
 
 
-class BlueButton(Button):
+class ShadeButton(Button):
+    def __init__(self, **kwargs):
+        self.use_shade = BooleanProperty(True)
+        super(ShadeButton, self).__init__(**kwargs)
+        self.redraw_shade()
+
+    def redraw_shade(self):
+        if self.disabled or not self.use_shade:
+            return
+
+        self.canvas.before.clear()
+
+        with self.canvas.before:
+            Color(rgba=(0, 0, 0, 0.7))
+
+            Rectangle(
+                pos=(self.pos[0] + dp(4), self.pos[1] - dp(4)), 
+                size=self.size
+            )
+
+    def on_size(self, *args):
+        self.redraw_shade()
+
+    def on_pos(self, *args):
+        self.redraw_shade()
+
+    def on_press(self):
+        self.canvas.before.clear()
+
+    def on_release(self):
+        self.redraw_shade()
+
+
+class BlueButton(ShadeButton):
     pass
 
 
