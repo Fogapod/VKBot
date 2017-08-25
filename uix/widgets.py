@@ -22,7 +22,8 @@ class ShadeButton(Button):
         if self.disabled or not self.use_shade:
             return
 
-        self.canvas.before.clear()
+        if self.canvas.before:
+            self.canvas.before.clear()
 
         with self.canvas.before:
             Color(rgba=(0, 0, 0, 0.7))
@@ -38,11 +39,13 @@ class ShadeButton(Button):
     def on_pos(self, *args):
         self.redraw_shade()
 
-    def on_press(self):
+    def on_touch_down(self, touch):
         self.canvas.before.clear()
+        super(ShadeButton, self).on_touch_down(touch)
 
-    def on_release(self):
+    def on_touch_up(self, touch):
         self.redraw_shade()
+        super(ShadeButton, self).on_touch_up(touch)
 
 
 class BlueButton(ShadeButton):
