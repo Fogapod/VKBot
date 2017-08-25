@@ -39,9 +39,8 @@ class ShadeButton(Button):
     def on_pos(self, *args):
         self.redraw_shade()
 
-    def on_touch_down(self, touch):
+    def on_press(self):
         self.canvas.before.clear()
-        super(ShadeButton, self).on_touch_down(touch)
 
     def on_touch_up(self, touch):
         self.redraw_shade()
