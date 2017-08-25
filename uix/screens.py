@@ -12,7 +12,6 @@ from kivy.clock import mainthread, Clock
 from kivy.core.clipboard import Clipboard
 from kivy.config import Config
 from kivy.app import App
-from kivy import platform
 
 from uix.customcommandblock import CustomCommandBlock, ListDropDown, \
     CommandButton
