@@ -18,23 +18,23 @@ class EditCommandPopup(Popup):
 
         self.switch_option_state(self.ids.regex_btn,
                                  self.ids.regex_btn.states,
-                                 force_state=command_button.options[0])
+                                 force_state=self.options[0])
 
         self.switch_option_state(self.ids.force_unmark_btn,
                                  self.ids.force_unmark_btn.states,
-                                 force_state=command_button.options[1])
+                                 force_state=self.options[1])
         
         self.switch_option_state(self.ids.force_forward_btn,
                                  self.ids.force_forward_btn.states,
-                                 force_state=command_button.options[2])
+                                 force_state=self.options[2])
 
         self.switch_option_state(self.ids.appeal_only_btn,
                                  self.ids.appeal_only_btn.states,
-                                 force_state=command_button.options[3])
+                                 force_state=self.options[3])
 
         self.switch_option_state(self.ids.disable_btn,
                                  self.ids.disable_btn.states,
-                                 force_state=command_button.options[4])
+                                 force_state=self.options[4])
 
         self.ids.delete_command_btn.disabled = False
 
@@ -99,8 +99,8 @@ class EditCommandPopup(Popup):
             option_button.background_color = [0, 1, 0, .6]
 
         if option_button.text == 'G':
-            self.ids.command_textinput.regex_activated =\
-                option_button.current_state == 2
+            self.ids.command_textinput.lower_mode = \
+                option_button.current_state == 0
             self.options[0] = option_button.current_state
         elif option_button.text == 'F':
             self.options[1] = option_button.current_state

@@ -198,5 +198,9 @@ class VKBotApp(App):
         return True
 
 
+    def on_close(self):
+        self.manager.get_screen('main_screen').stop_log_check_thread()
+
+
 if __name__ == '__main__':
     VKBotApp().run()

@@ -63,20 +63,24 @@ def send_status(status):
 
 def send_error(error):
     send_log_line(
-        u'Во время работы произошла непредвиденная ошибка!\nТекст ошибки: ' \
-            + error.decode('unicode-escape'),
+        u'[b]Во время работы произошла непредвиденная ошибка!\nТекст ошибки: ' \
+            + error.decode('unicode-escape') + '[/b]',
         2
     )
     utils.save_error(error, from_bot=True)
 
-    send_log_line(u'Ошибка сохранена в файле %(bot_error_file)s', 2)
+    send_log_line(u'[b]Ошибка сохранена в файле %(bot_error_file)s[/b]', 2)
+
 
 def send_answers_count(*args):
     osc.sendMsg('/answers count', [bot.reply_count, ], port=3002)
 
 
-def send_log_line(line, log_importance):
-    osc.sendMsg('/log', [str((line, log_importance, time.time())), ], port=3002)
+def send_log_line(line, log_importance, t=None):
+    if t is None:
+        t = time.time()
+
+    osc.sendMsg('/log', [str((line, log_importance, t)), ], port=3002)
 
 
 def exit(*args):
@@ -88,8 +92,8 @@ def exit(*args):
 
 if __name__ == '__main__':
     osc.init()
-    oscid = osc.listen(ipAddr='0.0.0.0', port=3000)
     send_log_line(u'Служба OSC подключена', 0)
+    oscid = osc.listen(ipAddr='0.0.0.0', port=3000)
 
     osc.bind(oscid, pong, '/ping')
     osc.bind(oscid, exit, '/exit')
@@ -106,17 +110,9 @@ if __name__ == '__main__':
 
             if error:
                 send_log_line(u'Авторизация не удалась', 2)
-                if '[errno 7]' in error or '[errno 8]' in error:
-                    send_log_line(
-                        u'Ошибка вызвана отсутствием соединения. ' \
-                        u'Повторная попытка через 5 секунд',
-                        2
-                    )
-                    time.sleep(5)
-                else:
-                    send_error(error)
-                    exit()
-                    break
+                send_error(error)
+                exit()
+                break
 
         send_log_line(u'Авторизация прошла без ошибок', 1)
 
@@ -124,7 +120,6 @@ if __name__ == '__main__':
 
         send_log_line(u'Включение бота...', 0)
         bot.launch_bot()
-        send_status('launched')
 
     except SystemExit:
         raise
@@ -133,6 +128,8 @@ if __name__ == '__main__':
         error = traceback.format_exc()
         send_error(error)
         exit()
+
+    send_status('launched')
 
     while True:
         osc.readQueue(oscid)
@@ -143,6 +140,7 @@ if __name__ == '__main__':
             send_log_line(u'Начинаю запись нового статуса активации', 0)
             Config.write()
             send_log_line(u'Записан новый статус активации', 1)
+            send_status('settings changed')
 
         if bot.openweathermap_api_key != openweathermap_api_key:
             openweathermap_api_key = bot.openweathermap_api_key
@@ -156,6 +154,7 @@ if __name__ == '__main__':
             )
             Config.write()
             send_log_line(u'Записан новый ключ openweathermap (погода)', 1)
+            send_status('settings changed')
 
         if bot.runtime_error:
             if bot.runtime_error != 1:

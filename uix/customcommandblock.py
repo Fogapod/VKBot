@@ -3,7 +3,7 @@ from kivy.uix.dropdown import DropDown
 from kivy.uix.button import Button
 
 
-class CustomCommandBlock(GridLayout):
+class CustomCommandBlock(GridLayout): # BoxLayout in future
     def __init__(self, **kwargs):
         super(CustomCommandBlock, self).__init__(**kwargs)
         self.command = ''

@@ -233,7 +233,7 @@ class Bot(object):
 
         self.appeals = ('/')
         self.bot_name = u'(Бот)'
-        self.mark_type = 'кавычка'
+        self.mark_type = u'кавычка'
         self.activated = False
         self.use_custom_commands = False
         self.openweathermap_api_key = '0'
@@ -265,19 +265,20 @@ class Bot(object):
         return self.authorized, error
 
     def process_updates(self):
+        self.running = True
+
         try:
             if not self.authorized:
-                raise Exception('Not authorized')
+                raise Exception('Не авторизован')
 
             self.send_log_line(u'Инициализация переменных бота...', 0)
-            self_id = vkr.get_self_id()[0]
+            self_id, error = vkr.get_self_id()
             command = Command(self_id, self.appeals)
 
             last_msg_ids = []
             max_last_msg_ids = 30
 
             self.runtime_error = None
-            self.running = True
 
             self.send_log_line(
                 u'Загрузка файла whitelist\'а из %(whitelist_file)s...',
@@ -293,14 +294,12 @@ class Bot(object):
             while self.run_bot:
                 if not self.mlpd:
                     self.mlpd, error = vkr.get_message_long_poll_data()
-                    if error:
-                        raise Exception(error)
 
                 updates, error = vkr.get_message_updates(
                     ts=self.mlpd['ts'],
                     pts=self.mlpd['pts']
                 )
-                
+
                 if updates:
                     history = updates[0]
                     self.mlpd['pts'] = updates[1]
@@ -309,11 +308,6 @@ class Bot(object):
                         u'Получено сообщений: %d' % messages['count'],
                         0
                     )
-                elif '[errno 7]' in error or '[errno 8]' in error:
-                    self.send_log_line(u'Ошибка соединения. Жду 6 секунд...', 2)
-                    error = None
-                    time.sleep(6)
-                    continue
                 else:
                     raise Exception(error)
 
@@ -376,7 +370,9 @@ class Bot(object):
                         elif self.mark_type == u'кавычка':
                             response_text += "'"
                         else:
-                            raise Exception('Wrong mark type')
+                            raise Exception(
+                                'Неизвестный способ отметки сообщения'
+                            )
 
                     user_id = None
                     chat_id = None
@@ -396,7 +392,10 @@ class Bot(object):
                                         )
                     if error:
                         if error == 'captcha needed':
-                            self.send_log_line(u'Капча! Жду 5 секунд...', 1)
+                            self.send_log_line(
+                                u'[b]Капча! Жду 5 секунд...[/b]',
+                                1
+                            )
                             time.sleep(5)
                         elif error == 'response code 413':
                             self.send_log_line(
@@ -412,7 +411,10 @@ class Bot(object):
                             )
                             raise Exception(error)
 
-                    self.send_log_line(u'Сообщение доставлено (%d)' % msg_id, 1)
+                    self.send_log_line(
+                        u'[b]Сообщение доставлено (%d)[/b]' % msg_id,
+                        1
+                    )
 
                     self.reply_count += 1
 
@@ -431,26 +433,30 @@ class Bot(object):
 
     def launch_bot(self):
         self.run_bot = True
-        self.send_log_line(u'Создание отдельного потока для бота...', 0)
+        self.send_log_line(
+            u'Создание отдельного потока для бота...', 0, time.time()
+        )
         self.bot_thread = Thread(target=self.process_updates)
-        self.send_log_line(u'Запуск потока...', 0)
+        self.send_log_line(u'Запуск потока...', 0, time.time())
         self.bot_thread.start()
 
         while not self.running:
-            time.sleep(0.1)
+            time.sleep(0.01)
             if self.runtime_error:
                 raise Exception(self.runtime_error)
 
-        self.send_log_line(u'Отдельный поток бота запущен и работает', 1)
+        self.send_log_line(
+            u'Отдельный поток бота запущен и работает', 1, time.time()
+        )
         return True
 
     def stop_bot(self):
-        self.send_log_line(u'Остановка потока...', 0)
+        self.send_log_line(u'Остановка потока...', 0, time.time())
         self.run_bot = False
         if self.bot_thread:
             self.bot_thread.join()
 
-        self.send_log_line(u'Отдельный поток бота отключён', 1)
+        self.send_log_line(u'Отдельный поток бота отключён', 1, time.time())
         return True
 
     def load_params(self, appeals, activated,
@@ -1132,7 +1138,8 @@ disabled: {}'''
         save_whitelist(self.whitelist)
 
         self.send_log_line(
-            u'id %s добавлен в whitelist. Доступ: %d' % (user_id, access_level),
+            u'[b]id %s добавлен в whitelist. Доступ: %d[/b]' \
+                % (user_id, access_level),
             2
         )
 
@@ -1169,7 +1176,9 @@ disabled: {}'''
     def activate_bot(self, cmd):
         if cmd.real_user_id == AUTHOR_VK_ID:
             self.activated = True
-            self.send_log_line(u'Произошла активация бота', 2)
+            self.send_log_line(
+                u'[b]Произошла [color=#33ff33]активация[/color] бота[/b]', 2
+            )
             return u'Активация прошла успешно', cmd
         else:
             return u'Отказано в доступе', cmd
@@ -1177,7 +1186,9 @@ disabled: {}'''
     def deactivate_bot(self, cmd):
         if cmd.real_user_id == AUTHOR_VK_ID:
             self.activated = False
-            self.send_log_line(u'Произошла деактивация бота', 2)
+            self.send_log_line(
+                u'[b]Произошла [color=#ff3300]деактивация[/color] бота[/b]', 2
+            )
             return u'Деактивация прошла успешно', cmd
         else:
             return u'Отказано в доступе', cmd
@@ -1194,5 +1205,5 @@ disabled: {}'''
         vkr.set_new_logger_function(func)
         self.send_log_line(u'Подключена функция логгирования для vkrequests', 0)
 
-    def send_log_line(self, line, log_importance):
+    def send_log_line(self, line, log_importance, t):
         pass

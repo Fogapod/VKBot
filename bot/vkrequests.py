@@ -15,17 +15,30 @@ def error_handler(request):
         error = None
 
         try:
-            send_log_line(u'Вызов: %s' % request.__name__, 0)
+            send_log_line(u'Вызов: [b]%s[/b]' % request.__name__, 0, time.time())
             response = request(*args, **kwargs)
         except Exception as raw_error:
-            send_log_line(u'Возникла ошибка: %s' % traceback.format_exc(), 0)
+            send_log_line(
+                u'Возникла ошибка (vkrequests): %s' % traceback.format_exc(),
+                0
+            )
             error = str(raw_error).lower()
 
             if error == 'captcha needed' and request.__name__ == 'log_in':
                 return False, raw_error
 
             elif 'timed out' in error:
-                send_log_line(u'Ошибка timed out. Повторяю запрос...', 1)
+                send_log_line(u'Ошибка [b]timed out[/b]. Повторяю запрос...', 1)
+                return do_request(*args, **kwargs)
+
+            elif '[errno 7]' in error \
+                    or '[errno 8]' in error \
+                    or '[errno 101]' in error \
+                    or '[errno 113]' in error \
+                    or 'connection' in error:
+                send_log_line(u'Ошибка сети. Жду 10 секунд...', 1)
+                time.sleep(10)
+
                 return do_request(*args, **kwargs)
 
             return False, error
@@ -58,7 +71,7 @@ def set_new_logger_function(func):
     send_log_line = func
 
 
-def send_log_line(line, log_importance):
+def send_log_line(line, log_importance, t=None):
     pass
 
 
@@ -180,6 +193,7 @@ def get_name_by_id(object_id=None, name_case='nom'):
         name = 'Unknown object'
 
     return name
+
 
 @error_handler
 def get_user_city(user_id=None):

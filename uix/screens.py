@@ -158,29 +158,37 @@ class MainScreen(ColoredScreen):
             )
         )
         self.log_queue = []
+        self.continue_reading_log_queue = True
         self.log_check_thread = Thread(target=self.read_log_queue)
         self.log_check_thread.start()
         self.service = OSCClient(self)
 
+
     def show_info(self):
         InfoPopup().open()
 
+
     def on_main_btn_press(self):
         if self.ids.main_btn.text == self.launch_bot_text:
-            self.put_log_to_queue(u'Начинаю запуск бота', 1, time.time())
             self.ids.main_btn.text = self.launching_bot_text
             self.service.start()
         else:
             self.service.stop()
-            self.put_log_to_queue(u'Бот полностью остановлен', 2, time.time())
             self.ids.main_btn.text = self.launch_bot_text
+
 
     def update_answers_count(self, new_answers_count):
         self.ids.actionprevious.title = 'Ответов: %s' % new_answers_count
 
+
     def read_log_queue(self):
-        while True:
-            if not self.log_queue:
+        while self.continue_reading_log_queue:
+            time.sleep(0.33)
+            if not self.log_queue \
+                    or not str(
+                        App.get_running_app().manager.current_screen
+                    )[14:-2] == 'main_screen':
+
                 continue
 
             _log_queue = sorted(self.log_queue, cmp=lambda x,y: cmp(x[2], y[2]))
@@ -211,10 +219,16 @@ class MainScreen(ColoredScreen):
 
             self.ids.logging_panel.text = new_log_text
 
-            time.sleep(0.33)
+
+    def stop_log_check_thread(self):
+        self.continue_reading_log_queue = False
+        if self.log_check_thread:
+            self.log_check_thread.join()
+
 
     def put_log_to_queue(self, line, log_importance, time):
         self.log_queue.append((line, log_importance, time))
+
 
     def logout(self):
         self.bot.authorization(logout=True)
@@ -228,15 +242,19 @@ class CustomCommandsScreen(ColoredScreen):
         self.included_keys = []
         self.max_command_preview_text_len = 47
 
+
+    @mainthread # not working
     def on_enter(self):
         self.custom_commands = load_custom_commands()
+
         if not self.custom_commands and type(self.custom_commands) is not dict:
             toast_notification(u'Повреждён файл пользовательских команд')
             Clock.schedule_once(self.leave, .1)
+
         else:
             for key in sorted(self.custom_commands.keys()):
                 for item in sorted(self.custom_commands[key]):
-                    if type(item) is not list or len(item)\
+                    if type(item) is not list or len(item) \
                             < CUSTOM_COMMAND_OPTIONS_COUNT + 1:
                         self.custom_commands[key].remove(item)
                         if type(item) is not list:
@@ -251,8 +269,10 @@ class CustomCommandsScreen(ColoredScreen):
                 if key not in self.included_keys:
                     self.add_command(key, self.custom_commands[key])
 
+
     def leave(self, delay=None):
         self.parent.show_main_screen()
+
 
     def open_edit_popup(self, command_button, command_block):
         max_title_len = 27
@@ -295,6 +315,7 @@ class CustomCommandsScreen(ColoredScreen):
 
         self.edit_popup.open()
 
+
     def open_new_command_popup(self):
         self.edit_popup.switch_to_empty_command()
         self.edit_popup.command_block = None
@@ -309,6 +330,7 @@ class CustomCommandsScreen(ColoredScreen):
             on_release=self.edit_popup.ids.apply_btn._callback
             )
         self.edit_popup.open()
+
 
     def save_edited_command(self, command, response, command_button, block):
         if not (self.edit_popup.ids.command_textinput.text
@@ -357,6 +379,7 @@ class CustomCommandsScreen(ColoredScreen):
             if command in self.included_keys:
                 toast_notification(u'Такая команда уже существует')
                 return
+
             self.included_keys.remove(button_command)
             self.included_keys.append(command)
             command_button.command = command
@@ -405,6 +428,7 @@ class CustomCommandsScreen(ColoredScreen):
         save_custom_commands(self.custom_commands)
         self.edit_popup.dismiss()
 
+
     def remove_command(self, command, response, command_button, block):
         options = self.edit_popup.get_options()
 
@@ -441,6 +465,7 @@ class CustomCommandsScreen(ColoredScreen):
 
         save_custom_commands(self.custom_commands)
         self.edit_popup.dismiss()
+
 
     def create_command(self, command, response):
         if not (self.edit_popup.ids.command_textinput.text
@@ -523,6 +548,7 @@ class CustomCommandsScreen(ColoredScreen):
         save_custom_commands(self.custom_commands)
         self.edit_popup.dismiss()
 
+
     def add_command(self, command, response):
         dropdown = ListDropDown()
         block = CustomCommandBlock(dropdown=dropdown)
@@ -565,6 +591,7 @@ class CustomCommandsScreen(ColoredScreen):
                 on_release=block.ids.dropdown_btn.callback)
         self.ids.cc_list.add_widget(block)
         self.included_keys.append(command)
+
 
     def sort_blocks(self):
         for widget in sorted(self.ids.cc_list.children):
