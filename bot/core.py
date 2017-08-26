@@ -211,6 +211,10 @@ class Command(object):
                     self.text = self.raw_text
                     self.lower_text = self.raw_text
 
+        else:
+            self.random_chat_user_id = \
+                random.choice((self.self_id, self.user_id))
+
         if self.from_user:
             if self.out:
                 self.real_user_id = self.self_id
@@ -488,37 +492,52 @@ class Bot(object):
 
         if '{version}' in response_text:
             format_dict['version'] = __version__
+
         if '{author}' in response_text:
             format_dict['author'] = AUTHOR
+
         if '{time}' in response_text:
             format_dict['time'] = time.strftime(
                 '%Y-%m-%d %H:%M:%S', time.localtime()
             )
+
         if '{appeal}' in response_text:
             format_dict['appeal'] = random.choice(self.appeals)
+
         if '{appeals}' in response_text:
             format_dict['appeals'] = '  '.join(self.appeals)
+
         if '{bot_name}' in response_text:
             format_dict['bot_name'] = self.bot_name
+
+        if '{my_id}' in response_text:
+            format_dict['my_id'] = command.self_id
+
         if '{my_name}' in response_text:
             name, error = vkr.get_name_by_id(object_id=command.self_id)
             format_dict['my_name'] = name if name else 'No name'
-        if '{my_id}' in response_text:
-            format_dict['my_id'] = command.self_id
+
+        if '{user_id}' in response_text:
+            format_dict['user_id'] = command.real_user_id
+
         if '{user_name}' in response_text:
             name, error = vkr.get_name_by_id(object_id=command.real_user_id)
             format_dict['user_name'] = name if name else 'No name'
-        if '{user_id}' in response_text:
-            format_dict['user_id'] = command.real_user_id
-        if '{random_user_name}' in response_text:
-            name, error = vkr.get_name_by_id(object_id=command.random_chat_user_id)
-            format_dict['random_user_name'] = name if name else 'No name'
+
         if '{random_user_id}' in response_text:
             format_dict['random_user_id'] = command.random_chat_user_id
+
+        if '{random_user_name}' in response_text:
+            name, error = \
+                vkr.get_name_by_id(object_id=command.random_chat_user_id)
+            format_dict['random_user_name'] = name if name else 'No name'
+
         if '{chat_name}' in response_text and command.from_chat:
             format_dict['chat_name'] = command.chat_name
+
         if '{event_user_id}' in response_text and command.event_user_id:
             format_dict['event_user_id'] = command.event_user_id
+
         if '{event_user_name}' in response_text and command.event_user_id:
             name, error = vkr.get_name_by_id(object_id=command.event_user_id)
             format_dict['event_user_name'] = name if name else 'No name'
