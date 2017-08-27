@@ -114,6 +114,7 @@ def save_custom_commands(content):
 def load_whitelist():
     if not os.path.exists(WHITELIST_FILE_PATH):
         open(WHITELIST_FILE_PATH, 'w').close()
+        return {}
     else:    
         with open(WHITELIST_FILE_PATH, 'r') as f:
             content = f.read()
@@ -141,6 +142,7 @@ def save_whitelist(whitelist):
 def load_blacklist():
     if not os.path.exists(BLACKLIST_FILE_PATH):
         open(BLACKLIST_FILE_PATH, 'w').close()
+        return {}
     else:    
         with open(BLACKLIST_FILE_PATH, 'r') as f:
             content = f.read()
