@@ -5,20 +5,23 @@ import os
 
 from kivy.app import App
 from kivy.lang import Builder
+from kivy.config import Config
 from kivy.uix.settings import SettingsWithNoMenu
 
 from uix.screens import Manager, TwoFAKeyEnterPopup, CaptchaPopup
 
-from bot.utils import SETTINGS_FILE_PATH, CUSTOM_COMMANDS_FILE_PATH, PATH
 from bot.core import Bot, __version__
+from bot.utils import SETTINGS_FILE_PATH, CUSTOM_COMMANDS_FILE_PATH, PATH
 
 
 class VKBotApp(App):
     use_kivy_settings = False
     settings_cls = SettingsWithNoMenu
+    config_version = 1
 
     def build(self):
         self.title = 'VKBot'
+
         self.bot = Bot()
         self.load_kv_files()
 
@@ -49,6 +52,7 @@ class VKBotApp(App):
     def build_config(self, config):
         config.setdefaults('General', 
                 {
+                    'config_version': '1',
                     'show_bot_activity': 'False',
                     'appeals': '/:бот,',
                     'bot_name': '(Бот)',
@@ -193,6 +197,13 @@ class VKBotApp(App):
         import webbrowser
         webbrowser.open(args[1][1].encode('utf8'))
 
+
+    def on_start(self):
+        Config.read(self.get_application_config())
+        config_file_version = int(Config.getdefault('General', 'config_version', 0))
+
+        if config_file_version < self.config_version:
+            self.config.write()
 
     def on_pause(self):
         return True
