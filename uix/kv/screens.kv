@@ -204,6 +204,8 @@
 
                 ActionButton:
                     text: 'Мои команды'
+                    size_hint_x: None
+                    width: self.texture_size[0]
 
                     on_release: root.parent.show_custom_commands_screen()
 
@@ -244,14 +246,16 @@
 
         GridLayout: # BoxLayout in future
             cols: 1
-            padding: dp(20), dp(30)
+            padding: dp(20), dp(15)
             size_hint_y: None
             height: self.minimum_height
 
             BlueButton:
                 id: main_btn
                 font_size: '16sp'
+                padding: 0, dp(10)
                 size_hint: 1, None
+                height: self.texture_size[1]
 
                 on_release: root.on_main_btn_press()
 
@@ -356,7 +360,9 @@
 
             BlueButton:
                 text: 'Вернуться'
-                size_hint: 1, None
+                padding: dp(5), dp(10)
+                size_hint: None, None
+                size: self.texture_size
 
                 on_release: root.leave()
 
