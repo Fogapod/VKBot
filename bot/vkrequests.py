@@ -99,6 +99,9 @@ def log_in(login=None, password=None, logout=False):
 
         session = vk.VkApi(**session_params)
         session.auth()
+
+        api = session.get_api()
+
         _save_token()
     else:
         if not token:
@@ -111,7 +114,7 @@ def log_in(login=None, password=None, logout=False):
         if not session.check_token():
             return False
 
-    api = session.get_api()
+        api = session.get_api()
 
     return True
 
