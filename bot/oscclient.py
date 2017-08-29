@@ -14,17 +14,15 @@ from bot.utils import SETTINGS_FILE_PATH, save_error, BOT_ERROR_FILE_PATH
 
 if platform == 'android':
     from android import AndroidService
+    from jnius import autoclass
+    import android
 else:
     import subprocess
 
 
 class OSCClient():
     def __init__(self, app):
-        if platform == 'android':
-            self.subprocess = AndroidService('VKBot', 'Бот работает')
-        else:
-            self.subprocess = None
-
+        self.subprocess = None
         self.app = app
         self.mainscreen = app.get_running_app().manager.get_screen('main_screen')
         self.answers_count = '0'
@@ -82,7 +80,14 @@ class OSCClient():
         self.start_reading_osc_queue()
 
         if platform == 'android':
-            self.subprocess.start('Сервис запущен')
+            try:
+                self.subprocess = autoclass('org.fogaprod.vkbot.dev.ServiceBotservice')
+                mActivity = autoclass('org.kivy.android.PythonActivity').mActivity
+                argument = ''
+                self.subprocess.start(mActivity, argument)
+            except:
+                self.subprocess = AndroidService('VKBot', 'Бот работает')
+                self.subprocess.start('Сервис запущен')
         else:
             self.subprocess = subprocess.Popen(['python2.7', 'service/main.py'])
 
@@ -93,7 +98,11 @@ class OSCClient():
         self.stop_requesting_answers_count()
 
         if platform == 'android':
-            self.subprocess.stop()
+            if self.subprocess:
+                try:
+                    android.stop_service()
+                except:
+                    self.subprocess.stop()
         else:
             osc.sendMsg('/exit', [], port=3000)
 
