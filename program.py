@@ -160,20 +160,16 @@ class VKBotApp(App):
                         int(value)
 
 
-    def send_auth_request(self, login, password):
-        self.osc_service.send_auth_request(login, password)
-
-
     def open_auth_popup(self):
         AuthPopup().open()
 
 
+    def open_twofa_popup(self):
+        TwoFAPopup(self).open()
+
+
     def open_captcha_popup(self, capthca_image_url):
-        CaptchaPopup(capthca_image_url, self).open()
-
-
-    def open_twofa_popup(self): #, vk, auth_response_page):
-        TwoFAPopup(self).open() #vk, auth_response_page)
+        CaptchaPopup(self, capthca_image_url).open()
 
 
     def _export_logs(self):
@@ -212,7 +208,7 @@ class VKBotApp(App):
         return True
 
 
-    def on_close(self):
+    def on_stop(self):
         self.manager.get_screen('main_screen').stop_log_check_thread()
 
 

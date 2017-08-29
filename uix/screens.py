@@ -36,7 +36,7 @@ class AuthPopup(ModalView):
         password = self.ids.pass_textinput.text
 
         if login and password:
-            self.app.send_auth_request(login, password)
+            self.app.osc_service.send_auth_request(login, password)
             self.dismiss()
 
 
@@ -82,7 +82,7 @@ class TwoFAPopup(ModalView):
 
 
 class CaptchaPopup(ModalView):
-    def __init__(self, captcha_img_url, app, **kwargs):
+    def __init__(self, app, captcha_img_url, **kwargs):
         self.app = app
         self.captcha_url = captcha_img_url
         super(CaptchaPopup, self).__init__(**kwargs)
@@ -145,7 +145,7 @@ class MainScreen(ColoredScreen):
             time.sleep(0.33)
             if not self.log_queue \
                     or not str(
-                        App.get_running_app().manager.current_screen
+                        self.app.manager.current_screen
                     )[14:-2] == 'main_screen':
 
                 continue

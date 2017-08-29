@@ -71,12 +71,12 @@ def log_in(login=None, password=None,
            logout=False
           ):
 
+    global api
+
     if logout:
         api = None
         _save_token(token='')
         return False
-
-    global api
 
     token = load_token()
 
