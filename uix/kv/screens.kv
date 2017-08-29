@@ -7,7 +7,7 @@
 #: import __version__ bot.core.__version__
 
 
-<TwoFAKeyEnterPopup>:
+<TwoFAPopup>:
     size_hint_y: None
     height: content.height + dp(30)
     pos_hint: {'center_y': 0.7}
@@ -26,7 +26,8 @@
             size_hint_y: None
             height: self.texture_size[1]
 
-        BoxLayout:
+        GridLayout: # BoxLayout in future
+            cols: 3
             size_hint_y: None
             height: self.minimum_height
 
@@ -49,28 +50,32 @@
                 font_size: sp(20)
                 size_hint_x: None
                 width: self.texture_size[0]
-                on_release: root.twofa_auth(code_textinput.text)
+                on_release: root.send_code(code_textinput.text)
 
 
-<AuthScreen>:
-    name: 'auth_screen'
+<AuthPopup>:
+    size_hint: None, None
+    size: content.size
+    pos_hint: {'center_y': .8}
 
     GridLayout:
+        id: content
         rows: 5
         spacing: dp(3)
         size_hint: None, None
         size: self.minimum_size
-        pos_hint: {'center_x':.5,'center_y':.75}
+        padding: dp(20)
 
         Label:
             text: 'Авторизация ВК'
-            color: 0, .2, .4, 1
+            # color: 0, .2, .4, 1
             font_size: '20sp'
             padding_y: dp(5)
             size_hint: None, None
             size: self.texture_size
 
         TextInput:
+            text: app._cached_login if app._cached_login is not None else ''
             hint_text: 'Логин'.decode('utf8')
             id: login_textinput
             size_hint: None, None
@@ -78,8 +83,11 @@
             height: self.minimum_height
             width: self.height*8
             multiline: False
+            focused: True
+            on_text_validate: self.focused = False; pass_textinput.focused = True
 
         TextInput:
+            text: app._cached_password if app._cached_login is not None else ''
             hint_text: 'Пароль'.decode('utf8')
             id: pass_textinput
             size_hint: None, None
@@ -87,12 +95,14 @@
             height: self.minimum_height
             width: self.height*8
             multiline: False
+            password: False
+            on_text_validate: self.focused = False; root.log_in()
 
         Button:
             id: show_pass_label
             text: root.hide_password_text
             background_color: 0, 0, 0, 0
-            color: 0, .2, .4, 1
+            # color: 0, .2, .4, 1
             font_size: '16sp'
             padding_y: dp(9)
             size_hint_y: None
@@ -117,18 +127,6 @@
 
             Widget
 
-    RoundedButtonWithShadow:
-        id: pass_auth
-        text: 'Пропустить'
-        font_size: '16sp'
-        background_color: .2, .2, .2, 0
-        size_hint: None, None
-        size: self.texture_size[0]*2.3, self.texture_size[1]*2.3
-        pos_hint: {'center_x':.5}
-        pos: self.pos[0], root.height*.05        
-        on_release: root.parent.show_main_screen()
-        disabled: False
-
 
 <InfoPopup>:
     size_hint: None, None
@@ -148,15 +146,16 @@
     size_hint: None, None
     size: content.width + dp(40), content.height + dp(50)
 
-    BoxLayout:
+    GridLayout: # BoxLayout in future
         id: content
+        rows: 3
         size_hint: None, None
         size: self.minimum_size
-        orientation: 'vertical'
         spacing: dp(8)
 
         AsyncImage:
             id: image
+            source: root.captcha_url
             allow_stretch: True
             size_hint: None, None
             size: dp(260), dp(100)
@@ -178,7 +177,7 @@
                 size_hint: None, None
                 size: self.texture_size[0], self.texture_size[1]*2
 
-                on_release: root.retry_request(textinput.text)
+                on_release: root.send_code(textinput.text)
 
             Widget
 
@@ -222,11 +221,6 @@
                         text: 'Настройки'
 
                         on_release: app.open_settings()
-
-                    ActionButton:
-                        text: 'Авторизация'
-
-                        on_release: root.parent.show_auth_screen()
 
                     ActionButton:
                         text: 'Информация'

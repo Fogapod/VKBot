@@ -52,22 +52,21 @@ def toast_notification(text, length_long=True):
 
 
 def load_token():
-    token = None
     if not os.path.exists(TOKEN_FILE_PATH):
         open(TOKEN_FILE_PATH, 'w').close()
+        return None
     else:
         try:
             with open(TOKEN_FILE_PATH, 'r') as f:
                 token = f.readlines()[0][:-1]
-        except:
             return token
-
-    return token
+        except:
+            return None
 
 
 def save_token(token):
-    if not token:
-        token = ''
+    if not token and token is not '':
+        return
 
     with open(TOKEN_FILE_PATH, 'w') as f:
         f.write('{}\n{}'.format(

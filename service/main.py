@@ -6,6 +6,8 @@ import sys
 import traceback
 import time
 
+from ast import literal_eval
+
 from kivy import platform
 from kivy.config import Config
 from kivy.lib import osc
@@ -23,6 +25,13 @@ if platform != 'android':
 utils.DATA_PATH = parent_path + utils.DATA_PATH
 
 utils.update_paths()
+
+
+# globals
+
+authorized = False
+twofactor_code = None
+captcha_code = None
 
 
 def update_params():
@@ -90,6 +99,72 @@ def exit(*args):
     sys.exit()
 
 
+def first_auth():
+    osc.sendMsg('/first auth', [], port=3002)
+    global authorized
+    authorized = False
+
+    while not authorized:
+        time.sleep(0.5)
+        osc.readQueue(oscid)
+
+    osc.sendMsg('/auth successful', [], port=3002)
+
+    return True
+
+
+def on_auth_request(message, *args):
+    global authorized
+    login, password = literal_eval(message[2])
+
+    authorized, error = bot.authorization(
+        login=login, password=password,
+        twofactor_handler=twofactor_handler, captcha_handler=captcha_handler
+    )
+    if error:
+        if error == 'bad password':
+            send_log_line(u'[b]Неверный логин или пароль![/b]', 2)
+            exit()
+        else:
+            raise Exception(error)
+
+
+def twofactor_handler():
+    global twofactor_code
+    twofactor_code = None
+    osc.sendMsg('/auth twofactor needed', [], port=3002)
+
+    while not twofactor_code:
+        time.sleep(0.5)
+        osc.readQueue(oscid)
+
+    return twofactor_code, True
+
+
+def captcha_handler(captcha):
+    global captcha_code
+    captcha_code = None
+    osc.sendMsg('/auth captcha needed', [captcha.get_url(), ], port=3002)
+
+    while not captcha_code:
+        time.sleep(0.5)
+        osc.readQueue(oscid)
+
+    captcha.try_again(captcha_code)
+
+
+def on_twofactor(message, *args):
+    send_log_line(u'Код получен', 1, time.time())
+    global twofactor_code
+    twofactor_code = message[2]
+
+
+def on_captcha(message, *args):
+    send_log_line(u'Код получен', 1, time.time())
+    global captcha_code
+    captcha_code = message[2]
+
+
 if __name__ == '__main__':
     osc.init()
     send_log_line(u'Служба OSC подключена', 0)
@@ -98,6 +173,9 @@ if __name__ == '__main__':
     osc.bind(oscid, pong, '/ping')
     osc.bind(oscid, exit, '/exit')
     osc.bind(oscid, send_answers_count, '/request answers count')
+    osc.bind(oscid, on_auth_request, '/auth request')
+    osc.bind(oscid, on_twofactor, '/twofactor response')
+    osc.bind(oscid, on_captcha, '/captcha response')
 
     try:
         bot = Bot()
@@ -109,10 +187,15 @@ if __name__ == '__main__':
             authorized, error = bot.authorization()
 
             if error:
-                send_log_line(u'Авторизация не удалась', 2)
-                send_error(error)
-                exit()
-                break
+                if error == 'no token':
+                    if first_auth():
+                        break
+                    else:
+                        exit()
+                else:
+                    send_log_line(u'Авторизация не удалась', 2)
+                    send_error(error)
+                    exit()
 
         send_log_line(u'Авторизация прошла без ошибок', 1)
 

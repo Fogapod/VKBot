@@ -14,7 +14,7 @@ class EditCommandPopup(Popup):
         self.title = title
         self.ids.command_textinput.text = command_button.command
         self.ids.response_textinput.text = command_button.response
-        self.options = command_button.options
+        self.options = command_button.options[:]
 
         self.switch_option_state(self.ids.regex_btn,
                                  self.ids.regex_btn.states,

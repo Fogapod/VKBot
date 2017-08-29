@@ -6,8 +6,13 @@ import traceback
 
 from kivy.app import App
 
-from libs import vk_api as vk
+import vk_api as vk
 from utils import load_token, save_token
+
+
+# globals
+
+api = None
 
 
 def error_handler(request):
@@ -24,10 +29,7 @@ def error_handler(request):
             )
             error = str(raw_error).lower()
 
-            if error == 'captcha needed' and request.__name__ == 'log_in':
-                return False, raw_error
-
-            elif 'timed out' in error:
+            if 'timed out' in error:
                 send_log_line(u'Ошибка [b]timed out[/b]. Повторяю запрос...', 1)
                 return do_request(*args, **kwargs)
 
@@ -48,18 +50,6 @@ def error_handler(request):
     return do_request
 
 
-def _auth_handler(vk, auth_response_page):
-    App.get_running_app().open_twofa_popup(vk, auth_response_page)
-
-
-def _captcha_handler(captcha):
-    app = App.get_running_app()
-    if app is None: # running in service
-        pass
-    else:
-        app.open_captcha_popup(captcha)
-
-
 def _save_token(token=None):
     if token is None:
         token = api._vk.token['access_token']
@@ -76,19 +66,23 @@ def send_log_line(line, log_importance, t=None):
 
 
 @error_handler
-def log_in(login=None, password=None, logout=False):
-    global api
+def log_in(login=None, password=None,
+           twofactor_handler=None, captcha_handler=None,
+           logout=False
+          ):
 
     if logout:
         api = None
         _save_token(token='')
         return False
 
+    global api
+
     token = load_token()
 
     session_params = {
-                        'auth_handler': _auth_handler,
-                        'captcha_handler': _captcha_handler,
+                        'auth_handler': twofactor_handler,
+                        'captcha_handler': captcha_handler,
                         'app_id': '6045412',
                         'scope': '70660' # messages, status, photos, offline
                      }
@@ -105,7 +99,7 @@ def log_in(login=None, password=None, logout=False):
         _save_token()
     else:
         if not token:
-            return False
+            raise Exception('No token')
 
         session_params['token'] = token
 

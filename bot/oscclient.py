@@ -7,7 +7,7 @@ from ast import literal_eval
 
 from kivy.lib import osc
 from kivy.clock import Clock
-from kivy.app import App
+
 from kivy import platform
 
 from bot.utils import SETTINGS_FILE_PATH, save_error, BOT_ERROR_FILE_PATH
@@ -19,14 +19,15 @@ else:
 
 
 class OSCClient():
-    def __init__(self, mainscreen):
+    def __init__(self, app):
         if platform == 'android':
             self.subprocess = AndroidService('VKBot', 'Бот работает')
         else:
             self.subprocess = None
 
+        self.app = app
+        self.mainscreen = app.get_running_app().manager.get_screen('main_screen')
         self.answers_count = '0'
-        self.mainscreen = mainscreen
         self.osc = osc
         self.osc.init()
         self.oscid = self.osc.listen(port=3002)
@@ -34,6 +35,14 @@ class OSCClient():
         self.osc.bind(self.oscid, self.read_status, '/status')
         self.osc.bind(self.oscid, self.set_answers_count, '/answers count')
         self.osc.bind(self.oscid, self.return_log_from_service, '/log')
+        self.osc.bind(self.oscid, self.on_first_auth, '/first auth')
+        self.osc.bind(self.oscid, self.on_auth_success, '/auth successful')
+        self.osc.bind(
+            self.oscid, self.on_auth_twofactor, '/auth twofactor needed'
+        )
+        self.osc.bind(self.oscid, self.on_auth_captcha, '/auth captcha needed')
+        self.osc.bind(self.oscid, self.on_auth_fail, '/auth failed')
+
         self.osc_read_event = None
         self.answers_request_event = None
         self.start_reading_osc_queue()
@@ -121,10 +130,9 @@ class OSCClient():
             self.mainscreen.ids.main_btn.text = self.mainscreen.launch_bot_text
 
         elif status == 'settings changed':
-            app = App.get_running_app()
-            app.close_settings()
-            app.destroy_settings()
-            app.load_config()
+            self.app.close_settings()
+            self.app.destroy_settings()
+            self.app.load_config()
 
 
     def set_answers_count(self, message, *args):
@@ -141,3 +149,54 @@ class OSCClient():
         if time is None:
             t = time.time()
         self.mainscreen.put_log_to_queue(message, log_importance, t)
+
+
+    def on_first_auth(self, message, *args):
+        self.logging_function(
+            u'[b]Пожалуйста, авторизируйтесь для начала работы[/b]',
+            2, time.time()
+        )
+        self.app.open_auth_popup()
+
+
+    def send_auth_request(self, login, password):
+        self.logging_function(u'[b]Начинаю авторизацию[/b]', 2)
+        self.osc.sendMsg('/auth request', [str((login, password))], port=3000)
+
+
+    def on_auth_success(self, message, *args):
+        self.logging_function(u'[b]Авторизация удалась. Вы превосходны![/b]', 2)
+
+
+    def on_auth_twofactor(self, message, *args):
+        self.logging_function(
+            u'[b]Необходимо ввести код для двухфакторной авторизации в ' \
+            u'появившемся окне[/b]', 2, time.time()
+        )
+        self.app.open_twofa_popup()
+        self.logging_function(u'Жду кода...', 1)
+
+
+    def send_twofactor_code(self, code):
+        self.osc.sendMsg('/twofactor response', [code, ], port=3000)
+        self.logging_function(u'Код отправлен', 0)
+
+
+    def on_auth_captcha(self, message, *args):
+        self.logging_function(u'[b]Пожалуйста, решите капчу[/b]', 2, time.time())
+        self.app.open_captcha_popup(message[2])
+        self.logging_function(u'Жду кода...', 1)
+
+
+    def send_captcha_code(self, code):
+        self.osc.sendMsg('/captcha response', [code, ], port=3000)
+        self.logging_function(u'Код отправлен', 0)
+
+
+    def on_auth_fail(self, message, *args):
+        error_message = message[2]
+        self.logging_function(
+            u'[b]Авторизация не удалась!\nОшибка: %s[/b]' % error_message,
+            2
+        )
+        self.app.enable_main_button()

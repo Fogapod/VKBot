@@ -18,53 +18,54 @@ from uix.customcommandblock import CustomCommandBlock, ListDropDown, \
 from uix.editcommandpopup import EditCommandPopup
 from uix.widgets import ColoredScreen
 
-from bot.oscclient import OSCClient
 from bot.utils import toast_notification, load_custom_commands, \
     save_custom_commands, save_error, CUSTOM_COMMAND_OPTIONS_COUNT, save_token, \
     WHITELIST_FILE_PATH, BLACKLIST_FILE_PATH, BOT_ERROR_FILE_PATH
 
 
-class AuthScreen(ColoredScreen):
+class AuthPopup(ModalView):
     def __init__(self, **kwargs):
         self.show_password_text = 'Показать пароль'
         self.hide_password_text = 'Скрыть пароль'
-        super(AuthScreen, self).__init__(**kwargs)
-        self.bot = App.get_running_app().bot
-        
-    def on_enter(self):
-        self.ids.pass_auth.disabled = not self.bot.authorized
+        super(AuthPopup, self).__init__(**kwargs)
+        self.app = App.get_running_app()
+
 
     def log_in(self):
         login = self.ids.login_textinput.text
         password = self.ids.pass_textinput.text
 
         if login and password:
-            authorized, error = self.bot.authorization(login=login,
-                                                           password=password)
-            if authorized:
-                self.parent.show_main_screen()
-                self.clear_pass_input_text()
-            elif error:
-                error = str(error)
-                if 'password' in error:
-                    toast_notification(u'Неправильный логин или пароль')
-                else:
-                    toast_notification(error)
-        return
-        
-    def clear_pass_input_text(self):
-        self.ids.pass_textinput.text = ''
+            self.app.send_auth_request(login, password)
+            self.dismiss()
+
 
     def update_pass_input_status(self, button):
-        if button.text == self.hide_password_text:
-            self.ids.pass_textinput.password = True
+        self.ids.pass_textinput.password = not self.ids.pass_textinput.password
+
+        if self.ids.pass_textinput.password:
             button.text = self.show_password_text
         else:
-            self.ids.pass_textinput.password = False
             button.text = self.hide_password_text
 
 
-class TwoFAKeyEnterPopup(ModalView):
+    def on_dismiss(self):
+        if self.ids.login_textinput.text != '':
+            self.app._cached_login = self.ids.login_textinput.text
+        else:
+            self.app._cached_login = None
+
+        if self.ids.pass_textinput.text != '':
+            self.app._cached_password = self.ids.pass_textinput.text
+        else:
+            self.app._cached_login = None
+
+
+class TwoFAPopup(ModalView):
+    def __init__(self, app, **kwargs):
+        self.app = app
+        super(TwoFAPopup, self).__init__(**kwargs)
+
     def paste_twofa_code(self, textinput):
         clipboard_data = Clipboard.paste()
         if type(clipboard_data) in (str, unicode) and re.match('\d+$', clipboard_data):
@@ -72,65 +73,25 @@ class TwoFAKeyEnterPopup(ModalView):
         else:
             toast_notification(u'Ошибка при вставке')
 
-    def twofa_auth(self, code):
+    def send_code(self, code):
         if not code:
             return
 
-        def auth_handler(*args):
-            return code, True
-
-        self.vk.error_handlers[-2] = auth_handler
-
-        try:
-            response = self.vk.twofactor(self.auth_response_page)
-        except Exception as e:
-            toast_notification(str(e))
-        else:
-            app = App.get_running_app()
-            app.bot.authorized = True
-
-            self.vk.save_cookies()
-            self.vk.api_login()
-            save_token(token=self.vk.token['access_token'])
-
-            if app.manager.current_screen.name == 'auth_screen':
-                app.manager.show_main_screen()
-
+        self.app.osc_service.send_twofactor_code(code)
         self.dismiss()
-
-    def open(self, vk, auth_response_page, **kwargs):
-        self.vk = vk
-        self.auth_response_page = auth_response_page
-        super(TwoFAKeyEnterPopup, self).open(**kwargs)
 
 
 class CaptchaPopup(ModalView):
-    def open(self, captcha, **kwargs):
-        self.captcha = captcha
-        self.ids.image.source = captcha.get_url()
-        super(CaptchaPopup, self).open(**kwargs)
+    def __init__(self, captcha_img_url, app, **kwargs):
+        self.app = app
+        self.captcha_url = captcha_img_url
+        super(CaptchaPopup, self).__init__(**kwargs)
 
-    def retry_request(self, key):
-        if not key:
+    def send_code(self, code):
+        if not code:
             return
-        try:
-            response = self.captcha.try_again(key) # None
-        except Exception as e:
-            e = str(e)
-            if 'password' in e:
-                toast_notification(u'Неправильный логин или пароль')
-            else:
-                toast_notification(e)
-        else:
-            app = App.get_running_app()
-            app.bot.authorized = True
 
-            self.captcha.vk.api_login()
-            save_token(token=self.captcha.vk.token['access_token'])
-
-            if app.manager.current_screen.name == 'auth_screen':
-                app.manager.show_main_screen()
-
+        self.app.osc_service.send_captcha_code(code)
         self.dismiss()
 
 
@@ -141,18 +102,18 @@ class InfoPopup(ModalView):
 class MainScreen(ColoredScreen):
     def __init__(self, **kwargs):
         super(MainScreen, self).__init__(**kwargs)
-        self.bot = App.get_running_app().bot
+        self.app = App.get_running_app()
         self.launch_bot_text = 'Включить бота'
         self.launching_bot_text = 'Запуск (отменить)' 
         self.stop_bot_text = 'Выключить бота'
         self.ids.main_btn.text = self.launch_bot_text
         self.logging_level = int(
-            App.get_running_app().config.getdefault(
+            self.app.config.getdefault(
                 'General', 'logging_level', 1
             )
         )
         self.max_log_lines = int(
-            App.get_running_app().config.getdefault(
+            self.app.config.getdefault(
                 'General', 'max_log_lines', 50
             )
         )
@@ -160,7 +121,6 @@ class MainScreen(ColoredScreen):
         self.continue_reading_log_queue = True
         self.log_check_thread = Thread(target=self.read_log_queue)
         self.log_check_thread.start()
-        self.service = OSCClient(self)
 
 
     def show_info(self):
@@ -170,9 +130,9 @@ class MainScreen(ColoredScreen):
     def on_main_btn_press(self):
         if self.ids.main_btn.text == self.launch_bot_text:
             self.ids.main_btn.text = self.launching_bot_text
-            self.service.start()
+            self.app.osc_service.start()
         else:
-            self.service.stop()
+            self.app.osc_service.stop()
             self.ids.main_btn.text = self.launch_bot_text
 
 
@@ -230,8 +190,9 @@ class MainScreen(ColoredScreen):
 
 
     def logout(self):
-        self.bot.authorization(logout=True)
-        self.parent.show_auth_screen()
+        self.put_log_to_queue(u'Записываю пустой токен...', 0, time.time())
+        save_token('')
+        self.put_log_to_queue(u'[b]Сессия сброшена[/b]', 2, time.time())
 
 
 class CustomCommandsScreen(ColoredScreen):
@@ -348,12 +309,7 @@ class CustomCommandsScreen(ColoredScreen):
             self.custom_commands[button_command].append(
                 [command_button.response] + options)
 
-            command_button.options = []
-            for i in options:
-                command_button.options.append(i)
-            # command_button.options = options will cause
-            # command_button.options is options
-
+            command_button.options = options[:]
             updated_command = []
 
             if options[0] == 2: # use_regex
@@ -605,11 +561,6 @@ class Manager(ScreenManager):
         super(Manager, self).__init__(**kwargs)
         self.transition = FadeTransition()
         self.last_screen = None
-
-    def show_auth_screen(self):
-        if not 'auth_screen' in self.screen_names:
-            self.add_widget(AuthScreen())
-        self.current = 'auth_screen'
 
     def show_main_screen(self):
         if not 'main_screen' in self.screen_names:

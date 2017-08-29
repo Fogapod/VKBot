@@ -262,9 +262,8 @@ class Bot(object):
         self.activate_access_level = 0
         self.deactivate_access_level = 0
 
-    def authorization(self, login= '', password= '', logout=False):
-        self.authorized, error = \
-            vkr.log_in(login=login, password=password, logout=logout)
+    def authorization(self, **kwargs):
+        self.authorized, error = vkr.log_in(**kwargs)
 
         return self.authorized, error
 
@@ -336,7 +335,8 @@ class Bot(object):
                             self.custom_command(command, self.custom_commands)
 
                     if not response_text and command.was_appeal:
-                        func, required_access_level = self.builtin_command(command.words[0].lower())
+                        func, required_access_level = \
+                            self.builtin_command(command.words[0].lower())
                         if func:
                             if command.out:
                                 user_access_level = 3
@@ -1036,7 +1036,7 @@ disabled: {}'''
             else:
                 response = ''
                 for i, uid in enumerate(self.blacklist.keys()):
-                    response += u'%d. {id%d_name} (%d) Причина: %s\n' % (i+1, uid, uid, self.blacklist[uid])
+                    response += u'%d. {id%d_name} (%d): %s\n' % (i+1, uid, uid, self.blacklist[uid])
                 response = response[:-1]
             return response, cmd
         else:
@@ -1222,7 +1222,7 @@ disabled: {}'''
         self.send_log_line = func
         self.send_log_line(u'Подключена функция логгирования для ядра бота', 0)
         vkr.set_new_logger_function(func)
-        self.send_log_line(u'Подключена функция логгирования для vkrequests', 0)
+        self.send_log_line(u'Подключена функция логгирования для vkr.quests', 0)
 
     def send_log_line(self, line, log_importance, t):
         pass

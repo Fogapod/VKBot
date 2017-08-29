@@ -8,9 +8,10 @@ from kivy.lang import Builder
 from kivy.config import Config
 from kivy.uix.settings import SettingsWithNoMenu
 
-from uix.screens import Manager, TwoFAKeyEnterPopup, CaptchaPopup
+from uix.screens import Manager, AuthPopup, TwoFAPopup, CaptchaPopup
 
-from bot.core import Bot, __version__
+from bot.core import __version__
+from bot.oscclient import OSCClient
 from bot.utils import SETTINGS_FILE_PATH, CUSTOM_COMMANDS_FILE_PATH, PATH
 
 
@@ -19,17 +20,17 @@ class VKBotApp(App):
     settings_cls = SettingsWithNoMenu
     config_version = 1
 
+    _cached_login = None
+    _cached_password = None
+
+
     def build(self):
         self.title = 'VKBot'
 
-        self.bot = Bot()
         self.load_kv_files()
 
         self.manager = Manager()
-
         self.manager.show_main_screen()
-        if not self.bot.authorization()[0]:
-            self.manager.show_auth_screen()
 
         return self.manager
 
@@ -169,12 +170,20 @@ class VKBotApp(App):
                         int(value)
 
 
-    def open_captcha_popup(self, capthca):
-        CaptchaPopup().open(capthca)
+    def send_auth_request(self, login, password):
+        self.osc_service.send_auth_request(login, password)
 
 
-    def open_twofa_popup(self, vk, auth_response_page):
-        TwoFAKeyEnterPopup().open(vk, auth_response_page)
+    def open_auth_popup(self):
+        AuthPopup().open()
+
+
+    def open_captcha_popup(self, capthca_image_url):
+        CaptchaPopup(capthca_image_url, self).open()
+
+
+    def open_twofa_popup(self): #, vk, auth_response_page):
+        TwoFAPopup(self).open() #vk, auth_response_page)
 
 
     def _export_logs(self):
@@ -200,10 +209,14 @@ class VKBotApp(App):
 
     def on_start(self):
         Config.read(self.get_application_config())
-        config_file_version = int(Config.getdefault('General', 'config_version', 0))
+        config_file_version = \
+            int(Config.getdefault('General', 'config_version', 0))
 
         if config_file_version < self.config_version:
             self.config.write()
+
+        self.osc_service = OSCClient(self)
+
 
     def on_pause(self):
         return True
