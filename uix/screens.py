@@ -24,11 +24,11 @@ from bot.utils import toast_notification, load_custom_commands, \
 
 
 class AuthPopup(ModalView):
-    def __init__(self, **kwargs):
+    def __init__(self, app, **kwargs):
         self.show_password_text = 'Показать пароль'
         self.hide_password_text = 'Скрыть пароль'
+        self.app = app
         super(AuthPopup, self).__init__(**kwargs)
-        self.app = App.get_running_app()
 
 
     def log_in(self):

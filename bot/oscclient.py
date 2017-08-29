@@ -165,7 +165,11 @@ class OSCClient():
 
 
     def on_auth_success(self, message, *args):
-        self.logging_function(u'[b]Авторизация удалась. Вы превосходны![/b]', 2)
+        self.logging_function(
+            u'[b][color=#33ff33]Авторизация удалась. Вы [i]превосходны[/i]![/color][/b]',
+            2
+        )
+        self.app._cached_password = None
 
 
     def on_auth_twofactor(self, message, *args):
@@ -178,7 +182,7 @@ class OSCClient():
 
 
     def send_twofactor_code(self, code):
-        self.osc.sendMsg('/twofactor response', [code, ], port=3000)
+        self.osc.sendMsg('/twofactor response', [str(code), ], port=3000)
         self.logging_function(u'Код отправлен', 0)
 
 
@@ -189,14 +193,9 @@ class OSCClient():
 
 
     def send_captcha_code(self, code):
-        self.osc.sendMsg('/captcha response', [code, ], port=3000)
+        self.osc.sendMsg('/captcha response', [str(code), ], port=3000)
         self.logging_function(u'Код отправлен', 0)
 
 
     def on_auth_fail(self, message, *args):
-        error_message = message[2]
-        self.logging_function(
-            u'[b]Авторизация не удалась!\nОшибка: %s[/b]' % error_message,
-            2
-        )
-        self.app.enable_main_button()
+        self.logging_function(u'[b][color=#ff3300]Авторизация не удалась![/color][/b]', 2)

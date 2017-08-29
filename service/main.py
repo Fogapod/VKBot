@@ -93,40 +93,41 @@ def send_log_line(line, log_importance, t=None):
 
 
 def exit(*args):
-    global bot
     bot.stop_bot()
     send_status('exiting')
     sys.exit()
 
 
 def first_auth():
-    osc.sendMsg('/first auth', [], port=3002)
     global authorized
     authorized = False
+
+    osc.sendMsg('/first auth', [], port=3002)
 
     while not authorized:
         time.sleep(0.5)
         osc.readQueue(oscid)
 
-    osc.sendMsg('/auth successful', [], port=3002)
-
-    return True
-
 
 def on_auth_request(message, *args):
     global authorized
     login, password = literal_eval(message[2])
+    send_log_line(u'Логин и пароль доставлены', 0)
 
     authorized, error = bot.authorization(
         login=login, password=password,
         twofactor_handler=twofactor_handler, captcha_handler=captcha_handler
     )
     if error:
+        osc.sendMsg('/auth failed', [], port=3002)
         if error == 'bad password':
-            send_log_line(u'[b]Неверный логин или пароль![/b]', 2)
-            exit()
+            send_log_line(u'[b]Неправильный логин или пароль[/b]', 2)
         else:
-            raise Exception(error)
+            send_error(error)
+
+        exit()
+
+    osc.sendMsg('/auth successful', [], port=3002)
 
 
 def twofactor_handler():
@@ -138,6 +139,7 @@ def twofactor_handler():
         time.sleep(0.5)
         osc.readQueue(oscid)
 
+    send_log_line(u'Повторяю запрос с кодом', 0)
     return twofactor_code, True
 
 
@@ -150,6 +152,7 @@ def captcha_handler(captcha):
         time.sleep(0.5)
         osc.readQueue(oscid)
 
+    send_log_line(u'Повторяю запрос с капчей', 0)
     captcha.try_again(captcha_code)
 
 
@@ -188,10 +191,8 @@ if __name__ == '__main__':
 
             if error:
                 if error == 'no token':
-                    if first_auth():
-                        break
-                    else:
-                        exit()
+                    first_auth()
+                    break
                 else:
                     send_log_line(u'Авторизация не удалась', 2)
                     send_error(error)

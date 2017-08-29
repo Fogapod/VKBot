@@ -7,6 +7,80 @@
 #: import __version__ bot.core.__version__
 
 
+<AuthPopup>:
+    size_hint: None, None
+    size: content.size
+    pos_hint: {'center_y': .8}
+
+    GridLayout:
+        id: content
+        rows: 5
+        spacing: dp(3)
+        size_hint: None, None
+        size: self.minimum_size
+        padding: dp(20)
+
+        Label:
+            text: 'Авторизация ВК'
+            # color: 0, .2, .4, 1
+            font_size: '20sp'
+            padding_y: dp(5)
+            size_hint: None, None
+            size: self.texture_size
+
+        TextInput:
+            text: app._cached_login if app._cached_login is not None else ''
+            hint_text: 'Логин'.decode('utf8')
+            id: login_textinput
+            size_hint: None, None
+            font_size: '18sp'
+            height: self.minimum_height
+            width: dp(200)
+            multiline: False
+            on_text_validate: self.focused = False; pass_textinput.focused = True
+
+        TextInput:
+            text: app._cached_password if app._cached_password is not None else ''
+            hint_text: 'Пароль'.decode('utf8')
+            id: pass_textinput
+            size_hint: None, None
+            font_size: '18sp'
+            height: self.minimum_height
+            width: dp(200)
+            multiline: False
+            password: False
+            on_text_validate: self.focused = False; root.log_in()
+
+        Button:
+            id: show_pass_label
+            text: root.hide_password_text
+            background_color: 0, 0, 0, 0
+            # color: 0, .2, .4, 1
+            font_size: '16sp'
+            padding_y: dp(9)
+            size_hint_y: None
+            height: self.texture_size[1]
+            on_release: root.update_pass_input_status(self)
+
+        GridLayout:
+            cols: 3
+            size_hint_y: None
+            size: self.minimum_size
+
+            Widget
+
+            BlueButton:
+                id: enter
+                text: 'Войти'
+                font_size: '16sp'
+                padding_y: dp(10)
+                size_hint: 1.3, None
+                height: self.texture_size[1]
+                on_release: root.log_in()
+
+            Widget
+
+
 <TwoFAPopup>:
     size_hint_y: None
     height: content.height + dp(30)
@@ -51,95 +125,6 @@
                 size_hint_x: None
                 width: self.texture_size[0]
                 on_release: root.send_code(code_textinput.text)
-
-
-<AuthPopup>:
-    size_hint: None, None
-    size: content.size
-    pos_hint: {'center_y': .8}
-
-    GridLayout:
-        id: content
-        rows: 5
-        spacing: dp(3)
-        size_hint: None, None
-        size: self.minimum_size
-        padding: dp(20)
-
-        Label:
-            text: 'Авторизация ВК'
-            # color: 0, .2, .4, 1
-            font_size: '20sp'
-            padding_y: dp(5)
-            size_hint: None, None
-            size: self.texture_size
-
-        TextInput:
-            text: app._cached_login if app._cached_login is not None else ''
-            hint_text: 'Логин'.decode('utf8')
-            id: login_textinput
-            size_hint: None, None
-            font_size: '18sp'
-            height: self.minimum_height
-            width: self.height*8
-            multiline: False
-            focused: True
-            on_text_validate: self.focused = False; pass_textinput.focused = True
-
-        TextInput:
-            text: app._cached_password if app._cached_login is not None else ''
-            hint_text: 'Пароль'.decode('utf8')
-            id: pass_textinput
-            size_hint: None, None
-            font_size: '18sp'
-            height: self.minimum_height
-            width: self.height*8
-            multiline: False
-            password: False
-            on_text_validate: self.focused = False; root.log_in()
-
-        Button:
-            id: show_pass_label
-            text: root.hide_password_text
-            background_color: 0, 0, 0, 0
-            # color: 0, .2, .4, 1
-            font_size: '16sp'
-            padding_y: dp(9)
-            size_hint_y: None
-            height: self.texture_size[1]
-            on_release: root.update_pass_input_status(self)
-
-        GridLayout:
-            cols: 3
-            size_hint_y: None
-            size: self.minimum_size
-
-            Widget
-
-            BlueButton:
-                id: enter
-                text: 'Войти'
-                font_size: '16sp'
-                padding_y: dp(10)
-                size_hint: 1.3, None
-                height: self.texture_size[1]
-                on_release: root.log_in()
-
-            Widget
-
-
-<InfoPopup>:
-    size_hint: None, None
-    size: content.width + dp(40), content.height + dp(50)
-
-    Label:
-        id: content
-        size_hint: None, None
-        size: self.texture_size
-        markup: True
-        text: 'VKBot версии %s\n\n[font=fonts/fontello.ttf]V[/font] [color=#199ac1][ref=https://vk.com/foga_prod]Группа в ВК[/ref][/color]\n[font=fonts/fontello.ttf]I[/font] [color=#199ac1][ref=https://github.com/Fogapod/VKBot]Репозиторий на github[/ref][/color]\n\n[color=#199ac1][ref=https://github.com/Fogapod/VKBot/tree/0.1.0dev#Руководство-к-использованию]Открыть мануал[/ref][/color]' % __version__
-        font_size: '18sp'
-        on_ref_press: app._open_url(args)
 
 
 <CaptchaPopup>:
@@ -187,6 +172,20 @@
                 size_hint: None, None
                 size: self.texture_size[0], self.texture_size[1]*2
                 on_release: root.dismiss()
+
+
+<InfoPopup>:
+    size_hint: None, None
+    size: content.width + dp(40), content.height + dp(50)
+
+    Label:
+        id: content
+        size_hint: None, None
+        size: self.texture_size
+        markup: True
+        text: 'VKBot версии %s\n\n[font=fonts/fontello.ttf]V[/font] [color=#199ac1][ref=https://vk.com/foga_prod]Группа в ВК[/ref][/color]\n[font=fonts/fontello.ttf]I[/font] [color=#199ac1][ref=https://github.com/Fogapod/VKBot]Репозиторий на github[/ref][/color]\n\n[color=#199ac1][ref=https://github.com/Fogapod/VKBot/tree/0.1.0dev#Руководство-к-использованию]Открыть мануал[/ref][/color]' % __version__
+        font_size: '18sp'
+        on_ref_press: app._open_url(args)
 
 
 <MainScreen>:

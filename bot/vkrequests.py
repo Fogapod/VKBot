@@ -33,7 +33,8 @@ def error_handler(request):
                 send_log_line(u'Ошибка [b]timed out[/b]. Повторяю запрос...', 1)
                 return do_request(*args, **kwargs)
 
-            elif '[errno 7]' in error \
+            elif '[errno -3]' in error \
+                    or '[errno 7]' in error \
                     or '[errno 8]' in error \
                     or '[errno 101]' in error \
                     or '[errno 113]' in error \
@@ -92,7 +93,7 @@ def log_in(login=None, password=None,
         session_params['password'] = password
 
         session = vk.VkApi(**session_params)
-        session.auth()
+        session.auth(reauth=True)
 
         api = session.get_api()
 

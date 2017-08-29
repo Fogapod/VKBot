@@ -161,7 +161,7 @@ class VKBotApp(App):
 
 
     def open_auth_popup(self):
-        AuthPopup().open()
+        AuthPopup(self).open()
 
 
     def open_twofa_popup(self):
