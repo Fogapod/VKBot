@@ -54,12 +54,11 @@ class VKBotApp(App):
         config.setdefaults('General', 
                 {
                     'config_version': '1',
-                    'show_bot_activity': 'False',
                     'appeals': '/:бот,',
                     'bot_name': '(Бот)',
                     'mark_type': 'кавычка',
                     'stable_mode': 'True',
-                    'use_custom_commands': 'False',
+                    'use_custom_commands': 'True',
                     'logging_level': '1',
                     'max_log_lines': '50',
                     'bot_activated': 'False',
@@ -72,15 +71,6 @@ class VKBotApp(App):
         settings.add_json_panel(
             'Настройки бота. Версия %s' % __version__, self.config, data=
         '''[
-            {
-            "type": "bool",
-            "title": "Отображать состояние бота в статусе",
-            "desc": "Если включено, в статус будет добавлено уведомление о том, что бот активен. Иначе вернется предыдущий текст",
-            "section": "General",
-            "key": "show_bot_activity",
-            "values": ["False","True"],
-            "disabled": 1
-            },
             {
             "type": "string",
             "title": "Обращение к боту",
