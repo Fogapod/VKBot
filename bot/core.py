@@ -1222,7 +1222,7 @@ disabled: {}'''
         self.send_log_line = func
         self.send_log_line(u'Подключена функция логгирования для ядра бота', 0)
         vkr.set_new_logger_function(func)
-        self.send_log_line(u'Подключена функция логгирования для vkr.quests', 0)
+        self.send_log_line(u'Подключена функция логгирования для vkrequests', 0)
 
     def send_log_line(self, line, log_importance, t):
         pass
