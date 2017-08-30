@@ -8,7 +8,7 @@ from kivy.lang import Builder
 from kivy.config import Config
 from kivy.uix.settings import SettingsWithNoMenu
 
-from uix.screens import Manager, AuthPopup, TwoFAPopup, CaptchaPopup
+from uix.screens import Manager, AuthPopup, TwoFAPopup, CaptchaPopup, LoadingPopup
 
 from bot.core import __version__
 from bot.oscclient import OSCClient
@@ -22,6 +22,8 @@ class VKBotApp(App):
 
     _cached_login = None
     _cached_password = None
+
+    loading_popup = None
 
 
     def build(self):
@@ -170,6 +172,15 @@ class VKBotApp(App):
 
     def open_captcha_popup(self, capthca_image_url):
         CaptchaPopup(self, capthca_image_url).open()
+
+
+    def open_loading_popup(self):
+        self.loading_popup = LoadingPopup()
+        self.loading_popup.open()
+
+    def close_loading_popup(self):
+        if self.loading_popup:
+            self.loading_popup.dismiss()
 
 
     def _export_logs(self):

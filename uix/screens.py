@@ -3,15 +3,17 @@
 
 import time
 import re
+import random
 
 from threading import Thread
 
+from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, FadeTransition
 from kivy.uix.modalview import ModalView
 from kivy.clock import mainthread, Clock
 from kivy.core.clipboard import Clipboard
-from kivy.config import Config
-from kivy.app import App
+from kivy.properties import NumericProperty
+from kivy.animation import Animation
 
 from uix.customcommandblock import CustomCommandBlock, ListDropDown, \
     CommandButton
@@ -20,7 +22,8 @@ from uix.widgets import ColoredScreen
 
 from bot.utils import toast_notification, load_custom_commands, \
     save_custom_commands, save_error, CUSTOM_COMMAND_OPTIONS_COUNT, save_token, \
-    WHITELIST_FILE_PATH, BLACKLIST_FILE_PATH, BOT_ERROR_FILE_PATH
+    WHITELIST_FILE_PATH, BLACKLIST_FILE_PATH, BOT_ERROR_FILE_PATH, \
+    CUSTOM_COMMANDS_FILE_PATH
 
 
 class AuthPopup(ModalView):
@@ -99,6 +102,25 @@ class InfoPopup(ModalView):
     pass
 
 
+class LoadingPopup(ModalView):
+    angle = NumericProperty(0)
+
+    def __init__(self, **kwargs):
+        super(LoadingPopup, self).__init__(**kwargs)
+        angle = 360
+        if random.choice((0, 1)):
+            angle = -angle
+
+        anim = Animation(angle=angle, duration=2)
+        anim += Animation(angle=angle, duration=2)
+        anim.repeat = True
+        anim.start(self)
+
+    def on_angle(self, item, angle):
+        if angle in (360, -360):
+            item.angle = 0
+
+
 class MainScreen(ColoredScreen):
     def __init__(self, **kwargs):
         super(MainScreen, self).__init__(**kwargs)
@@ -150,33 +172,38 @@ class MainScreen(ColoredScreen):
 
                 continue
 
-            _log_queue = sorted(self.log_queue, cmp=lambda x,y: cmp(x[2], y[2]))
-            new_lines = ''
+            try:
+                _log_queue = sorted(self.log_queue, cmp=lambda x,y: cmp(x[2], y[2]))
+                new_lines = ''
 
-            for message in _log_queue:
-                self.log_queue.remove(message)
+                for message in _log_queue:
+                    self.log_queue.remove(message)
 
-                if message[1] >= self.logging_level:
-                    new_lines += time.strftime(
-                        '\n[%H:%M:%S] ', time.localtime(message[2])
-                    ) + message[0]
+                    if message[1] >= self.logging_level:
+                        new_lines += time.strftime(
+                            '\n[%H:%M:%S] ', time.localtime(message[2])
+                        ) + message[0]
 
-            new_lines = new_lines % \
-                {
-                'whitelist_file': WHITELIST_FILE_PATH,
-                'blacklist_file': BLACKLIST_FILE_PATH,
-                'bot_error_file': BOT_ERROR_FILE_PATH
-                }
+                new_lines = new_lines % \
+                    {
+                    'whitelist_file': WHITELIST_FILE_PATH,
+                    'blacklist_file': BLACKLIST_FILE_PATH,
+                    'bot_error_file': BOT_ERROR_FILE_PATH,
+                    'custom_commands_file': CUSTOM_COMMANDS_FILE_PATH
+                    }
 
-            log_text = self.ids.logging_panel.text
-            new_log_text = log_text + new_lines
-            indent_num = new_log_text.count('\n')
+                log_text = self.ids.logging_panel.text
+                new_log_text = log_text + new_lines
+                indent_num = new_log_text.count('\n')
 
-            while indent_num > self.max_log_lines:
-                new_log_text = new_log_text[new_log_text.index('\n') + 1:]
-                indent_num -= 1
+                while indent_num > self.max_log_lines:
+                    new_log_text = new_log_text[new_log_text.index('\n') + 1:]
+                    indent_num -= 1
 
-            self.ids.logging_panel.text = new_log_text
+                self.ids.logging_panel.text = new_log_text
+
+            except:
+                self.ids.logging_panel.text += u'\n[b]Возникла ошибка! Не могу отобразить лог[/b]'
 
 
     def stop_log_check_thread(self):
@@ -203,8 +230,15 @@ class CustomCommandsScreen(ColoredScreen):
         self.max_command_preview_text_len = 47
 
 
-    @mainthread # not working
     def on_enter(self):
+        # App.get_running_app().open_loading_popup()
+        Clock.schedule_once(self.sort_blocks)
+
+    def sort_blocks(self, *args):
+        for widget in sorted(self.ids.cc_list.children):
+            self.included_keys.remove(widget.command)
+            self.ids.cc_list.remove_widget(widget)
+
         self.custom_commands = load_custom_commands()
 
         if not self.custom_commands and type(self.custom_commands) is not dict:
@@ -228,6 +262,8 @@ class CustomCommandsScreen(ColoredScreen):
                     self.custom_commands[key], key=lambda x: x[0])
                 if key not in self.included_keys:
                     self.add_command(key, self.custom_commands[key])
+
+        # App.get_running_app().close_loading_popup()
 
 
     def leave(self, delay=None):
@@ -546,14 +582,6 @@ class CustomCommandsScreen(ColoredScreen):
                 on_release=block.ids.dropdown_btn.callback)
         self.ids.cc_list.add_widget(block)
         self.included_keys.append(command)
-
-
-    def sort_blocks(self):
-        for widget in sorted(self.ids.cc_list.children):
-            self.included_keys.remove(widget.command)
-            self.ids.cc_list.remove_widget(widget)
-
-        self.on_enter()
 
 
 class Manager(ScreenManager):

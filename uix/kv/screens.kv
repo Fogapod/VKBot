@@ -188,6 +188,29 @@
         on_ref_press: app._open_url(args)
 
 
+<LoadingPopup>:
+    auto_dismiss: False
+    size_hint: None, None
+    size: 0, 0
+    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+    canvas.before:
+        PushMatrix
+        Rotate:
+            angle: root.angle
+            axis: 0, 0, 1
+            origin: root.center
+
+    canvas.after:
+        PopMatrix
+
+
+    Image:
+        size_hint: None, None
+        size: self.texture_size
+        source: 'data/images/icon.png'
+
+
 <MainScreen>:
     name: 'main_screen'
 
@@ -366,4 +389,4 @@
                 size_hint_x: 1.5
                 background_color: 0, 0, 0, 0
 
-                on_release: root.sort_blocks()
+                on_release: root.on_enter()
