@@ -32,7 +32,7 @@ source.exclude_patterns = license
 
 # (str) Application versioning (method 2)
 version.regex = __version__ = ['"](.*)['"]
-version.filename = %(source.dir)s/bot/core.py
+version.filename = %(source.dir)s/bot/utils.py
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy

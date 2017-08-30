@@ -13,15 +13,14 @@ import requests as r
 
 from utils import TOKEN_FILE_PATH, load_custom_commands, \
 save_custom_commands, load_whitelist, save_whitelist, \
-load_blacklist, save_blacklist, CUSTOM_COMMAND_OPTIONS_COUNT
+load_blacklist, save_blacklist, CUSTOM_COMMAND_OPTIONS_COUNT, \
+__version__
 
 import vkrequests as vkr
 
 
 AUTHOR_VK_ID = 180850898
 AUTHOR = u'[id%d|Евгений Ершов]' % AUTHOR_VK_ID
-
-__version__ = '0.1.0dev'
 
 __help__ = (
 u'''

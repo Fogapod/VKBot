@@ -10,9 +10,8 @@ from kivy.uix.settings import SettingsWithNoMenu
 
 from uix.screens import Manager, AuthPopup, TwoFAPopup, CaptchaPopup, LoadingPopup
 
-from bot.core import __version__
 from bot.oscclient import OSCClient
-from bot.utils import SETTINGS_FILE_PATH, CUSTOM_COMMANDS_FILE_PATH, PATH
+from bot.utils import SETTINGS_FILE_PATH, CUSTOM_COMMANDS_FILE_PATH, PATH, __version__
 
 
 class VKBotApp(App):
