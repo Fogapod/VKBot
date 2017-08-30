@@ -219,7 +219,8 @@ class VKBotApp(App):
 
 
     def on_stop(self):
-        self.manager.get_screen('main_screen').stop_log_check_thread()
+        if getattr(self, 'manager', None):
+            self.manager.get_screen('main_screen').stop_log_check_thread()
 
 
 if __name__ == '__main__':

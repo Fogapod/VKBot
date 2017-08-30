@@ -1,0 +1,81 @@
+#: import ScrollEffect kivy.effects.scroll.ScrollEffect
+
+
+<ExceptionScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(3)
+
+        canvas.before:
+            # if background was not correctly cleared
+            Color:
+                rgb: 0, 0, 0
+
+            Rectangle:
+                pos: self.pos
+                size: self.size
+
+        Label:
+            text: 'Во время работы VKBot произошла ошибка!'
+            padding: 0, dp(6)
+            size_hint_y: None
+            height: self.texture_size[1]
+
+        ScrollView:
+            effect_cls: ScrollEffect
+
+            TextInput:
+                id: exception_text_textinput
+                text: root.exception_text
+                text_size: self.width, None
+                font_size: sp(14)
+                readonly: True
+                size_hint_y: None
+                height: self.minimum_height
+
+        GridLayout:
+            rows: 3
+            spacing: dp(4)
+            size_hint_y: None
+            height: self.minimum_size[1]
+
+            Label:
+                text: 'Помогите улучшить приложение, отправив скриншот/скопировав ошибку'
+                halign: 'center'
+                text_size: self.width, None
+                size_hint_y: None
+                height: self.texture_size[1]
+
+            GridLayout:
+                size_hint_y: None
+                height: self.minimum_size[1]
+                cols: 3
+
+                Widget
+
+                Button:
+                    text: '[font=fonts/fontello.ttf]I[/font] Отправить на github'
+                    markup: True
+                    size_hint: None, None
+                    size: dp(200), dp(30)
+
+                    on_release: root.send_report_to_github(root.exception_text)
+
+                Widget
+
+            GridLayout:
+                size_hint_y: None
+                height: self.minimum_size[1]
+                cols: 3
+
+                Widget
+
+                Button:
+                    text: '[font=fonts/fontello.ttf]V[/font] Отправить в тему в ВК'
+                    markup: True
+                    size_hint: None, None
+                    size: dp(200), dp(30)
+
+                    on_release: root.send_report_to_vk(root.exception_text)
+
+                Widget
