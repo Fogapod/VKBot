@@ -170,7 +170,11 @@ class OSCClient():
 
     def send_auth_request(self, login, password):
         self.logging_function(u'[b]Начинаю авторизацию[/b]', 2)
-        self.osc.sendMsg('/auth request', [str((login, password))], port=3000)
+        self.osc.sendMsg(
+            '/auth request',
+            [str((login.encode('utf8'), password.encode('utf8')))],
+            port=3000
+        )
 
 
     def on_auth_success(self, message, *args):
@@ -202,7 +206,7 @@ class OSCClient():
 
 
     def send_captcha_code(self, code):
-        self.osc.sendMsg('/captcha response', [str(code), ], port=3000)
+        self.osc.sendMsg('/captcha response', [str(code.encode('utf8')), ], port=3000)
         self.logging_function(u'Код отправлен', 0)
 
 
