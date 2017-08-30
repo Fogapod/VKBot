@@ -288,11 +288,19 @@ class Bot(object):
                 0
             )
             self.whitelist = load_whitelist()
+
             self.send_log_line(
                 u'Загрузка файла blacklist\'а из %(blacklist_file)s...',
                 0
             )
             self.blacklist = load_blacklist()
+
+            if self.use_custom_commands:
+                self.send_log_line(
+                    u'Загрузка пользовательских команд из %(custom_commands_file)s...',
+                    0
+                )
+                self.custom_commands = load_custom_commands()
 
             while self.run_bot:
                 if not self.mlpd:
@@ -467,8 +475,6 @@ class Bot(object):
                     bot_name, mark_type,
                     use_custom_commands,
                     openweathermap_api_key):
-        if use_custom_commands:
-            self.custom_commands = load_custom_commands()
 
         appeals = appeals.split(':')
         _appeals = []
