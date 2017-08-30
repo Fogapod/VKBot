@@ -143,7 +143,16 @@ class Command(object):
     def load(self, message):
         self.__init__(self.self_id, self.appeals) # refresh params
 
-        self.raw_text = message['body']
+        if 'attachments' in message.keys() \
+                and message['attachments'][0]['type'] == 'sticker':
+            self.raw_text = 'sticker=%s:%s' % \
+                (
+                    message['attachments'][0]['sticker']['product_id'],
+                    message['attachments'][0]['sticker']['id']
+                )
+        else: 
+            self.raw_text = message['body']
+
         self.text = self.raw_text
         self.lower_text = self.text.lower()
 
@@ -371,9 +380,10 @@ class Bot(object):
                             u'\n\nБот не активирован. По вопросам активации ' \
                             u'просьба обратиться к автору: {author}'
 
-                    response_text, attachments = self._format_response(
-                        response_text, command, attachments
-                    )
+                    response_text, attachments, sticker_id = \
+                        self._format_response(
+                            response_text, command, attachments
+                        )
 
                     if command.mark_msg:
                         if self.mark_type == u'имя':
@@ -394,33 +404,34 @@ class Bot(object):
                         user_id = command.user_id
 
                     message_to_resend = command.forward_msg
-                    msg_id, error = \
-                        vkr.send_message(text = response_text,
-                                         uid = user_id,
-                                         gid = chat_id,
-                                         forward = message_to_resend,
-                                         attachments = attachments
-                                        )
+                    msg_id, error = vkr.send_message(
+                                                     text=response_text,
+                                                     uid=user_id,
+                                                     gid=chat_id,
+                                                     forward=message_to_resend,
+                                                     attachments=attachments,
+                                                     sticker_id=sticker_id
+                                                    )
                     if error:
-                        if error == 'captcha needed':
-                            self.send_log_line(
-                                u'[b]Капча! Жду 5 секунд...[/b]',
-                                1
-                            )
-                            time.sleep(5)
-                        elif error == 'response code 413':
+                        if error == 'response code 413':
                             self.send_log_line(
                                 u'Сообщение слишком длинное для отправки',
                                 # u'Разделяю сообщение', # TODO
                                 2
                             )
                             continue
+                        elif 'this sticker is not available' in error:
+                            self.send_log_line(
+                                u'Стикер (%d) недоступен! Не могу отправить' \
+                                u' сообщение' % sticker_id, 1
+                            )
                         else:
                             self.send_log_line(
                                 u'Неизвестная ошибка при отправке сообщения',
                                 1
                             )
                             raise Exception(error)
+                        continue
 
                     self.send_log_line(
                         u'[b]Сообщение доставлено (%d)[/b]' % msg_id,
@@ -494,6 +505,10 @@ class Bot(object):
 
     def _format_response(self, response_text, command, attachments):
         format_dict = {}
+
+        sticker_ids = re.findall('{sticker=(\d+)}', response_text)
+        if sticker_ids:
+            return '', [], random.choice(sticker_ids)
 
         if '{version}' in response_text:
             format_dict['version'] = __version__
@@ -581,7 +596,7 @@ class Bot(object):
 
         response_text = media_id_search_pattern.sub('', response_text)
         
-        return safe_format(response_text, **format_dict), attachments
+        return safe_format(response_text, **format_dict), attachments, None
 
     def custom_command(self, cmd, custom_commands):
         response_text = ''
@@ -1017,9 +1032,9 @@ disabled: {}'''
             elif len([x for x in self.custom_commands[command]\
                     if response == x[0]]) == 0:
                 response_text = u'В команде «%s» нет ключа «%s»' \
-                                            % (command.lower(), response)
+                                            % (command, response)
             else:
-                for response_list in self.custom_commands[command.lower()]:
+                for response_list in self.custom_commands[command]:
                     if response_list[0] == response:
                         self.custom_commands[command].remove(response_list)
                         break

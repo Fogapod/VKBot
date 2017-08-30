@@ -115,7 +115,9 @@ def log_in(login=None, password=None,
 
 
 @error_handler
-def send_message(text='', gid=None, uid=None, forward=None, attachments=[]):
+def send_message(text='', gid=None, uid=None, forward=None, attachments=[],
+                 sticker_id=None
+                ):
     if gid:
         gid -= 2000000000
 
@@ -125,7 +127,8 @@ def send_message(text='', gid=None, uid=None, forward=None, attachments=[]):
     response = api.messages.send(
         peer_id=uid, message=text,
         forward_messages=forward,
-        chat_id=gid, attachment=attachments
+        chat_id=gid, attachment=attachments,
+        sticker_id=sticker_id
     )
 
     return response
