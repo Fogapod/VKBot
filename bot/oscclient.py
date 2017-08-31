@@ -80,14 +80,14 @@ class OSCClient():
         self.start_reading_osc_queue()
 
         if platform == 'android':
-            try:
-                self.subprocess = autoclass('org.fogaprod.vkbot.dev.ServiceBotservice')
-                mActivity = autoclass('org.kivy.android.PythonActivity').mActivity
-                argument = ''
-                self.subprocess.start(mActivity, argument)
-            except:
-                self.subprocess = AndroidService('VKBot', 'Бот работает')
-                self.subprocess.start('Сервис запущен')
+            # try:
+            #     self.subprocess = autoclass('org.fogaprod.vkbot.dev.ServiceBotservice')
+            #     mActivity = autoclass('org.kivy.android.PythonActivity').mActivity
+            #     argument = ''
+            #     self.subprocess.start(mActivity, argument)
+            # except:
+            self.subprocess = AndroidService('VKBot', 'Бот работает')
+            self.subprocess.start('Сервис запущен')
         else:
             self.subprocess = subprocess.Popen(['python2.7', 'service/main.py'])
 
@@ -99,10 +99,10 @@ class OSCClient():
 
         if platform == 'android':
             if self.subprocess:
-                try:
-                    android.stop_service()
-                except:
-                    self.subprocess.stop()
+                # try:
+                #     android.stop_service()
+                # except:
+                self.subprocess.stop()
         else:
             osc.sendMsg('/exit', [], port=3000)
 
@@ -123,6 +123,7 @@ class OSCClient():
             u'[b]Бот уже запущен! Переподключение завершено[/b]',
             2, time.time()
         )
+        self.subprocess = AndroidService('VKBot', 'Бот работает')
         self.start_requesting_answers_count()
         self.mainscreen.ids.main_btn.text = self.mainscreen.stop_bot_text
 
