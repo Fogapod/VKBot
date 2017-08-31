@@ -12,6 +12,8 @@ from libs.toast import toast
 
 # GLOBALS
 
+__version__ = '0.1.0dev'
+
 PATH = '/sdcard/VKBot/' if platform == 'android' else ''
 DATA_PATH = 'data/'
 
@@ -52,22 +54,21 @@ def toast_notification(text, length_long=True):
 
 
 def load_token():
-    token = None
     if not os.path.exists(TOKEN_FILE_PATH):
         open(TOKEN_FILE_PATH, 'w').close()
+        return None
     else:
         try:
             with open(TOKEN_FILE_PATH, 'r') as f:
                 token = f.readlines()[0][:-1]
-        except:
             return token
-
-    return token
+        except:
+            return None
 
 
 def save_token(token):
-    if not token:
-        token = ''
+    if not token and token is not '':
+        return
 
     with open(TOKEN_FILE_PATH, 'w') as f:
         f.write('{}\n{}'.format(
@@ -114,6 +115,7 @@ def save_custom_commands(content):
 def load_whitelist():
     if not os.path.exists(WHITELIST_FILE_PATH):
         open(WHITELIST_FILE_PATH, 'w').close()
+        return {}
     else:    
         with open(WHITELIST_FILE_PATH, 'r') as f:
             content = f.read()
@@ -141,6 +143,7 @@ def save_whitelist(whitelist):
 def load_blacklist():
     if not os.path.exists(BLACKLIST_FILE_PATH):
         open(BLACKLIST_FILE_PATH, 'w').close()
+        return {}
     else:    
         with open(BLACKLIST_FILE_PATH, 'r') as f:
             content = f.read()

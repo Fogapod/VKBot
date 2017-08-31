@@ -3,66 +3,72 @@
 
 import time
 import re
+import random
 
+from threading import Thread
+
+from kivy.app import App
 from kivy.uix.screenmanager import ScreenManager, FadeTransition
 from kivy.uix.modalview import ModalView
 from kivy.clock import mainthread, Clock
 from kivy.core.clipboard import Clipboard
-from kivy.app import App
-from kivy import platform
+from kivy.properties import NumericProperty
+from kivy.animation import Animation
 
 from uix.customcommandblock import CustomCommandBlock, ListDropDown, \
     CommandButton
 from uix.editcommandpopup import EditCommandPopup
 from uix.widgets import ColoredScreen
 
-from bot.core import __version__
-from bot.oscclient import OSCClient
 from bot.utils import toast_notification, load_custom_commands, \
-    save_custom_commands, save_error, CUSTOM_COMMAND_OPTIONS_COUNT, save_token
+    save_custom_commands, save_error, CUSTOM_COMMAND_OPTIONS_COUNT, save_token, \
+    WHITELIST_FILE_PATH, BLACKLIST_FILE_PATH, BOT_ERROR_FILE_PATH, \
+    CUSTOM_COMMANDS_FILE_PATH
 
 
-class AuthScreen(ColoredScreen):
-    def __init__(self, **kwargs):
+class AuthPopup(ModalView):
+    def __init__(self, app, **kwargs):
         self.show_password_text = 'Показать пароль'
         self.hide_password_text = 'Скрыть пароль'
-        super(AuthScreen, self).__init__(**kwargs)
-        self.bot = App.get_running_app().bot
-        
-    def on_enter(self):
-        self.ids.pass_auth.disabled = not self.bot.authorized
+        self.app = app
+        super(AuthPopup, self).__init__(**kwargs)
+
 
     def log_in(self):
         login = self.ids.login_textinput.text
         password = self.ids.pass_textinput.text
 
         if login and password:
-            authorized, error = self.bot.authorization(login=login,
-                                                           password=password)
-            if authorized:
-                self.parent.show_main_screen()
-                self.clear_pass_input_text()
-            elif error:
-                error = str(error)
-                if 'password' in error:
-                    toast_notification(u'Неправильный логин или пароль')
-                else:
-                    toast_notification(error)
-        return
-        
-    def clear_pass_input_text(self):
-        self.ids.pass_textinput.text = ''
+            self.app.osc_service.send_auth_request(login, password)
+            self.dismiss()
+
 
     def update_pass_input_status(self, button):
-        if button.text == self.hide_password_text:
-            self.ids.pass_textinput.password = True
+        self.ids.pass_textinput.password = not self.ids.pass_textinput.password
+
+        if self.ids.pass_textinput.password:
             button.text = self.show_password_text
         else:
-            self.ids.pass_textinput.password = False
             button.text = self.hide_password_text
 
 
-class TwoFAKeyEnterPopup(ModalView):
+    def on_dismiss(self):
+        if self.ids.login_textinput.text != '':
+            self.app._cached_login = self.ids.login_textinput.text
+        else:
+            self.app._cached_login = None
+
+        if self.ids.pass_textinput.text != '':
+            self.app._cached_password = self.ids.pass_textinput.text
+        else:
+            self.app._cached_login = None
+
+
+class TwoFAPopup(ModalView):
+    def __init__(self, app, **kwargs):
+        self.app = app
+        super(TwoFAPopup, self).__init__(**kwargs)
+
     def paste_twofa_code(self, textinput):
         clipboard_data = Clipboard.paste()
         if type(clipboard_data) in (str, unicode) and re.match('\d+$', clipboard_data):
@@ -70,109 +76,150 @@ class TwoFAKeyEnterPopup(ModalView):
         else:
             toast_notification(u'Ошибка при вставке')
 
-    def twofa_auth(self, code):
+    def send_code(self, code):
         if not code:
             return
 
-        def auth_handler(*args):
-            return code, True
-
-        self.vk.error_handlers[-2] = auth_handler
-
-        try:
-            response = self.vk.twofactor(self.auth_response_page)
-        except Exception as e:
-            toast_notification(str(e))
-        else:
-            app = App.get_running_app()
-            app.bot.authorized = True
-
-            self.vk.save_cookies()
-            self.vk.api_login()
-            save_token(token=self.vk.token['access_token'])
-
-            if app.manager.current_screen.name == 'auth_screen':
-                app.manager.show_main_screen()
-
+        self.app.osc_service.send_twofactor_code(code)
         self.dismiss()
-
-    def open(self, vk, auth_response_page, **kwargs):
-        self.vk = vk
-        self.auth_response_page = auth_response_page
-        super(TwoFAKeyEnterPopup, self).open(**kwargs)
 
 
 class CaptchaPopup(ModalView):
-    def open(self, captcha, **kwargs):
-        self.captcha = captcha
-        self.ids.image.source = captcha.get_url()
-        super(CaptchaPopup, self).open(**kwargs)
+    def __init__(self, app, captcha_img_url, **kwargs):
+        self.app = app
+        self.captcha_url = captcha_img_url
+        super(CaptchaPopup, self).__init__(**kwargs)
 
-    def retry_request(self, key):
-        if not key:
+    def send_code(self, code):
+        if not code:
             return
-        try:
-            response = self.captcha.try_again(key) # None
-        except Exception as e:
-            e = str(e)
-            if 'password' in e:
-                toast_notification(u'Неправильный логин или пароль')
-            else:
-                toast_notification(e)
-        else:
-            app = App.get_running_app()
-            app.bot.authorized = True
 
-            self.captcha.vk.api_login()
-            save_token(token=self.captcha.vk.token['access_token'])
-
-            if app.manager.current_screen.name == 'auth_screen':
-                app.manager.show_main_screen()
-
+        self.app.osc_service.send_captcha_code(code)
         self.dismiss()
 
 
 class InfoPopup(ModalView):
+    pass
+
+
+class LoadingPopup(ModalView):
+    angle = NumericProperty(0)
+
     def __init__(self, **kwargs):
-        super(InfoPopup, self).__init__(**kwargs)
-        self.ids.label.text = self.ids.label.text % __version__
+        super(LoadingPopup, self).__init__(**kwargs)
+        angle = 360
+        if random.choice((0, 1)):
+            angle = -angle
+
+        anim = Animation(angle=angle, duration=2)
+        anim += Animation(angle=angle, duration=2)
+        anim.repeat = True
+        anim.start(self)
+
+    def on_angle(self, item, angle):
+        if angle in (360, -360):
+            item.angle = 0
 
 
 class MainScreen(ColoredScreen):
     def __init__(self, **kwargs):
         super(MainScreen, self).__init__(**kwargs)
-        self.bot = App.get_running_app().bot
+        self.app = App.get_running_app()
         self.launch_bot_text = 'Включить бота'
         self.launching_bot_text = 'Запуск (отменить)' 
         self.stop_bot_text = 'Выключить бота'
         self.ids.main_btn.text = self.launch_bot_text
-        self.service = OSCClient(self)
-        self.captcha_requests = {}
-        self.captcha_popups = []
+        self.logging_level = int(
+            self.app.config.getdefault(
+                'General', 'logging_level', 1
+            )
+        )
+        self.max_log_lines = int(
+            self.app.config.getdefault(
+                'General', 'max_log_lines', 50
+            )
+        )
+        self.log_queue = []
+        self.continue_reading_log_queue = True
+        self.log_check_thread = Thread(target=self.read_log_queue)
+        self.log_check_thread.start()
+
 
     def show_info(self):
         InfoPopup().open()
 
+
     def on_main_btn_press(self):
         if self.ids.main_btn.text == self.launch_bot_text:
             self.ids.main_btn.text = self.launching_bot_text
-            self.service.start()
+            self.app.osc_service.start()
         else:
-            self.service.stop()
+            self.app.osc_service.stop()
             self.ids.main_btn.text = self.launch_bot_text
 
+
     def update_answers_count(self, new_answers_count):
-        self.ids.answers_count_lb.text = 'Ответов: {}'.format(
-            new_answers_count)
+        self.ids.actionprevious.title = 'Ответов: %s' % new_answers_count
+
+
+    def read_log_queue(self):
+        while self.continue_reading_log_queue:
+            time.sleep(0.33)
+            if not self.log_queue \
+                    or not str(
+                        self.app.manager.current_screen
+                    )[14:-2] == 'main_screen':
+
+                continue
+
+            try:
+                _log_queue = sorted(self.log_queue, cmp=lambda x,y: cmp(x[2], y[2]))
+                new_lines = ''
+
+                for message in _log_queue:
+                    self.log_queue.remove(message)
+
+                    if message[1] >= self.logging_level:
+                        new_lines += time.strftime(
+                            '\n[%H:%M:%S] ', time.localtime(message[2])
+                        ) + message[0]
+
+                new_lines = new_lines % \
+                    {
+                    'whitelist_file': WHITELIST_FILE_PATH,
+                    'blacklist_file': BLACKLIST_FILE_PATH,
+                    'bot_error_file': BOT_ERROR_FILE_PATH,
+                    'custom_commands_file': CUSTOM_COMMANDS_FILE_PATH
+                    }
+
+                log_text = self.ids.logging_panel.text
+                new_log_text = log_text + new_lines
+                indent_num = new_log_text.count('\n')
+
+                while indent_num > self.max_log_lines:
+                    new_log_text = new_log_text[new_log_text.index('\n') + 1:]
+                    indent_num -= 1
+
+                self.ids.logging_panel.text = new_log_text
+
+            except:
+                self.ids.logging_panel.text += u'\n[b]Возникла ошибка! Не могу отобразить лог[/b]'
+
+
+    def stop_log_check_thread(self):
+        self.continue_reading_log_queue = False
+        if self.log_check_thread:
+            self.log_check_thread.join()
+
+
+    def put_log_to_queue(self, line, log_importance, time):
+        self.log_queue.append((line, log_importance, time))
+
 
     def logout(self):
-        self.bot.authorization(logout=True)
-        self.parent.show_auth_screen()
-    
-    def show_bot_error(self, error_text):
-        error_text = error_text.decode('unicode-escape')
-        toast_notification(error_text)
-        save_error(error_text, from_bot=True)
+        self.put_log_to_queue(u'Записываю пустой токен...', 0, time.time())
+        save_token('')
+        self.put_log_to_queue(u'[b]Сессия сброшена[/b]', 2, time.time())
 
 
 class CustomCommandsScreen(ColoredScreen):
@@ -182,15 +229,26 @@ class CustomCommandsScreen(ColoredScreen):
         self.included_keys = []
         self.max_command_preview_text_len = 47
 
+
     def on_enter(self):
+        # App.get_running_app().open_loading_popup()
+        Clock.schedule_once(self.sort_blocks)
+
+    def sort_blocks(self, *args):
+        for widget in sorted(self.ids.cc_list.children):
+            self.included_keys.remove(widget.command)
+            self.ids.cc_list.remove_widget(widget)
+
         self.custom_commands = load_custom_commands()
+
         if not self.custom_commands and type(self.custom_commands) is not dict:
             toast_notification(u'Повреждён файл пользовательских команд')
             Clock.schedule_once(self.leave, .1)
+
         else:
             for key in sorted(self.custom_commands.keys()):
                 for item in sorted(self.custom_commands[key]):
-                    if type(item) is not list or len(item)\
+                    if type(item) is not list or len(item) \
                             < CUSTOM_COMMAND_OPTIONS_COUNT + 1:
                         self.custom_commands[key].remove(item)
                         if type(item) is not list:
@@ -205,8 +263,12 @@ class CustomCommandsScreen(ColoredScreen):
                 if key not in self.included_keys:
                     self.add_command(key, self.custom_commands[key])
 
+        # App.get_running_app().close_loading_popup()
+
+
     def leave(self, delay=None):
         self.parent.show_main_screen()
+
 
     def open_edit_popup(self, command_button, command_block):
         max_title_len = 27
@@ -249,6 +311,7 @@ class CustomCommandsScreen(ColoredScreen):
 
         self.edit_popup.open()
 
+
     def open_new_command_popup(self):
         self.edit_popup.switch_to_empty_command()
         self.edit_popup.command_block = None
@@ -263,6 +326,7 @@ class CustomCommandsScreen(ColoredScreen):
             on_release=self.edit_popup.ids.apply_btn._callback
             )
         self.edit_popup.open()
+
 
     def save_edited_command(self, command, response, command_button, block):
         if not (self.edit_popup.ids.command_textinput.text
@@ -281,12 +345,7 @@ class CustomCommandsScreen(ColoredScreen):
             self.custom_commands[button_command].append(
                 [command_button.response] + options)
 
-            command_button.options = []
-            for i in options:
-                command_button.options.append(i)
-            # command_button.options = options will cause
-            # command_button.options is options
-
+            command_button.options = options[:]
             updated_command = []
 
             if options[0] == 2: # use_regex
@@ -309,8 +368,9 @@ class CustomCommandsScreen(ColoredScreen):
 
         if button_command != command:
             if command in self.included_keys:
-                toast_notification(u'Такая команда уже есть')
+                toast_notification(u'Такая команда уже существует')
                 return
+
             self.included_keys.remove(button_command)
             self.included_keys.append(command)
             command_button.command = command
@@ -359,6 +419,7 @@ class CustomCommandsScreen(ColoredScreen):
         save_custom_commands(self.custom_commands)
         self.edit_popup.dismiss()
 
+
     def remove_command(self, command, response, command_button, block):
         options = self.edit_popup.get_options()
 
@@ -396,8 +457,8 @@ class CustomCommandsScreen(ColoredScreen):
         save_custom_commands(self.custom_commands)
         self.edit_popup.dismiss()
 
+
     def create_command(self, command, response):
-        from kivy.logger import Logger
         if not (self.edit_popup.ids.command_textinput.text
                 and self.edit_popup.ids.response_textinput.text):
             toast_notification(
@@ -478,6 +539,7 @@ class CustomCommandsScreen(ColoredScreen):
         save_custom_commands(self.custom_commands)
         self.edit_popup.dismiss()
 
+
     def add_command(self, command, response):
         dropdown = ListDropDown()
         block = CustomCommandBlock(dropdown=dropdown)
@@ -521,24 +583,12 @@ class CustomCommandsScreen(ColoredScreen):
         self.ids.cc_list.add_widget(block)
         self.included_keys.append(command)
 
-    def sort_blocks(self):
-        for widget in sorted(self.ids.cc_list.children):
-            self.included_keys.remove(widget.command)
-            self.ids.cc_list.remove_widget(widget)
-
-        self.on_enter()
-
 
 class Manager(ScreenManager):
     def __init__(self, **kwargs):
         super(Manager, self).__init__(**kwargs)
         self.transition = FadeTransition()
         self.last_screen = None
-
-    def show_auth_screen(self):
-        if not 'auth_screen' in self.screen_names:
-            self.add_widget(AuthScreen())
-        self.current = 'auth_screen'
 
     def show_main_screen(self):
         if not 'main_screen' in self.screen_names:

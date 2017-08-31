@@ -1,13 +1,18 @@
 # coding:utf8
 
 
-import time, traceback
+import time
+import traceback
 
 from kivy.app import App
-from kivy.logger import Logger
 
-from libs import vk_api as vk
+import vk_api as vk
 from utils import load_token, save_token
+
+
+# globals
+
+api = None
 
 
 def error_handler(request):
@@ -15,29 +20,35 @@ def error_handler(request):
         error = None
 
         try:
+            send_log_line(u'Вызов: [b]%s[/b]' % request.__name__, 0, time.time())
             response = request(*args, **kwargs)
         except Exception as raw_error:
+            send_log_line(
+                u'Возникла ошибка (vkrequests): %s' % traceback.format_exc(),
+                0
+            )
             error = str(raw_error).lower()
 
-            if error == 'captcha needed' and request.__name__ == 'log_in':
-                return False, raw_error
+            if 'timed out' in error:
+                send_log_line(u'Ошибка [b]timed out[/b]. Повторяю запрос...', 1)
+                return do_request(*args, **kwargs)
+
+            elif '[errno -3]' in error \
+                    or '[errno 7]' in error \
+                    or '[errno 8]' in error \
+                    or '[errno 101]' in error \
+                    or '[errno 113]' in error \
+                    or 'connection' in error:
+                send_log_line(u'Ошибка сети. Жду 10 секунд...', 1)
+                time.sleep(10)
+
+                return do_request(*args, **kwargs)
+
             return False, error
         else:
             return response, error
 
     return do_request
-
-
-def _auth_handler(vk, auth_response_page):
-    App.get_running_app().open_twofa_popup(vk, auth_response_page)
-
-
-def _captcha_handler(captcha):
-    app = App.get_running_app()
-    if app is None: # running in service
-        pass
-    else:
-        app.open_captcha_popup(captcha)
 
 
 def _save_token(token=None):
@@ -46,8 +57,21 @@ def _save_token(token=None):
     save_token(token)
 
 
+def set_new_logger_function(func):
+    global send_log_line
+    send_log_line = func
+
+
+def send_log_line(line, log_importance, t=None):
+    pass
+
+
 @error_handler
-def log_in(login=None, password=None, logout=False):
+def log_in(login=None, password=None,
+           twofactor_handler=None, captcha_handler=None,
+           logout=False
+          ):
+
     global api
 
     if logout:
@@ -58,8 +82,8 @@ def log_in(login=None, password=None, logout=False):
     token = load_token()
 
     session_params = {
-                        'auth_handler': _auth_handler,
-                        'captcha_handler': _captcha_handler,
+                        'auth_handler': twofactor_handler,
+                        'captcha_handler': captcha_handler,
                         'app_id': '6045412',
                         'scope': '70660' # messages, status, photos, offline
                      }
@@ -67,21 +91,33 @@ def log_in(login=None, password=None, logout=False):
     if login and password:
         session_params['login'] = login
         session_params['password'] = password
+
+        session = vk.VkApi(**session_params)
+        session.auth(reauth=True)
+
+        api = session.get_api()
+
+        _save_token()
     else:
-        session_params['token'] = token
         if not token:
+            raise Exception('No token')
+
+        session_params['token'] = token
+
+        session = vk.VkApi(**session_params)
+
+        if not session.check_token():
             return False
 
-    session = vk.VkApi(**session_params)
-    session.auth(reauth=login and password)
-    api = session.get_api()
+        api = session.get_api()
 
-    _save_token()
     return True
 
 
 @error_handler
-def send_message(text='', gid=None, uid=None, forward=None, attachments=[]):
+def send_message(text='', gid=None, uid=None, forward=None, attachments=[],
+                 sticker_id=None
+                ):
     if gid:
         gid -= 2000000000
 
@@ -91,7 +127,8 @@ def send_message(text='', gid=None, uid=None, forward=None, attachments=[]):
     response = api.messages.send(
         peer_id=uid, message=text,
         forward_messages=forward,
-        chat_id=gid, attachment=attachments
+        chat_id=gid, attachment=attachments,
+        sticker_id=sticker_id
     )
 
     return response
@@ -157,6 +194,7 @@ def get_name_by_id(object_id=None, name_case='nom'):
         name = 'Unknown object'
 
     return name
+
 
 @error_handler
 def get_user_city(user_id=None):

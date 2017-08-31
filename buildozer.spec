@@ -4,25 +4,25 @@
 title = VKBot
 
 # (str) Package name
-package.name = VKBot
+package.name = vkbot.dev
 
 # (str) Package domain (needed for android/ios packaging)
-package.domain = org
+package.domain = org.fogaprod
 
 # (str) Source code where the main.py live
 source.dir = .
 
 # (list) Source files to include (let empty to include all the files)
-source.include_exts = py,kv,jpg,png
+source.include_exts = py,png,jpg,kv,ttf
 
 # (list) List of inclusions using pattern matching
-# source.include_patterns = assets/*,images/*.png
+#source.include_patterns = assets/*,images/*.png
 
 # (list) Source files to exclude (let empty to not exclude anything)
-# source.exclude_exts = spec,ini,log,pyc,pyx,pyo,txt
+source.exclude_exts = spec,ini,log,pyc,pyx,pyo,txt,md
 
 # (list) List of directory to exclude (let empty to not exclude anything)
-source.exclude_dirs = bin,data/images/screenshots
+source.exclude_dirs = bin,build,data/images/screenshots
 
 # (list) List of exclusions using pattern matching
 source.exclude_patterns = license
@@ -32,30 +32,30 @@ source.exclude_patterns = license
 
 # (str) Application versioning (method 2)
 version.regex = __version__ = ['"](.*)['"]
-version.filename = %(source.dir)s/bot/core.py
+version.filename = %(source.dir)s/bot/utils.py
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy
-requirements = kivy==master,android,openssl,requests
+requirements = kivy==master,android,openssl,requests,vk_api
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
 # requirements.source.kivy = ../../kivy
 
 # (list) Garden requirements
-# garden_requirements =
+#garden_requirements =
 
 # (str) Presplash of the application
-presplash.filename = %(source.dir)s/data/images/presplash.png
+presplash.filename = %(source.dir)s/build/presplash.png
 
 # (str) Icon of the application
 icon.filename = %(source.dir)s/data/images/icon.png
 
 # (str) Supported orientation (one of landscape, portrait or all)
-orientation = all
+orientation = portrait
 
 # (list) List of service to declare
-# services = VKBot:/service/main.py,NAME2:ENTRYPOINT2_TO_PY
+services = botservice:service/main.py:foreground
 
 #
 # OSX Specific
@@ -64,6 +64,12 @@ orientation = all
 #
 # author = © Copyright Info
 
+# change the major version of python used by the app
+# osx.python_version = 3
+
+# Kivy version to use
+# osx.kivy_version = 1.9.1
+
 #
 # Android specific
 #
@@ -71,38 +77,39 @@ orientation = all
 # (bool) Indicate if the application should be fullscreen or not
 fullscreen = 0
 
+# (string) Presplash background color (for new android toolchain)
+# Supported formats are: #RRGGBB #AARRGGBB or one of the following names:
+# red, blue, green, black, white, gray, cyan, magenta, yellow, lightgray,
+# darkgray, grey, lightgrey, darkgrey, aqua, fuchsia, lime, maroon, navy,
+# olive, purple, silver, teal.
+#android.presplash_color = #FFFFFF
+
 # (list) Permissions
 android.permissions = INTERNET
 
 # (int) Android API to use
-android.api = 20
+#android.api = 19
 
 # (int) Minimum API required
 android.minapi = 14
 
 # (int) Android SDK version to use
-android.sdk = 24
+android.sdk = 20
 
 # (str) Android NDK version to use
-# android.ndk = 9c
+android.ndk = 10.3.2
 
 # (bool) Use --private data storage (True) or --dir public storage (False)
-# android.private_storage = True
+# android.private_storage = False
 
 # (str) Android NDK directory (if empty, it will be automatically downloaded.)
-# android.ndk_path =
+android.ndk_path = /home/foga/android/crystax-ndk-10.3.2
 
 # (str) Android SDK directory (if empty, it will be automatically downloaded.)
-# android.sdk_path =
+android.sdk_path = /home/foga/android/android-sdk-20
 
 # (str) ANT directory (if empty, it will be automatically downloaded.)
-# android.ant_path =
-
-# (str) python-for-android git clone directory (if empty, it will be automatically cloned from github)
-# android.p4a_dir =
-
-# (list) python-for-android whitelist
-# android.p4a_whitelist =
+#android.ant_path =
 
 # (bool) If True, then skip trying to update the Android sdk
 # This can be useful to avoid excess Internet downloads or save time
@@ -110,68 +117,104 @@ android.sdk = 24
 # android.skip_update = False
 
 # (str) Android entry point, default is ok for Kivy-based app
-# android.entrypoint = org.renpy.android.PythonActivity
+#android.entrypoint = org.renpy.android.PythonActivity
+
+# (list) Pattern to whitelist for the whole project
+#android.whitelist =
+
+# (str) Path to a custom whitelist file
+#android.whitelist_src =
+
+# (str) Path to a custom blacklist file
+#android.blacklist_src =
 
 # (list) List of Java .jar files to add to the libs so that pyjnius can access
 # their classes. Don't add jars that you do not need, since extra jars can slow
 # down the build process. Allows wildcards matching, for example:
 # OUYA-ODK/libs/*.jar
-# android.add_jars = foo.jar,bar.jar,path/to/more/*.jar
+#android.add_jars = foo.jar,bar.jar,path/to/more/*.jar
 
 # (list) List of Java files to add to the android project (can be java or a
 # directory containing the files)
-# android.add_src =
+#android.add_src =
 
-# (str) python-for-android branch to use, if not master, useful to try
-# not yet merged features.
-p4a.branch = stable
+# (list) Android AAR archives to add (currently works only with sdl2_gradle
+# bootstrap)
+#android.add_aars =
+
+# (list) Gradle dependencies to add (currently works only with sdl2_gradle
+# bootstrap)
+#android.gradle_dependencies =
+
+# (str) python-for-android branch to use, defaults to master
+p4a.branch = master
 
 # (str) OUYA Console category. Should be one of GAME or APP
 # If you leave this blank, OUYA support will not be enabled
-# android.ouya.category = GAME
+#android.ouya.category = GAME
 
 # (str) Filename of OUYA Console icon. It must be a 732x412 png image.
-# android.ouya.icon.filename = %(source.dir)s/data/ouya_icon.png
+#android.ouya.icon.filename = %(source.dir)s/data/ouya_icon.png
 
 # (str) XML file to include as an intent filters in <activity> tag
-# android.manifest.intent_filters =
+#android.manifest.intent_filters =
 
 # (list) Android additionnal libraries to copy into libs/armeabi
-# android.add_libs_armeabi = libs/android/*.so
-# android.add_libs_armeabi_v7a = libs/android-v7/*.so
-# android.add_libs_x86 = libs/android-x86/*.so
-# android.add_libs_mips = libs/android-mips/*.so
+#android.add_libs_armeabi = libs/android/*.so
+#android.add_libs_armeabi_v7a = libs/android-v7/*.so
+#android.add_libs_x86 = libs/android-x86/*.so
+#android.add_libs_mips = libs/android-mips/*.so
 
 # (bool) Indicate whether the screen should stay on
 # Don't forget to add the WAKE_LOCK permission if you set this to True
-# android.wakelock = False
+#android.wakelock = False
 
 # (list) Android application meta-data to set (key=value format)
-# android.meta_data =
+#android.meta_data =
 
 # (list) Android library project to add (will be added in the
 # project.properties automatically.)
-# android.library_references =
+#android.library_references =
 
 # (str) Android logcat filters to use
-# android.logcat_filters = *:S python:D
+#android.logcat_filters = *:S python:D
 
 # (bool) Copy library instead of making a libpymodules.so
-# android.copy_libs = 1
+#android.copy_libs = 1
+
+# (str) The Android arch to build for, choices: armeabi-v7a, arm64-v8a, x86
+android.arch = armeabi-v7a
+
+#
+# Python for android (p4a) specific
+#
+
+# (str) python-for-android git clone directory (if empty, it will be automatically cloned from github)
+#p4a.source_dir =
+
+# (str) The directory in which python-for-android should look for your own build recipes (if any)
+#p4a.local_recipes =
+
+# (str) Filename to the hook for p4a
+#p4a.hook =
+
+# (str) Bootstrap to use for android builds
+# p4a.bootstrap = sdl2
+
 
 #
 # iOS specific
 #
 
 # (str) Path to a custom kivy-ios folder
-# ios.kivy_ios_dir = ../kivy-ios
+#ios.kivy_ios_dir = ../kivy-ios
 
 # (str) Name of the certificate to use for signing the debug version
 # Get a list of available identities: buildozer ios list_identities
-# ios.codesign.debug = "iPhone Developer: <lastname> <firstname> (<hexstring>)"
+#ios.codesign.debug = "iPhone Developer: <lastname> <firstname> (<hexstring>)"
 
 # (str) Name of the certificate to use for signing the release version
-# ios.codesign.release = %(ios.codesign.debug)s
+#ios.codesign.release = %(ios.codesign.debug)s
 
 
 [buildozer]
@@ -186,7 +229,7 @@ warn_on_root = 1
 # build_dir = ./.buildozer
 
 # (str) Path to build output (i.e. .apk, .ipa) storage
-bin_dir = ./bin/android
+bin_dir = bin/android
 
 #    -----------------------------------------------------------------------------
 #    List as sections

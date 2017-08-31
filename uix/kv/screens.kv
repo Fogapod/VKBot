@@ -1,14 +1,92 @@
 #: import Widget uix.widgets
+#: import RoundedButtonWithShadow uix.widgets
+#: import BlueButton uix.widgets
 #: import FontelloButton uix.widgets
-#: import Apply uix.widgets
+#: import ScrollEffect kivy.effects.scroll.ScrollEffect
+
+#: import __version__ bot.utils.__version__
 
 
-<TwoFAKeyEnterPopup>:
+<AuthPopup>:
+    size_hint: None, None
+    size: content.size
+    pos_hint: {'center_y': .8}
+
+    GridLayout:
+        id: content
+        rows: 5
+        spacing: dp(3)
+        size_hint: None, None
+        size: self.minimum_size
+        padding: dp(20)
+
+        Label:
+            text: 'Авторизация ВК'
+            # color: 0, .2, .4, 1
+            font_size: '20sp'
+            padding_y: dp(5)
+            size_hint: None, None
+            size: self.texture_size
+
+        TextInput:
+            text: app._cached_login if app._cached_login is not None else ''
+            hint_text: 'Логин'.decode('utf8')
+            id: login_textinput
+            size_hint: None, None
+            font_size: '18sp'
+            height: self.minimum_height
+            width: dp(200)
+            multiline: False
+            on_text_validate: self.focused = False; pass_textinput.focused = True
+
+        TextInput:
+            text: app._cached_password if app._cached_password is not None else ''
+            hint_text: 'Пароль'.decode('utf8')
+            id: pass_textinput
+            size_hint: None, None
+            font_size: '18sp'
+            height: self.minimum_height
+            width: dp(200)
+            multiline: False
+            password: False
+            on_text_validate: self.focused = False; root.log_in()
+
+        Button:
+            id: show_pass_label
+            text: root.hide_password_text
+            background_color: 0, 0, 0, 0
+            # color: 0, .2, .4, 1
+            font_size: '16sp'
+            padding_y: dp(9)
+            size_hint_y: None
+            height: self.texture_size[1]
+            on_release: root.update_pass_input_status(self)
+
+        GridLayout:
+            cols: 3
+            size_hint_y: None
+            size: self.minimum_size
+
+            Widget
+
+            BlueButton:
+                id: enter
+                text: 'Войти'
+                font_size: '16sp'
+                padding_y: dp(10)
+                size_hint: 1.3, None
+                height: self.texture_size[1]
+                on_release: root.log_in()
+
+            Widget
+
+
+<TwoFAPopup>:
     size_hint_y: None
     height: content.height + dp(30)
     pos_hint: {'center_y': 0.7}
 
-    GridLayout:
+    GridLayout: # BoxLayout in future
         id: content
         cols: 1
         size_hint: None, None
@@ -22,7 +100,8 @@
             size_hint_y: None
             height: self.texture_size[1]
 
-        BoxLayout:
+        GridLayout: # BoxLayout in future
+            cols: 3
             size_hint_y: None
             height: self.minimum_height
 
@@ -45,117 +124,23 @@
                 font_size: sp(20)
                 size_hint_x: None
                 width: self.texture_size[0]
-                on_release: root.twofa_auth(code_textinput.text)
-
-
-<AuthScreen>:
-    name: 'auth_screen'
-
-    GridLayout:
-        rows: 5
-        spacing: dp(3)
-        size_hint: None, None
-        size: self.minimum_size
-        pos_hint: {'center_x':.5,'center_y':.75}
-
-        Label:
-            text: 'Авторизация ВК'
-            color: 0, .2, .4, 1
-            font_size: '20sp'
-            padding_y: dp(5)
-            size_hint: None, None
-            size: self.texture_size
-
-        TextInput:
-            hint_text: 'Логин'.decode('utf8')
-            id: login_textinput
-            size_hint: None, None
-            font_size: '18sp'
-            height: self.minimum_height
-            width: self.height*8
-            multiline: False
-
-        TextInput:
-            hint_text: 'Пароль'.decode('utf8')
-            id: pass_textinput
-            size_hint: None, None
-            font_size: '18sp'
-            height: self.minimum_height
-            width: self.height*8
-            multiline: False
-
-        Button:
-            id: show_pass_label
-            text: root.hide_password_text
-            background_color: 0, 0, 0, 0
-            color: 0, .2, .4, 1
-            font_size: '16sp'
-            padding_y: dp(9)
-            size_hint_y: None
-            height: self.texture_size[1]
-            on_release: root.update_pass_input_status(self)
-
-        GridLayout:
-            cols: 3
-            size_hint_y: None
-            size: self.minimum_size
-
-            Widget
-
-            Button:
-                id: enter
-                text: 'Войти'
-                font_size: '16sp'
-                padding_y: dp(10)
-                background_normal: ''
-                background_color: 0, .2, .4, 1
-                size_hint: 1.3, None
-                height: self.texture_size[1]
-                on_release: root.log_in()
-
-            Widget
-
-    Button:
-        id: pass_auth
-        text: 'Пропустить'
-        font_size: '16sp'
-        background_normal: ''
-        background_color: 0, .2, .4, .5
-        size_hint: None, None
-        size: self.texture_size[0]*2.3, self.texture_size[1]*2.3
-        pos_hint: {'center_x':.5}
-        pos: self.pos[0], root.height*.05        
-        on_release: root.parent.show_main_screen()
-        disabled: False
-
-
-<InfoPopup>:
-    size_hint: None, None
-    size: label.width + dp(40), label.height + dp(50)
-
-    Label:
-        id: label
-        size_hint: None, None
-        size: self.texture_size
-        markup: True
-        text: 'VKBot версии %s\nГруппа в ВК: [color=#199ac1][ref=https://vk.com/foga_prod]vk.com/foga_prod[/ref][/color]\n\n[color=#199ac1][ref=https://github.com/Fogapod/VKBot#Руководство-к-использованию]Открыть мануал[/ref][/color]'
-        font_size: '18sp'
-        on_ref_press: app._open_url(args)
+                on_release: root.send_code(code_textinput.text)
 
 
 <CaptchaPopup>:
     size_hint: None, None
     size: content.width + dp(40), content.height + dp(50)
 
-    BoxLayout:
+    GridLayout: # BoxLayout in future
         id: content
+        rows: 3
         size_hint: None, None
         size: self.minimum_size
-        orientation: 'vertical'
         spacing: dp(8)
 
         AsyncImage:
             id: image
+            source: root.captcha_url
             allow_stretch: True
             size_hint: None, None
             size: dp(260), dp(100)
@@ -176,7 +161,8 @@
                 font_size: '17sp'
                 size_hint: None, None
                 size: self.texture_size[0], self.texture_size[1]*2
-                on_release: root.retry_request(textinput.text)
+
+                on_release: root.send_code(textinput.text)
 
             Widget
 
@@ -188,83 +174,148 @@
                 on_release: root.dismiss()
 
 
+<InfoPopup>:
+    size_hint: None, None
+    size: content.width + dp(40), content.height + dp(50)
+
+    Label:
+        id: content
+        size_hint: None, None
+        size: self.texture_size
+        markup: True
+        text: 'VKBot версии %s\n\n[font=fonts/fontello.ttf]V[/font] [color=#199ac1][ref=https://vk.com/foga_prod]Группа в ВК[/ref][/color]\n[font=fonts/fontello.ttf]I[/font] [color=#199ac1][ref=https://github.com/Fogapod/VKBot]Репозиторий на github[/ref][/color]\n\n[color=#199ac1][ref=https://github.com/Fogapod/VKBot/tree/0.1.0dev#Руководство-к-использованию]Открыть мануал[/ref][/color]' % __version__
+        font_size: '18sp'
+        on_ref_press: app._open_url(args)
+
+
+<LoadingPopup>:
+    auto_dismiss: False
+    size_hint: None, None
+    size: 0, 0
+    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+    canvas.before:
+        PushMatrix
+        Rotate:
+            angle: root.angle
+            axis: 0, 0, 1
+            origin: root.center
+
+    canvas.after:
+        PopMatrix
+
+
+    Image:
+        size_hint: None, None
+        size: self.texture_size
+        source: 'data/images/icon.png'
+
+
 <MainScreen>:
     name: 'main_screen'
 
     BoxLayout:
         orientation: 'vertical'
-        
-        ActionBar:
-            id: actionbar
 
+        ActionBar:
             ActionView:
                 ActionPrevious:
+                    id: actionprevious
                     app_icon: 'data/images/icon.png'
+                    on_release: app._export_logs()
 
                 ActionButton:
                     text: 'Мои команды'
+                    size_hint_x: None
+                    width: self.texture_size[0]
+
                     on_release: root.parent.show_custom_commands_screen()
 
                 ActionOverflow:
                     mode: 'spinner'
 
                     ActionButton:
-                        minimum_width: '110sp'
+                        minimum_width: '125sp'
                         text: 'Настройки'
+
                         on_release: app.open_settings()
 
                     ActionButton:
-                        text: 'Авторизация'
-                        on_release: root.parent.show_auth_screen()
-
-                    ActionButton:
                         text: 'Информация'
+
                         on_release: root.show_info()
 
                     ActionButton:
                         text: 'Выйти'
+
                         on_release: root.logout()
 
-        Carousel:
-            loop: True
+                    ActionButton:
+                        text: 'Очистка лога'
 
-            FloatLayout:
-                Button:
-                    id: main_btn
-                    font_size: '16sp'
-                    background_normal: ''
-                    background_color: 0, .2, .4, 1
-                    size_hint: None, None
-                    size: self.texture_size[0]*2.3, self.texture_size[1]*2.3
-                    pos_hint: {'center_x':.5}
-                    pos_hint_y: None
-                    pos: self.pos[0], actionbar.pos[1]-actionbar.height*1.5
-                    on_release: root.on_main_btn_press()
+                        on_release:
+                            root.ids.logging_panel.text = root.ids.logging_panel.default_text
 
-                Label:
-                    id: answers_count_lb
-                    font_size: '17sp'
-                    color: 0, .2, .4, 1
-                    size_hint: None, None
-                    size: self.texture_size[0]+10, self.texture_size[1]+10
-                    pos_hint: {'center_x':.5}
-                    pos_hint_y: None
-                    pos: self.pos[0], main_btn.pos[1]-actionbar.height*1.3
+        GridLayout: # BoxLayout in future
+            cols: 1
+            padding: dp(20), dp(15)
+            size_hint_y: None
+            height: self.minimum_height
 
-            FloatLayout:
-                Apply:
-                    text: 'Восстановить статус'
-                    width: self.texture_size[0] + dp(4)
-                    pos_hint: {'center_x':.5, 'pos_y': None}
-                    pos: self.pos[0], export_logs_btn.pos[1] + export_logs_btn.height*2
-                    disabled: True
+            BlueButton:
+                id: main_btn
+                font_size: '16sp'
+                padding: 0, dp(10)
+                size_hint: 1, None
+                height: self.texture_size[1]
 
-                Apply:
-                    id: export_logs_btn
-                    text: 'Экспортировать логи'
-                    width: self.texture_size[0] + dp(4)
-                    pos_hint: {'center_x':.5, 'center_y':.1}
-                    on_release: app._export_logs()
+                on_release: root.on_main_btn_press()
+
+        BoxLayout:
+            padding: dp(4)
+
+            canvas.before:
+                Color:
+                    rgb: .2, .2, .2
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            BoxLayout:
+                padding: dp(2)
+
+                canvas.before:
+                    Color:
+                        rgb: 0, 0, 0
+
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+                    Color:
+                        rgb: .46, .46, .46
+
+                    Rectangle:
+                        pos:
+                            self.pos[0] + self.padding[0]/2, self.pos[1] + self.padding[1]/2
+                        size:
+                            self.size[0] - self.padding[0], self.size[1] - self.padding[1]
+
+                ScrollView:
+                    effect_cls: ScrollEffect
+
+                    Label:
+                        id: logging_panel
+                        default_text: '[b]Добро пожаловать в приложение [i]VKBot[/i] версии %s !\n[/b]'.decode('utf8') % __version__
+                        text: self.default_text
+                        text_size: self.width, None
+                        color: 1, 1, 1, .8
+                        font_name: 'Roboto' # TODO 'RobotoMono'
+                        font_size: sp(12)
+                        markup: True
+                        padding: dp(2), dp(2)
+                        size_hint_y: None
+                        height: self.texture_size[1]
 
 
 <CustomCommandsScreen>:
@@ -275,13 +326,35 @@
         padding: dp(10)
         spacing: dp(5)
 
-        ScrollView:
-            GridLayout:
-                id: cc_list
-                cols: 1
-                spacing: dp(2)
-                size_hint_y: None
-                height: self.minimum_size[1]
+        BoxLayout:
+            padding: dp(4)
+
+            canvas.before:
+                Color:
+                    rgb: 0, 0, 0
+
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+                Color:
+                    rgb: .46, .46, .46
+
+                Rectangle:
+                    pos:
+                        self.pos[0] + self.padding[0]/2, self.pos[1] + self.padding[1]/2
+                    size:
+                        self.size[0] - self.padding[0], self.size[1] - self.padding[1]
+
+            ScrollView:
+                effect_cls: ScrollEffect
+
+                GridLayout: # BoxLayout in future
+                    id: cc_list
+                    cols: 1
+                    spacing: dp(2)
+                    size_hint_y: None
+                    height: self.minimum_size[1]
 
         GridLayout:
             cols: 5
@@ -291,13 +364,18 @@
             FontelloButton:
                 text: 'P'
                 size_hint_x: 1.5
+                background_color: 0, 0, 0, 0
+
                 on_release: root.open_new_command_popup()
 
             Widget
 
-            Button:
+            BlueButton:
                 text: 'Вернуться'
-                size_hint: 1, None
+                padding: dp(5), dp(10)
+                size_hint: None, None
+                size: self.texture_size
+
                 on_release: root.leave()
 
             Widget
@@ -305,4 +383,6 @@
             FontelloButton:
                 text: 'U'
                 size_hint_x: 1.5
-                on_release: root.sort_blocks()
+                background_color: 0, 0, 0, 0
+
+                on_release: root.on_enter()

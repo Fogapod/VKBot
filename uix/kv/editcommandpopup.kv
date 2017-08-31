@@ -8,7 +8,8 @@
     current_state: 0
 
     background_color: 1, 0, 0, .6
-    size_hint: 1.5, None
+    size_hint: None, None
+    size: dp(55), dp(55)
 
 
 <EditCommandPopup>:
@@ -17,7 +18,7 @@
     height: content.height + dp(70)
     pos_hint: {'center_y':.6}
 
-    GridLayout:
+    GridLayout: # BoxLayout in future
         id: content
         cols: 1
         size_hint_y: None
@@ -32,6 +33,7 @@
 
             LowerTextInput:
                 id: command_textinput
+                text_size: self.width, None
                 size_hint_y: None
                 height:
                     min((self.line_height+dp(1))*6, max((self.line_height+dp(1))*3, self.minimum_height))
@@ -39,6 +41,7 @@
 
             TextInput:
                 id: response_textinput
+                text_size: self.width, None
                 size_hint_y: None
                 height:
                     min((self.line_height+dp(1))*6, max((self.line_height+dp(1))*3, self.minimum_height))
@@ -48,7 +51,7 @@
                 cols: 9
                 size_hint_y: None
                 height: self.minimum_height
-                spacing: dp(5)
+                spacing: dp(1)
 
                 OptionButton:
                     states: (0, 2)
@@ -90,21 +93,29 @@
 
         GridLayout:
             cols: 3
-            size_hint_y: None
             spacing: dp(5)
+            size_hint_y: None
+            height: self.minimum_height
 
             Button:
                 id: apply_btn
-                _callback: None
                 text: 'Применить'
+                size_hint_y: None
+                height: delete_command_btn.height
+                _callback: None
 
             FontelloButton:
                 id: delete_command_btn
                 _callback: None
                 text: 'C'
-                size_hint_x: None
+                size_hint: None, None
+                padding: dp(10), dp(10)
+                size: self.texture_size
                 background_color: 1, 0, 0, 1
 
             Button:
                 text: 'Отмена'
+                size_hint_y: None
+                height: delete_command_btn.height
+
                 on_release: root.dismiss()
