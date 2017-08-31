@@ -5,8 +5,6 @@
 Приложение написано на языке python версии 2.7 с использованием фреймворка [Kivy](https://kivy.org) и является мультиплатформенным.
 Предполагается использование на OC android, но работа возможна и на других платформах.
 
-<img height="600" src="https://github.com/Fogapod/ChatBot_UI/blob/0.1.0dev/data/images/screenshots/login_screen.png" 
-align="left"/>
 <img height="600" src="https://github.com/Fogapod/ChatBot_UI/blob/0.1.0dev/data/images/screenshots/main_screen.png" 
 align="center"/>
 
