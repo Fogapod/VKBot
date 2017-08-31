@@ -5,7 +5,7 @@
 Приложение написано на языке python версии 2.7 с использованием фреймворка [Kivy](https://kivy.org) и является мультиплатформенным.
 Предполагается использование на OC android, но работа возможна и на других платформах.
 
-<img height="600" src="https://github.com/Fogapod/ChatBot_UI/blob/0.1.0dev/data/images/screenshots/main_screen.png" 
+<img height="600" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/main_screen.png" 
 align="center"/>
 
 ## Использованы библиотеки:
@@ -20,7 +20,7 @@ align="center"/>
 Для начала необходимо войти в аккаунт
 Приложение имеет открытый исходный код. Сохранность данных авторизации гарантирована.
 
-<img height="140" src="https://github.com/Fogapod/VKBot/blob/0.1.0dev/data/images/screenshots/options_dropdown.png" align="right"/>
+<img height="140" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/options_dropdown.png" align="right"/>
 
 После входа будет открыт главный экран приложения. Рекомендуется сразу перейти в настройки  установить обращение(я) к боту. Обращения разделяются двоеточием `:`  
 
@@ -31,7 +31,7 @@ align="center"/>
 После запуска и активации следует ознакомиться с разделом help. Для этого нужно выполнить команду `/help` 
 (`/` является одним из стандартных обращений к боту. Оно может быть любым, я использую его для удобства)
 
-<img height="400" src="https://github.com/Fogapod/VKBot/blob/0.1.0dev/data/images/screenshots/help_command.png"/>
+<img height="400" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/help_command.png"/>
 
 ### Пользовательские команды
 Бот поддерживает создание и использование своих команд. Их можно добавлять двумя способами. Через интерфейс и сообщения.
@@ -40,7 +40,7 @@ align="center"/>
 Регистр команды не учитывается.
 
 ##### Интерфейс
-<img height="300" src="https://github.com/Fogapod/VKBot/blob/0.1.0dev/data/images/screenshots/command_edit_popup.png"/>
+<img height="300" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/command_edit_popup.png"/>
 
 Для работы с пользовательскими командами в интерефейсе необходимо перейти на экран их настройки из главного экрана приложения. Изначально никаких команд нет. Это можно исправить, добавив несколько.
 Каждая команда содержит 5 опций, переключаемых кнопками ниже поля `ответ`
@@ -49,20 +49,20 @@ align="center"/>
 
 
 Использовать для определения команды синтаксис регулярных выражений (нет, да)
-<img height="25" src="https://github.com/Fogapod/VKBot/blob/0.1.0dev/data/images/screenshots/button_use_regex_option.png" align="left"/>
+<img height="25" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/button_use_regex_option.png" align="left"/>
 
 Убрать отметку бота в сообщении (обычное поведение, никогда не убирать, убирать всегда)
-<img height="25" src="https://github.com/Fogapod/VKBot/blob/0.1.0dev/data/images/screenshots/button_force_unmark_option.png" align="left"/>
+<img height="25" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/button_force_unmark_option.png" align="left"/>
 
 Пересылать сообщения (обычное поведение, никогда не пересылать, пересылать всегда)
-<img height="25" src="https://github.com/Fogapod/VKBot/blob/0.1.0dev/data/images/screenshots/button_force_forward_option.png" align="left"/>
+<img height="25" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/button_force_forward_option.png" align="left"/>
 
-<img height="25" src="https://github.com/Fogapod/VKBot/blob/0.1.0dev/data/images/screenshots/button_appeal_only_option.png" align="left"/>
+<img height="25" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/button_appeal_only_option.png" align="left"/>
 
 Отвечать на команду только при (в любом случае, только без обращения, только при обращении (`бот, команда`))
 
 Отключить команду (нет, да)
-<img height="25" src="https://github.com/Fogapod/VKBot/blob/0.1.0dev/data/images/screenshots/button_disable_option.png" align="left"/>
+<img height="25" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/button_disable_option.png" align="left"/>
 
 > Язык регулярных выражений - поиск совпадений в тексте по определённым правилам.  
 Документация по регулярным выражениям: <https://docs.python.org/2/library/re.html>  
@@ -80,8 +80,8 @@ align="center"/>
 Удаление всей команды производится командой `/forgot команда`. Удаление ответа производится через `/forgot команда::Ответ`
 
 ### OpenWeatherMap
-Для работы команды `погода` необходимо зарегистрироваться на сайте https://openweathermap.org ([скриншот](https://github.com/Fogapod/ChatBot_UI/blob/0.1.0dev/data/images/screenshots/openweathermap_instruction_1.png))
-После этого нужно перейти в раздел [ключей api](https://home.openweathermap.org/api_keys) и скопировать ваш ключ ([скриншот](https://github.com/Fogapod/ChatBot_UI/blob/0.1.0dev/data/images/screenshots/openweathermap_instruction_2.png))  
+Для работы команды `погода` необходимо зарегистрироваться на сайте https://openweathermap.org ([скриншот](https://github.com/Fogapod/ChatBot_UI/blob/master/data/images/screenshots/openweathermap_instruction_1.png))
+После этого нужно перейти в раздел [ключей api](https://home.openweathermap.org/api_keys) и скопировать ваш ключ ([скриншот](https://github.com/Fogapod/ChatBot_UI/blob/master/data/images/screenshots/openweathermap_instruction_2.png))  
 
 Далее используйте команду `/погода ваш_ключ`. Готово.
 > От момента создания аккаунта до начала работы ключа может пройти от 10 до 60 минут. Если бот ругается на неправильность ключа, немного подождите и попробуйте ещё раз.
