@@ -850,7 +850,7 @@ class Bot(object):
         api_key_not_confirmed = \
 u'''
 Команда не может функционировать. Для её активации необходим специальный ключ:
-https://github.com/Fogapod/VKBot/blob/0.1.0dev/README.md#openweathermap 
+https://github.com/Fogapod/VKBot/blob/master/README.md#openweathermap 
 
 Скопируйте полученный ключ и повторите команду, добавив его, чтобы получилось
 /погода 9ld10763q10b2cc882a4a10fg90fc974
