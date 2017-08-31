@@ -243,6 +243,8 @@ if __name__ == '__main__':
         if bot.runtime_error:
             if bot.runtime_error != 1:
                 send_error(bot.runtime_error)
+            else:
+                send_log_line(u'[b]Бот остановлен через сообщение[/b]', 2)
             if stable_mode and bot.runtime_error != 1:
                 send_log_line(
                     u'Активирован устойчивый режим. Сброс параметров и повторный запуск бота...',

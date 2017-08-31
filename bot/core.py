@@ -46,11 +46,11 @@ u'''
 -Выбрать участника беседы
 (кто|who) <вопрос>
 -Сообщить информацию о погоде
-погода|weather <?город=город со страницы или Москва>|-
+(погода|weather) <?город=город со страницы или Москва>|-
 -Быстрая проверка активности бота
-ping
+(пинг|ping)
 -Игнорировать пользователя
-(ignore|игнор)
+(игнор|ignore)
 
 Автор: {author}''',
 u'''
@@ -70,9 +70,9 @@ u'''
 Необходимый уровень доступа: 2
 
 -Игнорировать пользователя (лс), беседу или группу
-blacklist <?+|-> <?id> <?reason:причина>
+(чс|blacklist) <?+|-> <?id> <?reason:причина>
 -Перезапустить бота (применение команд и настроек)
-restart''',
+(перезапуск|restart)''',
 u'''
 --Страница 3--
 
@@ -80,13 +80,13 @@ u'''
 Необходимый уровень доступа: 3
 
 -Выключить бота (!)
-stop
+(стоп|stop)
 -Изменить уровень доступа пользователя
-whitelist <?id пользователя> <?уровень доступа=1>
+(вайтлист|whitelist) <?id пользователя> <?уровень доступа=1>
 -Спровоцировать ошибку бота
 raise <?сообщение=Default exception text>
 -Поставить бота на паузу (игнорирование сообщений)
-pause <время (секунды)=5>''',
+(пауза|pause) <время (секунды)=5>''',
 u'''
 --Страница 4--
 
@@ -680,7 +680,7 @@ class Bot(object):
             return self.who, self.who_access_level
         elif s in ('weather', u'погода'):
             return self.weather, self.weather_access_level
-        elif s in ('ping'):
+        elif s in ('ping', u'пинг'):
             return self.pong, self.pong_access_level
         elif s in ('ignore', u'игнор'):
             return self.ignore, self.ignore_access_level
@@ -688,17 +688,17 @@ class Bot(object):
             return self.learn, self.learn_access_level
         elif s in ('forgot', u'забудь', '-'):
             return self.forgot, self.forgot_access_level
-        elif s in ('blacklist'):
+        elif s in ('blacklist', u'чс'):
             return self.blacklist_command, self.blacklist_access_level
-        elif s in ('restart'):
+        elif s in ('restart', u'перезапуск'):
             return self.restart, self.restart_access_level
-        elif s in ('stop', '!'):
+        elif s in ('stop', u'стоп', '!'):
             return self.stop_bot_from_message, self.stop_access_level
-        elif s in ('whitelist'):
+        elif s in ('whitelist', u'вайтлист'):
             return self.whitelist_command, self.whitelist_access_level
         elif s in ('raise'):
             return self.raise_exception, self.raise_access_level
-        elif s in ('pause'):
+        elif s in ('pause', u'пауза'):
             return self.pause, self.pause_access_level
         elif s in ('activate'):
             return self.activate_bot, self.activate_access_level
