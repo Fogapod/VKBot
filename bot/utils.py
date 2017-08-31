@@ -12,7 +12,7 @@ from libs.toast import toast
 
 # GLOBALS
 
-__version__ = '0.1.0dev'
+__version__ = '0.1.0'
 
 PATH = '/sdcard/VKBot/' if platform == 'android' else ''
 DATA_PATH = 'data/'
