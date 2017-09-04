@@ -177,7 +177,7 @@ class Command(object):
         else:
             self.out = message['out']
 
-        if 'chat_id' in message.keys():
+        if 'chat_id' in message:
             self.from_chat = True
         elif self.user_id < 1:
             self.from_group = True
@@ -356,7 +356,7 @@ class Bot(object):
                         if func:
                             if command.out:
                                 user_access_level = 3
-                            elif command.real_user_id in self.whitelist.keys():
+                            elif command.real_user_id in self.whitelist:
                                 user_access_level = \
                                     self.whitelist[command.real_user_id]
                             if user_access_level < required_access_level:
@@ -983,7 +983,7 @@ disabled: {}'''
         elif command in self.custom_commands.keys() \
                 and response in self.custom_commands[command]:
             response_text = u'Я уже знаю такой ответ'
-        elif command in self.custom_commands.keys():
+        elif command in self.custom_commands:
             updated_commands = []
 
             if options[0] == 2: # use_regex
@@ -1027,7 +1027,7 @@ disabled: {}'''
             response = ''
 
         if command and response:
-            if not command in self.custom_commands.keys():
+            if not command in self.custom_commands:
                 response = ''
             elif len([x for x in self.custom_commands[command]\
                     if response == x[0]]) == 0:
@@ -1110,7 +1110,7 @@ disabled: {}'''
                     else:
                         chat_id = int(chat_id)
 
-                if chat_id not in self.blacklist.keys():
+                if chat_id not in self.blacklist:
                     return u'В списке нет данного id', cmd
 
                 self.blacklist.pop(chat_id)
@@ -1169,7 +1169,7 @@ disabled: {}'''
                 access_level = int(access_level)
 
         if access_level == 0:
-            if user_id in self.whitelist.keys():
+            if user_id in self.whitelist:
                 self.whitelist.pop(user_id)
         else:
             self.whitelist[user_id] = access_level
