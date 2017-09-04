@@ -1,0 +1,235 @@
+#: import Widget uix.widgets
+
+#: import __version__ bot.utils.__version__
+
+
+<AuthPopup>:
+    size_hint: None, None
+    size: content.size
+    pos_hint: {'center_y': .8}
+
+    GridLayout:
+        id: content
+        rows: 5
+        spacing: dp(3)
+        size_hint: None, None
+        size: self.minimum_size
+        padding: dp(20)
+
+        Label:
+            text: 'Авторизация ВК'
+            # color: 0, .2, .4, 1
+            font_size: '20sp'
+            padding_y: dp(5)
+            size_hint: None, None
+            size: self.texture_size
+
+        TextInput:
+            text: app._cached_login if app._cached_login is not None else ''
+            hint_text: 'Логин'.decode('utf8')
+            id: login_textinput
+            size_hint: None, None
+            font_size: '18sp'
+            height: self.minimum_height
+            width: dp(200)
+            multiline: False
+            on_text_validate: self.focused = False; pass_textinput.focused = True
+
+        TextInput:
+            text: app._cached_password if app._cached_password is not None else ''
+            hint_text: 'Пароль'.decode('utf8')
+            id: pass_textinput
+            size_hint: None, None
+            font_size: '18sp'
+            height: self.minimum_height
+            width: dp(200)
+            multiline: False
+            password: True
+            on_text_validate: self.focused = False; root.log_in()
+
+        Button:
+            id: show_pass_label
+            text: root.hide_password_text
+            background_color: 0, 0, 0, 0
+            font_size: '16sp'
+            padding_y: dp(9)
+            size_hint_y: None
+            height: self.texture_size[1]
+            on_release: root.update_pass_input_status(self)
+
+        GridLayout:
+            cols: 3
+            size_hint_y: None
+            size: self.minimum_size
+
+            Widget
+
+            BlueButton:
+                id: enter
+                text: 'Войти'
+                font_size: '16sp'
+                padding_y: dp(10)
+                size_hint: 1.3, None
+                height: self.texture_size[1]
+                on_release: root.log_in()
+
+            Widget
+
+
+<TwoFAPopup>:
+    size_hint_y: None
+    height: content.height + dp(30)
+    pos_hint: {'center_y': 0.7}
+
+    GridLayout: # BoxLayout in future
+        id: content
+        cols: 1
+        size_hint: None, None
+        width: app.root_window.width - dp(20)
+        height: self.minimum_height
+
+        Label:
+            text: 'Код для двухфакторной авторизации:'
+            text_size: self.width, None
+            font_size: sp(20)
+            size_hint_y: None
+            height: self.texture_size[1]
+
+        GridLayout: # BoxLayout in future
+            cols: 3
+            size_hint_y: None
+            height: self.minimum_height
+
+            Button:
+                text: ' Вставить код '
+                font_size: sp(20)
+                size_hint_x: None
+                width: self.texture_size[0]
+                on_release: root.paste_twofa_code(code_textinput)
+
+            TextInput:
+                id: code_textinput
+                multiline: False
+                font_size: sp(40)
+                size_hint_y: None
+                height: self.minimum_height
+
+            Button:
+                text: '  Ввод  '
+                font_size: sp(20)
+                size_hint_x: None
+                width: self.texture_size[0]
+                on_release: root.send_code(code_textinput.text)
+
+
+<CaptchaPopup>:
+    size_hint: None, None
+    size: content.width + dp(40), content.height + dp(50)
+
+    GridLayout: # BoxLayout in future
+        id: content
+        rows: 3
+        size_hint: None, None
+        size: self.minimum_size
+        spacing: dp(8)
+
+        AsyncImage:
+            id: image
+            source: root.captcha_url
+            allow_stretch: True
+            size_hint: None, None
+            size: dp(260), dp(100)
+
+        TextInput:
+            id: textinput
+            multiline: False
+            size_hint_y: None
+            height: self.minimum_height
+
+        GridLayout:
+            cols: 3
+            size_hint: None, None
+            size: image.width, self.minimum_height
+
+            Button:
+                text: ' Принять '
+                font_size: '17sp'
+                size_hint: None, None
+                size: self.texture_size[0], self.texture_size[1]*2
+
+                on_release: root.send_code(textinput.text)
+
+            Widget
+
+            Button:
+                text: ' Отмена '
+                font_size: '17sp'
+                size_hint: None, None
+                size: self.texture_size[0], self.texture_size[1]*2
+                on_release: root.dismiss()
+
+
+<InfoPopup>:
+    size_hint: None, None
+    size: content.width + dp(40), content.height + dp(50)
+
+    Label:
+        id: content
+        size_hint: None, None
+        size: self.texture_size
+        markup: True
+        text: 'VKBot версии %s\n\n[font=fonts/fontello.ttf]V[/font] [color=#199ac1][ref=https://vk.com/foga_prod]Группа в ВК[/ref][/color]\n[font=fonts/fontello.ttf]I[/font] [color=#199ac1][ref=https://github.com/Fogapod/VKBot]Репозиторий на github[/ref][/color]\n\n[color=#199ac1][ref=https://github.com/Fogapod/VKBot/tree/master#Руководство-к-использованию]Открыть мануал[/ref][/color]' % __version__
+        font_size: '18sp'
+        on_ref_press: app._open_url(args)
+
+
+<LoadingPopup>:
+    auto_dismiss: False
+    size_hint: None, None
+    size: 0, 0
+    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+
+    canvas.before:
+        PushMatrix
+        Rotate:
+            angle: root.angle
+            axis: 0, 0, 1
+            origin: root.center
+
+    canvas.after:
+        PopMatrix
+
+
+    Image:
+        size_hint: None, None
+        size: self.texture_size
+        source: 'data/images/icon.png'
+
+
+<CustomCommandBlock>:
+    dropdown: None
+    cols: 1
+    size_hint_y: None
+    height: self.minimum_height
+
+    DropdownButton:
+        id: dropdown_btn
+
+
+<ListDropDown>:
+    id: dropdown
+    required_spacing: dp(2)
+
+
+<CommandButton>:
+    text: 'команда'
+    text_size: self.width, None
+    halign: 'center'
+    background_color: .25, .7, .7, 1
+    padding: dp(20), dp(10)
+    size_hint_y: None
+    height: self.texture_size[1]
+
+
+<DropdownButton@CommandButton>:
+    background_color: .8, .8, 0, 1

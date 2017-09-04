@@ -7,11 +7,14 @@ from kivy.app import App
 from kivy.lang import Builder
 from kivy.config import Config
 from kivy.uix.settings import SettingsWithNoMenu
+from kivy.uix.screenmanager import ScreenManager, FadeTransition
 
-from uix.screens import Manager, AuthPopup, TwoFAPopup, CaptchaPopup, LoadingPopup
+from uix.popups import AuthPopup, TwoFAPopup, CaptchaPopup, LoadingPopup
+from uix.screens.mainscreen import MainScreen
+from uix.screens.customcommandsscreen import CustomCommandsScreen
 
 from bot.oscclient import OSCClient
-from bot.utils import SETTINGS_FILE_PATH, CUSTOM_COMMANDS_FILE_PATH, PATH, __version__
+from bot import utils
 
 
 class VKBotApp(App):
@@ -48,7 +51,7 @@ class VKBotApp(App):
 
 
     def get_application_config(self):
-        return SETTINGS_FILE_PATH
+        return utils.SETTINGS_FILE_PATH
 
 
     def build_config(self, config):
@@ -70,7 +73,7 @@ class VKBotApp(App):
 
     def build_settings(self, settings):
         settings.add_json_panel(
-            'Настройки бота. Версия %s' % __version__, self.config, data=
+            'Настройки бота. Версия %s' % utils.__version__, self.config, data=
         '''[
             {
             "type": "string",
@@ -146,7 +149,7 @@ class VKBotApp(App):
             "values": ["False","True"],
             "disabled": 1
             }
-        ]''' % CUSTOM_COMMANDS_FILE_PATH
+        ]''' % utils.CUSTOM_COMMANDS_FILE_PATH
         )
 
 
@@ -183,19 +186,19 @@ class VKBotApp(App):
 
 
     def _export_logs(self):
-        if not os.path.exists(PATH + '.logs/'):
-            os.makedirs(PATH + '.logs/')
-        if not os.path.exists(PATH + '.service_logs/'):
-            os.makedirs(PATH + '.service_logs/')
+        if not os.path.exists(utils.PATH + '.logs/'):
+            os.makedirs(utils.PATH + '.logs/')
+        if not os.path.exists(utils.PATH + '.service_logs/'):
+            os.makedirs(utils.PATH + '.service_logs/')
 
         from shutil import copyfile
 
         if os.path.exists('.kivy/logs/'):
             for file in os.listdir('.kivy/logs/'):
-                copyfile('.kivy/logs/' + file, PATH + '.logs/' + file)
+                copyfile('.kivy/logs/' + file, utils.PATH + '.logs/' + file)
         if os.path.exists('service/.kivy/logs/'):
             for file in os.listdir('service/.kivy/logs/'):
-                copyfile('service/.kivy/logs/' + file, PATH + '.service_logs/' + file)
+                copyfile('service/.kivy/logs/' + file, utils.PATH + '.service_logs/' + file)
 
 
     def _open_url(*args):
@@ -220,7 +223,27 @@ class VKBotApp(App):
 
     def on_stop(self):
         if getattr(self, 'manager', None):
-            self.manager.get_screen('main_screen').stop_log_check_thread()
+            try:
+                self.manager.get_screen('main_screen').stop_log_check_thread()
+            except:
+                pass
+
+
+class Manager(ScreenManager):
+    def __init__(self, **kwargs):
+        super(Manager, self).__init__(**kwargs)
+        self.transition = FadeTransition()
+        self.last_screen = None
+
+    def show_main_screen(self):
+        if not 'main_screen' in self.screen_names:
+            self.add_widget(MainScreen())
+        self.current = 'main_screen'
+
+    def show_custom_commands_screen(self):
+        if not 'cc_screen' in self.screen_names:
+            self.add_widget(CustomCommandsScreen())
+        self.current = 'cc_screen'
 
 
 if __name__ == '__main__':

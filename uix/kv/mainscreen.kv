@@ -1,0 +1,109 @@
+#: import Widget uix.widgets
+#: import BlueButton uix.widgets
+
+
+<MainScreen>:
+    name: 'main_screen'
+
+    BoxLayout:
+        orientation: 'vertical'
+
+        ActionBar:
+            ActionView:
+                ActionPrevious:
+                    id: actionprevious
+                    app_icon: 'data/images/icon.png'
+                    on_release: app._export_logs()
+
+                ActionButton:
+                    text: 'Мои команды'
+                    size_hint_x: None
+                    width: self.texture_size[0]
+
+                    on_release: root.parent.show_custom_commands_screen()
+
+                ActionOverflow:
+                    mode: 'spinner'
+
+                    ActionButton:
+                        minimum_width: '125sp'
+                        text: 'Настройки'
+
+                        on_release: app.open_settings()
+
+                    ActionButton:
+                        text: 'Информация'
+
+                        on_release: root.show_info()
+
+                    ActionButton:
+                        text: 'Выйти'
+
+                        on_release: root.logout()
+
+                    ActionButton:
+                        text: 'Очистка лога'
+
+                        on_release:
+                            root.ids.logging_panel.text = root.ids.logging_panel.default_text
+
+        GridLayout: # BoxLayout in future
+            cols: 1
+            padding: dp(20), dp(15)
+            size_hint_y: None
+            height: self.minimum_height
+
+            BlueButton:
+                id: main_btn
+                font_size: '16sp'
+                padding: 0, dp(10)
+                size_hint: 1, None
+                height: self.texture_size[1]
+
+                on_release: root.on_main_btn_press()
+
+        BoxLayout:
+            padding: dp(4)
+
+            canvas.before:
+                Color:
+                    rgb: .2, .2, .2
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+            BoxLayout:
+                padding: dp(2)
+
+                canvas.before:
+                    Color:
+                        rgb: 0, 0, 0
+
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+                    Color:
+                        rgb: .46, .46, .46
+
+                    Rectangle:
+                        pos:
+                            self.pos[0] + self.padding[0]/2, self.pos[1] + self.padding[1]/2
+                        size:
+                            self.size[0] - self.padding[0], self.size[1] - self.padding[1]
+
+                ScrollView:
+                    effect_cls: ScrollEffect
+
+                    Label:
+                        id: logging_panel
+                        default_text: '[b]Добро пожаловать в приложение [i]VKBot[/i] версии %s !\n[/b]'.decode('utf8') % __version__
+                        text: self.default_text
+                        text_size: self.width, None
+                        color: 1, 1, 1, .8
+                        font_name: 'Roboto' # TODO 'RobotoMono'
+                        font_size: sp(12)
+                        markup: True
+                        padding: dp(2), dp(2)
+                        size_hint_y: None
+                        height: self.texture_size[1]

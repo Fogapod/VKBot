@@ -20,17 +20,17 @@ def main():
         app = VKBotApp()
         app.run()
     except Exception:
+        error_text = traceback.format_exc()
+        save_error(error_text)
+
         if app:
             try:
                 app.stop()
             except AttributeError:
                 pass
 
-        error_text = traceback.format_exc()
-        save_error(error_text)
-
         from kivy.base import runTouchApp
-        from uix.exceptionscreen import ExceptionScreen
+        from uix.screens.exceptionscreen import ExceptionScreen
 
         error_text += u'\nОшибка записана в файл %s' % ERROR_FILE_PATH
         runTouchApp(ExceptionScreen(exception_text=error_text))

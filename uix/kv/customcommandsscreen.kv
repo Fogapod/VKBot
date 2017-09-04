@@ -1,0 +1,74 @@
+#: import Widget uix.widgets
+#: import BlueButton uix.widgets
+#: import FontelloButton uix.widgets
+#: import ScrollEffect kivy.effects.scroll.ScrollEffect
+
+
+<CustomCommandsScreen>:
+    name: 'cc_screen'
+
+    BoxLayout:
+        orientation: 'vertical'
+        padding: dp(10)
+        spacing: dp(5)
+
+        BoxLayout:
+            padding: dp(4)
+
+            canvas.before:
+                Color:
+                    rgb: 0, 0, 0
+
+                Rectangle:
+                    pos: self.pos
+                    size: self.size
+
+                Color:
+                    rgb: .46, .46, .46
+
+                Rectangle:
+                    pos:
+                        self.pos[0] + self.padding[0]/2, self.pos[1] + self.padding[1]/2
+                    size:
+                        self.size[0] - self.padding[0], self.size[1] - self.padding[1]
+
+            ScrollView:
+                effect_cls: ScrollEffect
+
+                GridLayout: # BoxLayout in future
+                    id: cc_list
+                    cols: 1
+                    spacing: dp(2)
+                    size_hint_y: None
+                    height: self.minimum_size[1]
+
+        GridLayout:
+            cols: 5
+            size_hint_y: None
+            height: self.minimum_height
+
+            FontelloButton:
+                text: 'P'
+                size_hint_x: 1.5
+                background_color: 0, 0, 0, 0
+
+                on_release: root.open_new_command_popup()
+
+            Widget
+
+            BlueButton:
+                text: 'Вернуться'
+                padding: dp(5), dp(10)
+                size_hint: None, None
+                size: self.texture_size
+
+                on_release: root.leave()
+
+            Widget
+
+            FontelloButton:
+                text: 'U'
+                size_hint_x: 1.5
+                background_color: 0, 0, 0, 0
+
+                on_release: root.on_enter()
