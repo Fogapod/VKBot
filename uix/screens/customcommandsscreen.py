@@ -3,9 +3,8 @@
 
 from kivy.clock import mainthread, Clock
 
-from uix.widgets import ColoredScreen
 from uix.popups import EditCommandPopup
-from uix.customcommandblock import CustomCommandBlock, ListDropDown, \
+from uix.widgets import ColoredScreen, CustomCommandBlock, ListDropDown, \
     CommandButton
 
 from bot import utils

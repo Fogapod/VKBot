@@ -2,6 +2,8 @@ from kivy.uix.widget import Widget
 from kivy.uix.button import Button
 from kivy.uix.screenmanager import Screen
 from kivy.uix.textinput import TextInput
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.dropdown import DropDown
 
 from kivy.graphics import Color, Rectangle, RoundedRectangle
 from kivy.metrics import dp
@@ -14,7 +16,7 @@ class Widget(Widget):
 class ButtonWithShadow(Button):
     def __init__(self, **kwargs):
         self.disable_shadow = False
-        self.shadow_visibility = .3
+        self.shadow_visibility = 0.3
         self.shadow_shift_x = dp(3)
         self.shadow_shift_y = dp(3)
         self.drawing_shape = Rectangle
@@ -94,3 +96,22 @@ class LowerTextInput(TextInput):
         if self.lower_mode:
             s = s.lower()
         return super(LowerTextInput, self).insert_text(s, from_undo=from_undo)
+
+
+class CustomCommandBlock(GridLayout): # BoxLayout in future
+    def __init__(self, **kwargs):
+        super(CustomCommandBlock, self).__init__(**kwargs)
+        self.command = ''
+        self.responses = []
+        options = []
+        self.dropdown = kwargs['dropdown']
+
+
+class ListDropDown(DropDown):
+    def __init__(self, **kwargs):
+        super(ListDropDown, self).__init__(**kwargs)
+        self.container.spacing = self.required_spacing
+
+
+class CommandButton(Button):
+    pass

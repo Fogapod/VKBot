@@ -19,3 +19,32 @@
             source: 'data/images/background.jpg'
             pos: self.pos
             size: self.size
+
+
+<CustomCommandBlock>:
+    dropdown: None
+    cols: 1
+    size_hint_y: None
+    height: self.minimum_height
+
+    DropdownButton:
+        id: dropdown_btn
+
+
+<ListDropDown>:
+    id: dropdown
+    required_spacing: dp(2)
+
+
+<CommandButton>:
+    text: 'команда'
+    text_size: self.width, None
+    halign: 'center'
+    background_color: .25, .7, .7, 1
+    padding: dp(20), dp(10)
+    size_hint_y: None
+    height: self.texture_size[1]
+
+
+<DropdownButton@CommandButton>:
+    background_color: .8, .8, 0, 1
