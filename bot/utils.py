@@ -2,9 +2,7 @@
 
 
 import json
-import re
 import os
-import time
 
 from kivy import platform
 
@@ -12,7 +10,7 @@ from libs.toast import toast
 
 # GLOBALS
 
-__version__ = '0.1.0'
+__version__ = '0.1.1dev'
 
 PATH = '/sdcard/VKBot/' if platform == 'android' else ''
 DATA_PATH = 'data/'
