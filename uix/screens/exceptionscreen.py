@@ -5,7 +5,7 @@ import webbrowser
 
 
 class ExceptionScreen(Screen):
-    Builder.load_file('uix/kv/exceptionscreen.kv')
+    Builder.load_file('uix/kv/exceptionscreen/exceptionscreen.kv')
 
     def __init__(self, exception_text, **kwargs):
         self.exception_text = exception_text

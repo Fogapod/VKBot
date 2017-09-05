@@ -1,0 +1,48 @@
+#: import Widget uix.widgets
+
+
+<CaptchaPopup>:
+    size_hint: None, None
+    size: content.width + dp(40), content.height + dp(50)
+
+    GridLayout: # BoxLayout in future
+        id: content
+        rows: 3
+        size_hint: None, None
+        size: self.minimum_size
+        spacing: dp(8)
+
+        AsyncImage:
+            id: image
+            source: root.captcha_url
+            allow_stretch: True
+            size_hint: None, None
+            size: dp(260), dp(100)
+
+        TextInput:
+            id: textinput
+            multiline: False
+            size_hint_y: None
+            height: self.minimum_height
+
+        GridLayout:
+            cols: 3
+            size_hint: None, None
+            size: image.width, self.minimum_height
+
+            Button:
+                text: ' Принять '
+                font_size: '17sp'
+                size_hint: None, None
+                size: self.texture_size[0], self.texture_size[1]*2
+
+                on_release: root.send_code(textinput.text)
+
+            Widget
+
+            Button:
+                text: ' Отмена '
+                font_size: '17sp'
+                size_hint: None, None
+                size: self.texture_size[0], self.texture_size[1]*2
+                on_release: root.dismiss()

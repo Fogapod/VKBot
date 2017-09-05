@@ -7,7 +7,7 @@ from threading import Thread
 from kivy.app import App
 
 from uix.widgets import ColoredScreen
-from uix.popups import InfoPopup
+from uix.popups.infopopup import InfoPopup
 
 from bot import utils
 

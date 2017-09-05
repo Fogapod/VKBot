@@ -19,7 +19,7 @@ def main():
 
         app = VKBotApp()
         app.run()
-    except Exception:
+    except:
         error_text = traceback.format_exc()
         utils.save_error(error_text)
 

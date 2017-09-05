@@ -9,7 +9,10 @@ from kivy.config import Config
 from kivy.uix.settings import SettingsWithNoMenu
 from kivy.uix.screenmanager import ScreenManager, FadeTransition
 
-from uix.popups import AuthPopup, TwoFAPopup, CaptchaPopup, LoadingPopup
+from uix.popups.authpopup import AuthPopup
+from uix.popups.twofapopup import TwoFAPopup
+from uix.popups.captchapopup import CaptchaPopup
+# from uix.popups.loadingpopup import LoadingPopup
 from uix.screens.mainscreen import MainScreen
 from uix.screens.customcommandsscreen import CustomCommandsScreen
 

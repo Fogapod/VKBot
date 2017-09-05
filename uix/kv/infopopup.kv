@@ -1,0 +1,17 @@
+#: import Widget uix.widgets
+
+#: import __version__ bot.utils.__version__
+
+
+<InfoPopup>:
+    size_hint: None, None
+    size: content.width + dp(40), content.height + dp(50)
+
+    Label:
+        id: content
+        size_hint: None, None
+        size: self.texture_size
+        markup: True
+        text: 'VKBot версии %s\n\n[font=fonts/fontello.ttf]V[/font] [color=#199ac1][ref=https://vk.com/foga_prod]Группа в ВК[/ref][/color]\n[font=fonts/fontello.ttf]I[/font] [color=#199ac1][ref=https://github.com/Fogapod/VKBot]Репозиторий на github[/ref][/color]\n\n[color=#199ac1][ref=https://github.com/Fogapod/VKBot/tree/master#Руководство-к-использованию]Открыть мануал[/ref][/color]' % __version__
+        font_size: '18sp'
+        on_ref_press: app._open_url(args)

@@ -1,0 +1,47 @@
+#: import Widget uix.widgets
+
+
+<TwoFAPopup>:
+    size_hint_y: None
+    height: content.height + dp(30)
+    pos_hint: {'center_y': 0.7}
+
+    GridLayout: # BoxLayout in future
+        id: content
+        cols: 1
+        size_hint: None, None
+        width: app.root_window.width - dp(20)
+        height: self.minimum_height
+
+        Label:
+            text: 'Код для двухфакторной авторизации:'
+            text_size: self.width, None
+            font_size: sp(20)
+            size_hint_y: None
+            height: self.texture_size[1]
+
+        GridLayout: # BoxLayout in future
+            cols: 3
+            size_hint_y: None
+            height: self.minimum_height
+
+            Button:
+                text: ' Вставить код '
+                font_size: sp(20)
+                size_hint_x: None
+                width: self.texture_size[0]
+                on_release: root.paste_twofa_code(code_textinput)
+
+            TextInput:
+                id: code_textinput
+                multiline: False
+                font_size: sp(40)
+                size_hint_y: None
+                height: self.minimum_height
+
+            Button:
+                text: '  Ввод  '
+                font_size: sp(20)
+                size_hint_x: None
+                width: self.texture_size[0]
+                on_release: root.send_code(code_textinput.text)

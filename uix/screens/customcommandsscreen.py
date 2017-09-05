@@ -3,7 +3,7 @@
 
 from kivy.clock import mainthread, Clock
 
-from uix.popups import EditCommandPopup
+from uix.popups.editcommandpopup import EditCommandPopup
 from uix.widgets import ColoredScreen, CustomCommandBlock, ListDropDown, \
     CommandButton
 
@@ -134,25 +134,12 @@ class CustomCommandsScreen(ColoredScreen):
                 [command_button.response] + options)
 
             command_button.options = options[:]
-            updated_command = []
 
-            if options[0] == 2: # use_regex
-                for r in self.custom_commands[button_command]:
-                    r[1] = 2
-                    updated_command.append(r)
+            for r in self.custom_commands[button_command]:
+                r[1] = options[0]
 
-                for button in block.dropdown.container.children:
-                    button.options[0] = 2
-
-            else:
-                for r in self.custom_commands[button_command]:
-                    r[1] = 0
-                    updated_command.append(r)
-
-                for button in block.dropdown.container.children:
-                    button.options[0] = 0
-            
-            self.custom_commands[button_command] = updated_command
+            for button in block.dropdown.container.children:
+                button.options[0] = options[0]
 
         if button_command != command:
             if command in self.included_keys:
@@ -305,24 +292,11 @@ class CustomCommandsScreen(ColoredScreen):
             block.responses.append(response)
             self.custom_commands[command].append([response] + options)
 
-            updated_command = []
+            for r in self.custom_commands[command]:
+                r[1] = options[0]
 
-            if options[0] == 2: # use_regex
-                for r in self.custom_commands[command]:
-                    r[1] = 2
-                    updated_command.append(r)
-
-                for button in block.dropdown.container.children:
-                    button.options[0] = 2
-            else:
-                for r in self.custom_commands[command]:
-                    r[1] = 0
-                    updated_command.append(r)
-
-                for button in block.dropdown.container.children:
-                    button.options[0] = 0
-
-            self.custom_commands[command] = updated_command
+            for button in block.dropdown.container.children:
+                button.options[0] = options[0]
 
         utils.save_custom_commands(self.custom_commands)
         self.edit_popup.dismiss()
