@@ -37,6 +37,7 @@ def error_handler(request):
                     or '[errno 7]' in error \
                     or '[errno 8]' in error \
                     or '[errno 101]' in error \
+                    or '[errno 111]' in error \
                     or '[errno 113]' in error \
                     or 'connection' in error:
                 send_log_line(u'Ошибка сети. Жду 10 секунд...', 1)
