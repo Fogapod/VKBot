@@ -11,11 +11,7 @@ from threading import Thread
 
 import requests as r
 
-from utils import TOKEN_FILE_PATH, load_custom_commands, \
-save_custom_commands, load_whitelist, save_whitelist, \
-load_blacklist, save_blacklist, CUSTOM_COMMAND_OPTIONS_COUNT, \
-__version__
-
+import utils
 import vkrequests as vkr
 
 
@@ -295,20 +291,20 @@ class Bot(object):
                 u'Загрузка файла whitelist\'а из %(whitelist_file)s...',
                 0
             )
-            self.whitelist = load_whitelist()
+            self.whitelist = utils.load_whitelist()
 
             self.send_log_line(
                 u'Загрузка файла blacklist\'а из %(blacklist_file)s...',
                 0
             )
-            self.blacklist = load_blacklist()
+            self.blacklist = utils.load_blacklist()
 
             if self.use_custom_commands:
                 self.send_log_line(
                     u'Загрузка пользовательских команд из %(custom_commands_file)s...',
                     0
                 )
-                self.custom_commands = load_custom_commands()
+                self.custom_commands = utils.load_custom_commands()
 
             while self.run_bot:
                 if not self.mlpd:
@@ -511,7 +507,7 @@ class Bot(object):
             return '', [], random.choice(sticker_ids)
 
         if '{version}' in response_text:
-            format_dict['version'] = __version__
+            format_dict['version'] = utils.__version__
 
         if '{author}' in response_text:
             format_dict['author'] = AUTHOR
@@ -933,7 +929,8 @@ u'''
     def ignore(self, cmd):
         user_id = cmd.real_user_id
         self.blacklist[user_id] = u'По собственному желанию'
-        save_blacklist(self.blacklist)
+        
+        utils.save_blacklist(self.blacklist)
 
         return u'id %s добавлен в чёрный список по собственному желанию' % user_id, cmd
 
@@ -978,24 +975,15 @@ disabled: {}'''
             response_text = argument_required
         elif len(text) < 2 or not (command and response):
             response_text = u'Неправильный синтаксис команды' 
-        elif len(options) != CUSTOM_COMMAND_OPTIONS_COUNT:
+        elif len(options) != utils.CUSTOM_COMMAND_OPTIONS_COUNT:
             response_text = u'Неправильное количество опций'
         elif command in self.custom_commands.keys() \
                 and response in self.custom_commands[command]:
             response_text = u'Я уже знаю такой ответ'
         elif command in self.custom_commands:
-            updated_commands = []
-
-            if options[0] == 2: # use_regex
-                for r in self.custom_commands[command]:
-                    r[1] = 2
-                    updated_commands.append(r)
-            else:
-                for r in self.custom_commands[command]:
-                    r[1] = 0
-                    updated_commands.append(r)
-
-            self.custom_commands[command] = updated_commands
+            # update regex option for all responses
+            for r in self.custom_commands[command]:
+                r[1] = options[0] if options[0] in (0, 2) else 0
 
             self.custom_commands[command].append([response] + options)
             response_text = response_text.format(command, response, *options)
@@ -1003,7 +991,10 @@ disabled: {}'''
             self.custom_commands[command] = [[response] + options]
             response_text = response_text.format(command, response, *options)
 
-        save_custom_commands(self.custom_commands)
+        self.send_log_line(u'Пользовательские команды сохраняются...', 0)
+        utils.save_custom_commands(self.custom_commands)
+        self.send_log_line(u'Пользовательские команды сохранены', 1)
+
         return response_text, cmd
 
     def forgot(self, cmd):
@@ -1046,7 +1037,10 @@ disabled: {}'''
         if not response and not self.custom_commands.pop(command, None):
             response_text = u'Я не знаю такой команды (%s)' % command
         
-        save_custom_commands(self.custom_commands)
+        self.send_log_line(u'Пользовательские команды сохраняются...', 0)
+        utils.save_custom_commands(self.custom_commands)
+        self.send_log_line(u'Пользовательские команды сохранены', 1)
+
         return response_text, cmd
 
     def blacklist_command(self, cmd):
@@ -1089,7 +1083,7 @@ disabled: {}'''
                 if not blacklist_reason:
                     blacklist_reason = u'Причина не указана'
                 self.blacklist[chat_id] = blacklist_reason
-                save_blacklist(self.blacklist)
+                utils.save_blacklist(self.blacklist)
 
                 self.send_log_line(
                     u'id %s добавлен в чёрный список по причине: %s' % \
@@ -1114,7 +1108,7 @@ disabled: {}'''
                     return u'В списке нет данного id', cmd
 
                 self.blacklist.pop(chat_id)
-                save_blacklist(self.blacklist)
+                utils.save_blacklist(self.blacklist)
 
                 self.send_log_line(
                     u'id %s удалён из чёрного списка' % chat_id, 1
@@ -1174,7 +1168,7 @@ disabled: {}'''
         else:
             self.whitelist[user_id] = access_level
 
-        save_whitelist(self.whitelist)
+        utils.save_whitelist(self.whitelist)
 
         self.send_log_line(
             u'[b]id %s добавлен в whitelist. Доступ: %d[/b]' \
@@ -1246,3 +1240,4 @@ disabled: {}'''
 
     def send_log_line(self, line, log_importance, t):
         pass
+
