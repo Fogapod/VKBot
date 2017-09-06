@@ -895,17 +895,15 @@ https://github.com/Fogapod/VKBot/blob/master/README.md#openweathermap
             '%H:%M:%S', time.gmtime(time.time() - weather_json['dt'])
         )
 
-        weather_response = \
-u'''
-Погода для: {city} ({country})
-
-Состояние погоды: {description}
-Температура: {temp}°C
-Облачность: {cloud}%
-Влажность: {humidity}%
-Давление: {pressure} hPa
-Прошло с момента последнего измерения: {time_since_calculation}'''.format(
-    **format_dict)
+        weather_response = (
+            u'Погода для: {city} ({country})\n\n'
+            u'Состояние погоды: {description}\n'
+            u'Температура: {temp}°C\n'
+            u'Облачность: {cloud}%\n'
+            u'Влажность: {humidity}%\n'
+            u'Давление: {pressure} hPa\n'
+            u'Прошло с момента последнего измерения: {time_since_calculation}'
+        ).format(**format_dict)
 
         return weather_response, cmd
 
@@ -938,16 +936,16 @@ u'''
         if self.custom_commands is None:
             return u'Пользовательские команды отключены или повреждены', cmd
 
-        response_text = \
-u'''Команда выучена.
-Теперь на «{}» я буду отвечать «{}»
-
-Опции:
-use_regex: {}
-force_unmark: {}
-force_forward: {}
-appeal_only: {}
-disabled: {}'''
+        response_text = (
+            u'Команда выучена.'
+            u'Теперь на «{}» я буду отвечать «{}»\n\n'
+            u'Опции:\n'
+            u'use_regex: {}\n'
+            u'force_unmark: {}\n'
+            u'force_forward: {}\n'
+            u'appeal_only: {}\n'
+            u'disabled: {}\n'
+        )
 
         words = cmd.words
         argument_required = self._is_argument_missing(words)
