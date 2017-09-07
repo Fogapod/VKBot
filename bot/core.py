@@ -19,80 +19,72 @@ AUTHOR_VK_ID = 180850898
 AUTHOR = u'[id%d|Евгений Ершов]' % AUTHOR_VK_ID
 
 __help__ = (
-u'''
---Страница 0--
-	
-Версия: {version}
-
-Обращения к боту: {appeals}
-
-Открытые команды:
-Необходимый уровень доступа: 0
-
--Показывать это сообщение (?)
-(помощь|help) <?страница=0>
--Написать сообщение
-(скажи|say) <фраза>
--Посчитать математическое выражение (=)
-(посчитай|calculate) <выражение>
--Проверить, простое ли число (%)
-(простое|prime) <число>
--Определить достоверность информации
-(инфа|chance) <вопрос>
--Выбрать участника беседы
-(кто|who) <вопрос>
--Сообщить информацию о погоде
-(погода|weather) <?город=город со страницы или Москва>|-
--Быстрая проверка активности бота
-(пинг|ping)
--Игнорировать пользователя
-(игнор|ignore)
-
-Автор: {author}''',
-u'''
---Страница 1--
-
-Базовые команды:
-Необходимый уровень доступа: 1
-
--Выучить команду (+)
-(выучи|learn) <команда>::<ответ>::<?опции=00000>
--Забыть команду (-)
-(забудь|forgot) <команда>::<?ответ>''',
-u'''
---Страница 2--
-
-Ограниченные команды:
-Необходимый уровень доступа: 2
-
--Игнорировать пользователя (лс), беседу или группу
-(чс|blacklist) <?+|-> <?id> <?reason:причина>
--Перезапустить бота (применение команд и настроек)
-(перезапуск|restart)''',
-u'''
---Страница 3--
-
-Защищённые команды:
-Необходимый уровень доступа: 3
-
--Выключить бота (!)
-(стоп|stop)
--Изменить уровень доступа пользователя
-(вайтлист|whitelist) <?id пользователя> <?уровень доступа=1>
--Спровоцировать ошибку бота
-raise <?сообщение=Default exception text>
--Поставить бота на паузу (игнорирование сообщений)
-(пауза|pause) <время (секунды)=5>''',
-u'''
---Страница 4--
-
-Закрытые команды:
-Необходимый уровень доступа: нет, только для автора
-
--Активировать бота
-activate
--Деактивировать бота
-deactivate'''
+    (
+        u'--Страница 0--\n\n'
+        u'Версия: {version}\n\n'
+        u'Обращения к боту: {appeals}\n\n'
+        u'Открытые команды:\n'
+        u'Необходимый уровень доступа: 0\n\n'
+        u'-Показывать это сообщение (?)\n'
+        u'(помощь|help) <?страница=0>\n'
+        u'-Написать сообщение\n'
+        u'(скажи|say) <фраза>\n'
+        u'-Посчитать математическое выражение (=)\n'
+        u'(посчитай|calculate) <выражение>\n'
+        u'-Проверить, простое ли число (%)\n'
+        u'(простое|prime) <число>\n'
+        u'-Определить достоверность информации\n'
+        u'(инфа|chance) <вопрос>\n'
+        u'-Выбрать участника беседы\n'
+        u'(кто|who) <вопрос>\n'
+        u'-Сообщить информацию о погоде\n'
+        u'(погода|weather) <?город=город со страницы или Москва>|-\n'
+        u'-Быстрая проверка активности бота\n'
+        u'(пинг|ping)\n'
+        u'-Игнорировать пользователя\n'
+        u'(игнор|ignore)\n\n'
+        u'Автор: {author}'
+    ),
+    (
+        u'\n--Страница 1--\n\n'
+        u'Базовые команды:\n'
+        u'Необходимый уровень доступа: 1\n\n'
+        u'-Выучить команду (+)\n'
+        u'(выучи|learn) <команда>::<ответ>::<?опции=00000>\n'
+        u'-Забыть команду (-)\n'
+        u'(забудь|forgot) <команда>::<?ответ>'
+    ),
+    (
+        u'\n--Страница 2--\n\n'
+        u'Ограниченные команды:\n'
+        u'Необходимый уровень доступа: 2\n\n'
+        u'-Игнорировать пользователя (лс), беседу или группу\n'
+        u'(чс|blacklist) <?+|-> <?id> <?reason:причина>\n'
+        u'-Перезапустить бота (применение команд и настроек)\n'
+        u'перезапуск|restart)'
+    ),
+    (
+        u'--Страница 3--\n\n'
+        u'Защищённые команды:\n'
+        u'Необходимый уровень доступа: 3\n\n'
+        u'-Выключить бота (!)\n'
+        u'(стоп|stop)\n'
+        u'-Изменить уровень доступа пользователя\n'
+        u'(вайтлист|whitelist) <?id пользователя> <?уровень доступа=1>\n'
+        u'Спровоцировать ошибку бота\n'
+        u'raise <?сообщение=Default exception text>\n'
+        u'-Поставить бота на паузу (игнорирование сообщений)\n'
+        u'(пауза|pause) <время (секунды)=5>'
+    ),
+    (
+        u'--Страница 4--\n\n'
+        u'Закрытые команды:\n'
+        u'Необходимый уровень доступа: нет, только для автора\n\n'
+        u'-Активировать бота\n'
+        u'activate\n'
+        u'-Деактивировать бота\n'
+        u'deactivate'
+    )
 )
 
 
@@ -105,7 +97,7 @@ def safe_format(s, *args, **kwargs):
         try:
             return s.format(*args, **kwargs)
         except KeyError as e:
-            e=e.args[0]
+            e = e.args[0]
             kwargs[e] = '{%s}' % e
         except:
             return s
@@ -137,7 +129,7 @@ class Command(object):
         self.msg_id = 0
 
     def load(self, message):
-        self.__init__(self.self_id, self.appeals) # refresh params
+        self.__init__(self.self_id, self.appeals)  # refresh params
 
         if 'attachments' in message.keys() \
                 and message['attachments'][0]['type'] == 'sticker':
@@ -146,7 +138,7 @@ class Command(object):
                     message['attachments'][0]['sticker']['product_id'],
                     message['attachments'][0]['sticker']['id']
                 )
-        else: 
+        else:
             self.raw_text = message['body']
 
         self.text = self.raw_text
@@ -203,8 +195,8 @@ class Command(object):
                             and not message['action_mid'] == self.self_id:
                         self.event = 'user joined'
                         self.event_user_id = message['action_mid']
-                    elif self.event == 'chat_kick_user' \
-                        and not message['action_mid'] == self.self_id:
+                    elif self.event == 'chat_kick_user' and not \
+                            message['action_mid'] == self.self_id:
                         self.event = 'user kicked'
                         self.event_user_id = message['action_mid']
                     else:
@@ -245,7 +237,7 @@ class Bot(object):
         self.activated = False
         self.use_custom_commands = False
         self.openweathermap_api_key = '0'
-        
+
         self.help_access_level = 0
         self.say_access_level = 0
         self.calculate_access_level = 0
@@ -301,7 +293,8 @@ class Bot(object):
 
             if self.use_custom_commands:
                 self.send_log_line(
-                    u'Загрузка пользовательских команд из %(custom_commands_file)s...',
+                    u'Загрузка пользовательских команд из '
+                    u'%(custom_commands_file)s...',
                     0
                 )
                 self.custom_commands = utils.load_custom_commands()
@@ -336,9 +329,11 @@ class Bot(object):
                     if not command.text or command.msg_id in last_msg_ids:
                         continue
 
-                    if (command.real_user_id in self.blacklist.keys() \
-                            or command.chat_id in self.blacklist.keys()) \
-                            and not (command.was_appeal and command.words[0] == 'blacklist'):
+                    if (command.real_user_id in self.blacklist.keys() or
+                            command.chat_id in self.blacklist.keys()) and not (
+                                command.was_appeal and
+                                command.words[0] == 'blacklist'
+                            ):
                         continue
 
                     if self.use_custom_commands \
@@ -418,7 +413,7 @@ class Bot(object):
                             continue
                         elif 'this sticker is not available' in error:
                             self.send_log_line(
-                                u'Стикер (%d) недоступен! Не могу отправить' \
+                                u'Стикер (%d) недоступен! Не могу отправить'
                                 u' сообщение' % sticker_id, 1
                             )
                         else:
@@ -559,7 +554,7 @@ class Bot(object):
             format_dict['event_user_name'] = name if name else 'No name'
 
         for r in re.findall('{random(\d{1,500})}', response_text):
-            format_dict['random%s' %r] = random.randrange(int(r) + 1)
+            format_dict['random%s' % r] = random.randrange(int(r) + 1)
 
         for match in re.findall('{id(-?\d+)_name}', response_text):
             user_id = match
@@ -567,12 +562,14 @@ class Bot(object):
             format_dict['id%s_name' % user_id] = name if name else 'No name'
 
         media_id_search_pattern = re.compile(
-            '{attach=.*?(((photo)|(album)|(video)|(audio)|(doc)|(wall)|(market))'
+            '{attach=.*?'
+            '(((photo)|(album)|(video)|(audio)|(doc)|(wall)|(market))'
             '-?\d+_\d+(_\d+)?)}'
         )
 
         for match in media_id_search_pattern.findall(response_text):
-            if len(attachments) >= 10: break
+            if len(attachments) >= 10:
+                break
 
             attachment_id = match[0]
 
@@ -591,7 +588,7 @@ class Bot(object):
                 attachments.append(attachment_id)
 
         response_text = media_id_search_pattern.sub('', response_text)
-        
+
         return safe_format(response_text, **format_dict), attachments, None
 
     def custom_command(self, cmd, custom_commands):
@@ -601,13 +598,16 @@ class Bot(object):
             return response_text, cmd
 
         response = ''
-        for key in random.sample(custom_commands.keys(), \
-        	       len(custom_commands.keys())):
-            if custom_commands[key][0][1] == 2: # use regex
+        for key in random.sample(
+                                 custom_commands.keys(),
+                                 len(custom_commands.keys())):
+
+            if custom_commands[key][0][1] == 2:  # use regex
                 pattern = re.compile(key, re.U + re.I)
                 if pattern.search(cmd.text):
-                    for resp in random.sample(custom_commands[key], \
-                            len(custom_commands[key])):
+                    for resp in random.sample(
+                                              custom_commands[key],
+                                              len(custom_commands[key])):
                         if resp[5] == 2:
                             continue
                         else:
@@ -620,8 +620,9 @@ class Bot(object):
                         break
 
             elif cmd.text.lower() == key:
-                for resp in random.sample(custom_commands[key], \
-                        len(custom_commands[key])):
+                for resp in random.sample(
+                                          custom_commands[key],
+                                          len(custom_commands[key])):
                     if resp[5] == 2:
                         continue
                     else:
@@ -633,21 +634,21 @@ class Bot(object):
         if not response:
             return response_text, cmd
 
-        if choice[4] == 1: # works only WITHOUT appeal
+        if choice[4] == 1:  # works only WITHOUT appeal
             if cmd.was_appeal:
                 return response_text, cmd
-        elif choice[4] == 2: # works only WITH appeal
+        elif choice[4] == 2:  # works only WITH appeal
             if not cmd.was_appeal:
                 return response_text, cmd
 
-        if choice[3] == 2: # force forward
+        if choice[3] == 2:  # force forward
             cmd.forward_msg = cmd.msg_id
-        elif choice[3] == 1: # never forward
+        elif choice[3] == 1:  # never forward
             cmd.forward_msg = None
-            
-        if choice[2] == 1: # always mark message
+
+        if choice[2] == 1:  # always mark message
             cmd.mark_msg = True
-        elif choice[2] == 2: # never mark message
+        elif choice[2] == 2:  # never mark message
             cmd.mark_msg = False
 
         if response.startswith('self='):
@@ -793,7 +794,7 @@ class Bot(object):
 
         del words[0]
         input_number = ''.join(words)
-        if re.match('^\d+$', input_number) and len(input_number)<=5:
+        if re.match('^\d+$', input_number) and len(input_number) <= 5:
             input_number = int(input_number)
             luc_number = 0
             last_luc_number = 0
@@ -806,7 +807,7 @@ class Bot(object):
                 else:
                     luc_number, last_luc_number = last_luc_number\
                                                   + luc_number, luc_number
-                            
+
             if input_number != 0:
                 is_prime = True if (luc_number - 1) \
                                 % input_number == 0 else False
@@ -839,19 +840,19 @@ class Bot(object):
             user_name, error = vkr.get_name_by_id(
                 user_id=cmd.random_chat_user_id, name_case='acc')
             if user_name:
-                return u'Я выбираю [id%d|%s]' % (cmd.random_chat_user_id, user_name), cmd
+                return u'Я выбираю [id%d|%s]' \
+                    % (cmd.random_chat_user_id, user_name), cmd
 
     def weather(self, cmd):
         api_key = self.openweathermap_api_key
-        api_key_not_confirmed = \
-u'''
-Команда не может функционировать. Для её активации необходим специальный ключ:
-https://github.com/Fogapod/VKBot/blob/master/README.md#openweathermap 
-
-Скопируйте полученный ключ и повторите команду, добавив его, чтобы получилось
-/погода 9ld10763q10b2cc882a4a10fg90fc974
-
-[id{my_id}|НИКОМУ НЕ ПОКАЗЫВАЙТЕ ДАННЫЙ КЛЮЧ, ИНАЧЕ РИСКУЕТЕ ЕГО ПОТЕРЯТЬ!]'''
+        api_key_not_confirmed_text = (
+            u'Команда не может функционировать. '
+            u'Для её активации необходим специальный ключ:\n'
+            u'https://github.com/Fogapod/VKBot/blob/master/README.md#openweathermap\n'
+            u'Скопируйте полученный ключ и повторите команду, добавив его, '
+            u'чтобы получилось\n/погода 9ld10763q10b2cc882a4a10fg90fc974\n\n'
+            u'[id{my_id}|НИКОМУ НЕ ПОКАЗЫВАЙТЕ ДАННЫЙ КЛЮЧ, ИНАЧЕ РИСКУЕТЕ ЕГО ПОТЕРЯТЬ!]'
+        )
 
         if len(cmd.words) > 1:
             if ' '.join(cmd.words[1:]) == '-':
@@ -868,14 +869,19 @@ https://github.com/Fogapod/VKBot/blob/master/README.md#openweathermap
             city = ' '.join(cmd.words[1:])
         else:
             if api_key == '0':
-                return api_key_not_confirmed, cmd
+                return api_key_not_confirmed_text, cmd
 
             city, error = vkr.get_user_city(user_id=cmd.real_user_id)
             if not city:
                 city = u'Москва'
 
-        url = u'http://api.openweathermap.org/data/2.5/weather?APPID={api_key}&lang=ru&q={city}&units=metric'
-        url = url.format(api_key=api_key, city=city)
+        url = (
+            u'http://api.openweathermap.org/data/2.5/weather?'
+            u'APPID={api_key}&'
+            u'lang=ru&'
+            u'q={city}&'
+            u'units=metric'
+            ).format(api_key=api_key, city=city)
 
         weather_data = r.get(url)
         weather_json = weather_data.json()
@@ -910,7 +916,8 @@ https://github.com/Fogapod/VKBot/blob/master/README.md#openweathermap
     def _verify_openweathermap_api_key(self, cmd):
         api_key = cmd.words[1]
 
-        test_url = 'https://api.openweathermap.org/data/2.5/weather?APPID=%s' % api_key
+        test_url = 'https://api.openweathermap.org/data/2.5/weather?APPID=%s' \
+            % api_key
         test_weather_json = r.get(test_url).json()
 
         if 'cod' in test_weather_json:
@@ -927,10 +934,11 @@ https://github.com/Fogapod/VKBot/blob/master/README.md#openweathermap
     def ignore(self, cmd):
         user_id = cmd.real_user_id
         self.blacklist[user_id] = u'По собственному желанию'
-        
+
         utils.save_blacklist(self.blacklist)
 
-        return u'id %s добавлен в чёрный список по собственному желанию' % user_id, cmd
+        return u'id %s добавлен в чёрный список по собственному желанию' \
+            % user_id, cmd
 
     def learn(self, cmd):
         if self.custom_commands is None:
@@ -972,7 +980,7 @@ https://github.com/Fogapod/VKBot/blob/master/README.md#openweathermap
         if argument_required:
             response_text = argument_required
         elif len(text) < 2 or not (command and response):
-            response_text = u'Неправильный синтаксис команды' 
+            response_text = u'Неправильный синтаксис команды'
         elif len(options) != utils.CUSTOM_COMMAND_OPTIONS_COUNT:
             response_text = u'Неправильное количество опций'
         elif command in self.custom_commands.keys() \
@@ -1016,10 +1024,10 @@ https://github.com/Fogapod/VKBot/blob/master/README.md#openweathermap
             response = ''
 
         if command and response:
-            if not command in self.custom_commands:
+            if command not in self.custom_commands:
                 response = ''
-            elif len([x for x in self.custom_commands[command]\
-                    if response == x[0]]) == 0:
+            elif len([x for x in self.custom_commands[command]
+                     if response == x[0]]) == 0:
                 response_text = u'В команде «%s» нет ключа «%s»' \
                                             % (command, response)
             else:
@@ -1034,7 +1042,7 @@ https://github.com/Fogapod/VKBot/blob/master/README.md#openweathermap
 
         if not response and not self.custom_commands.pop(command, None):
             response_text = u'Я не знаю такой команды (%s)' % command
-        
+
         self.send_log_line(u'Пользовательские команды сохраняются...', 0)
         utils.save_custom_commands(self.custom_commands)
         self.send_log_line(u'Пользовательские команды сохранены', 1)
@@ -1048,7 +1056,8 @@ https://github.com/Fogapod/VKBot/blob/master/README.md#openweathermap
             else:
                 response = ''
                 for i, uid in enumerate(self.blacklist.keys()):
-                    response += u'%d. {id%d_name} (%d): %s\n' % (i+1, uid, uid, self.blacklist[uid])
+                    response += u'%d. {id%d_name} (%d): %s\n' \
+                                % (i+1, uid, uid, self.blacklist[uid])
                 response = response[:-1]
             return response, cmd
         else:
@@ -1058,14 +1067,19 @@ https://github.com/Fogapod/VKBot/blob/master/README.md#openweathermap
                 if len(cmd.words) == 2:
                     chat_id = cmd.chat_id if cmd.from_chat else cmd.user_id
                 else:
-                    blacklist_reason = re.search(u'.*?((причина)|(reason)):((.|\n)+)', cmd.text, re.I)
+                    blacklist_reason = re.search(
+                        u'.*?((причина)|(reason)):((.|\n)+)', cmd.text, re.I)
+
                     if blacklist_reason:
                         blacklist_reason = blacklist_reason.group(4)
                         if len(cmd.words) == 3:
-                            chat_id = cmd.chat_id if cmd.from_chat else cmd.user_id
+                            chat_id = \
+                                cmd.chat_id if cmd.from_chat else cmd.user_id
                         else:
-                            if cmd.words[2].lower().startswith(('reason:', u'причина')):
-                                chat_id = cmd.chat_id if cmd.from_chat else cmd.user_id
+                            if cmd.words[2].lower().startswith(
+                                    ('reason:', u'причина')):
+                                chat_id = cmd.chat_id if cmd.from_chat \
+                                    else cmd.user_id
                             else:
                                 chat_id = cmd.words[2]
                     else:
@@ -1084,11 +1098,11 @@ https://github.com/Fogapod/VKBot/blob/master/README.md#openweathermap
                 utils.save_blacklist(self.blacklist)
 
                 self.send_log_line(
-                    u'id %s добавлен в чёрный список по причине: %s' % \
-                        (chat_id, blacklist_reason),
-                    1
-                )
-                return u'id %s добавлен в список по причине: %s' % (chat_id, blacklist_reason), cmd
+                    u'id %s добавлен в чёрный список по причине: %s'
+                    % (chat_id, blacklist_reason), 1)
+
+                return u'id %s добавлен в список по причине: %s' \
+                    % (chat_id, blacklist_reason), cmd
 
             elif cmd.words[1] == '-':
                 if len(cmd.words) == 2:
@@ -1169,10 +1183,8 @@ https://github.com/Fogapod/VKBot/blob/master/README.md#openweathermap
         utils.save_whitelist(self.whitelist)
 
         self.send_log_line(
-            u'[b]id %s добавлен в whitelist. Доступ: %d[/b]' \
-                % (user_id, access_level),
-            2
-        )
+            u'[b]id %s добавлен в whitelist. Доступ: %d[/b]'
+            % (user_id, access_level), 2)
 
         return u'Теперь {id%s_name} имеет доступ %d' \
             % (user_id, access_level), cmd
@@ -1232,10 +1244,11 @@ https://github.com/Fogapod/VKBot/blob/master/README.md#openweathermap
 
     def set_new_logger_function(self, func):
         self.send_log_line = func
-        self.send_log_line(u'Подключена функция логгирования для ядра бота', 0)
+        self.send_log_line(
+            u'Подключена функция логгирования для ядра бота', 0)
         vkr.set_new_logger_function(func)
-        self.send_log_line(u'Подключена функция логгирования для vkrequests', 0)
+        self.send_log_line(
+            u'Подключена функция логгирования для vkrequests', 0)
 
     def send_log_line(self, line, log_importance, t):
         pass
-

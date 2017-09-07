@@ -24,7 +24,8 @@ class OSCClient():
     def __init__(self, app):
         self.subprocess = None
         self.app = app
-        self.mainscreen = app.get_running_app().manager.get_screen('main_screen')
+        self.mainscreen = app.get_running_app().manager.get_screen(
+            'main_screen')
         self.answers_count = '0'
         self.osc = osc
         self.osc.init()
@@ -46,20 +47,18 @@ class OSCClient():
         self.start_reading_osc_queue()
         self.ping()
 
-
     def start_requesting_answers_count(self):
         if not self.answers_request_event:
             self.answers_request_event = Clock.schedule_interval(
-                lambda *x: osc.sendMsg('/request answers count', [], port=3000),
+                lambda *x:
+                    osc.sendMsg('/request answers count', [], port=3000),
                 5
             )
-
 
     def stop_requesting_answers_count(self):
         if self.answers_request_event:
             self.answers_request_event.cancel()
             self.answers_request_event = None
-
 
     def start_reading_osc_queue(self):
         if not self.osc_read_event:
@@ -68,12 +67,10 @@ class OSCClient():
                 0.1
             )
 
-
     def stop_reading_osc_queue(self):
         if self.osc_read_event:
             self.osc_read_event.cancel()
             self.osc_read_event = None
-
 
     def start(self):
         self.logging_function(u'Начинаю запуск бота', 1, time.time())
@@ -81,18 +78,20 @@ class OSCClient():
 
         if platform == 'android':
             # try:
-            #     self.subprocess = autoclass('org.fogaprod.vkbot.dev.ServiceBotservice')
-            #     mActivity = autoclass('org.kivy.android.PythonActivity').mActivity
+            #     self.subprocess = autoclass(
+            #         'org.fogaprod.vkbot.dev.ServiceBotservice')
+            #     mActivity = autoclass(
+            #        'org.kivy.android.PythonActivity').mActivity
             #     argument = ''
             #     self.subprocess.start(mActivity, argument)
             # except:
             self.subprocess = AndroidService('VKBot', 'Бот работает')
             self.subprocess.start('Сервис запущен')
         else:
-            self.subprocess = subprocess.Popen(['python2.7', 'service/main.py'])
+            self.subprocess = subprocess.Popen(
+                ['python2.7', 'service/main.py'])
 
         self.start_requesting_answers_count()
-
 
     def stop(self):
         self.stop_requesting_answers_count()
@@ -110,13 +109,12 @@ class OSCClient():
                 self.subprocess.kill()
 
         self.stop_reading_osc_queue()
-        self.logging_function(u'[b]Бот полностью остановлен[/b]', 2, time.time())
-
+        self.logging_function(
+            u'[b]Бот полностью остановлен[/b]', 2, time.time())
 
     def ping(self):
         self.logging_function(u'Проверяю, запущен ли бот...', 1)
         self.osc.sendMsg('/ping', [], port=3000)
-
 
     def pong(self, message, *args):
         self.logging_function(
@@ -126,7 +124,6 @@ class OSCClient():
         self.subprocess = AndroidService('VKBot', 'Бот работает')
         self.start_requesting_answers_count()
         self.mainscreen.ids.main_btn.text = self.mainscreen.stop_bot_text
-
 
     def read_status(self, message, *args):
         status = message[2]
@@ -144,22 +141,18 @@ class OSCClient():
             self.app.destroy_settings()
             self.app.load_config()
 
-
     def set_answers_count(self, message, *args):
         self.answers_count = str(message[2])
         if self.mainscreen:
             self.mainscreen.update_answers_count(self.answers_count)
 
-
     def return_log_from_service(self, message, *args):
         self.logging_function(*literal_eval(message[2]))
-
 
     def logging_function(self, message, log_importance, t=None):
         if time is None:
             t = time.time()
         self.mainscreen.put_log_to_queue(message, log_importance, t)
-
 
     def on_first_auth(self, message, *args):
         self.logging_function(
@@ -167,7 +160,6 @@ class OSCClient():
             2, time.time()
         )
         self.app.open_auth_popup()
-
 
     def send_auth_request(self, login, password):
         self.logging_function(u'[b]Начинаю авторизацию[/b]', 2)
@@ -177,39 +169,37 @@ class OSCClient():
             port=3000
         )
 
-
     def on_auth_success(self, message, *args):
         self.logging_function(
-            u'[b][color=#33ff33]Авторизация удалась. Вы [i]превосходны[/i]![/color][/b]',
+            u'[b][color=#33ff33]Авторизация удалась. '
+            u'Вы [i]превосходны[/i]![/color][/b]',
             2
         )
         self.app._cached_password = None
 
-
     def on_auth_twofactor(self, message, *args):
         self.logging_function(
-            u'[b]Необходимо ввести код для двухфакторной авторизации в ' \
+            u'[b]Необходимо ввести код для двухфакторной авторизации в '
             u'появившемся окне[/b]', 2, time.time()
         )
         self.app.open_twofa_popup()
         self.logging_function(u'Жду кода...', 1)
 
-
     def send_twofactor_code(self, code):
         self.osc.sendMsg('/twofactor response', [str(code), ], port=3000)
         self.logging_function(u'Код отправлен', 0)
 
-
     def on_auth_captcha(self, message, *args):
-        self.logging_function(u'[b]Пожалуйста, решите капчу[/b]', 2, time.time())
+        self.logging_function(
+            u'[b]Пожалуйста, решите капчу[/b]', 2, time.time())
         self.app.open_captcha_popup(message[2])
         self.logging_function(u'Жду кода...', 1)
 
-
     def send_captcha_code(self, code):
-        self.osc.sendMsg('/captcha response', [str(code.encode('utf8')), ], port=3000)
+        self.osc.sendMsg(
+            '/captcha response', [str(code.encode('utf8')), ], port=3000)
         self.logging_function(u'Код отправлен', 0)
 
-
     def on_auth_fail(self, message, *args):
-        self.logging_function(u'[b][color=#ff3300]Авторизация не удалась![/color][/b]', 2)
+        self.logging_function(
+            u'[b][color=#ff3300]Авторизация не удалась![/color][/b]', 2)

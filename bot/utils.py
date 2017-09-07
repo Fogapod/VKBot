@@ -79,7 +79,7 @@ def load_custom_commands():
         with open(CUSTOM_COMMANDS_FILE_PATH, 'w') as f:
             f.write('{\n\n}')
         return {}
-    else:    
+    else:
         with open(CUSTOM_COMMANDS_FILE_PATH, 'r') as f:
             try:
                 content = json.load(f)
@@ -114,7 +114,7 @@ def load_whitelist():
     if not os.path.exists(WHITELIST_FILE_PATH):
         open(WHITELIST_FILE_PATH, 'w').close()
         return {}
-    else:    
+    else:
         with open(WHITELIST_FILE_PATH, 'r') as f:
             content = f.read()
 
@@ -142,7 +142,7 @@ def load_blacklist():
     if not os.path.exists(BLACKLIST_FILE_PATH):
         open(BLACKLIST_FILE_PATH, 'w').close()
         return {}
-    else:    
+    else:
         with open(BLACKLIST_FILE_PATH, 'r') as f:
             content = f.read()
 

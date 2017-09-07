@@ -12,13 +12,12 @@ from kivy import platform
 from kivy.config import Config
 from kivy.lib import osc
 
+from bot import utils
+from bot.core import Bot
+
 parent_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 parent_path += '\\' if platform == 'win' else '/'
 os.sys.path.append(parent_path)
-
-
-from bot import utils
-from bot.core import Bot
 
 if platform != 'android':
     utils.PATH = parent_path + utils.PATH
@@ -27,7 +26,7 @@ utils.DATA_PATH = parent_path + utils.DATA_PATH
 utils.update_paths()
 
 
-# globals
+# GLOBALS
 
 authorized = False
 twofactor_code = None
@@ -46,12 +45,14 @@ def update_params():
     activated = Config.get('General', 'bot_activated') == 'True'
     bot_name = Config.get('General', 'bot_name')
     mark_type = Config.get('General', 'mark_type')
-    use_custom_commands = Config.get('General', 'use_custom_commands') == 'True'
+    use_custom_commands = \
+        Config.get('General', 'use_custom_commands') == 'True'
     stable_mode = Config.get('General', 'stable_mode') == 'True'
     openweathermap_api_key = Config.get('General', 'openweathermap_api_key')
-    
+
     send_log_line(u'Обновление параметров бота...', 0)
-    bot.load_params(appeals,
+    bot.load_params(
+        appeals,
         activated=activated,
         bot_name=bot_name, mark_type=mark_type,
         use_custom_commands=use_custom_commands,
@@ -72,8 +73,8 @@ def send_status(status):
 
 def send_error(error):
     send_log_line(
-        u'[b]Во время работы произошла непредвиденная ошибка!\nТекст ошибки: ' \
-            + error.decode('unicode-escape') + '[/b]',
+        u'[b]Во время работы произошла непредвиденная ошибка!\n'
+        u'Текст ошибки: ' + error.decode('unicode-escape') + '[/b]',
         2
     )
     utils.save_error(error, from_bot=True)
@@ -247,7 +248,8 @@ if __name__ == '__main__':
                 send_log_line(u'[b]Бот остановлен через сообщение[/b]', 2)
             if stable_mode and bot.runtime_error != 1:
                 send_log_line(
-                    u'Активирован устойчивый режим. Сброс параметров и повторный запуск бота...',
+                    u'Активирован устойчивый режим. '
+                    u'Сброс параметров и повторный запуск бота...',
                     1
                 )
                 bot.runtime_error = None

@@ -20,7 +20,8 @@ def error_handler(request):
         error = None
 
         try:
-            send_log_line(u'Вызов: [b]%s[/b]' % request.__name__, 0, time.time())
+            send_log_line(
+                u'Вызов: [b]%s[/b]' % request.__name__, 0, time.time())
             response = request(*args, **kwargs)
         except Exception as raw_error:
             send_log_line(
@@ -30,7 +31,8 @@ def error_handler(request):
             error = str(raw_error).lower()
 
             if 'timed out' in error:
-                send_log_line(u'Ошибка [b]timed out[/b]. Повторяю запрос...', 1)
+                send_log_line(
+                    u'Ошибка [b]timed out[/b]. Повторяю запрос...', 1)
                 return do_request(*args, **kwargs)
 
             elif '[errno -3]' in error \
@@ -71,7 +73,7 @@ def send_log_line(line, log_importance, t=None):
 def log_in(login=None, password=None,
            twofactor_handler=None, captcha_handler=None,
            logout=False
-          ):
+           ):
 
     global api
 
@@ -86,7 +88,7 @@ def log_in(login=None, password=None,
                         'auth_handler': twofactor_handler,
                         'captcha_handler': captcha_handler,
                         'app_id': '6045412',
-                        'scope': '70660' # messages, status, photos, offline
+                        'scope': '70660'  # messages, status, photos, offline
                      }
 
     if login and password:
@@ -118,7 +120,7 @@ def log_in(login=None, password=None,
 @error_handler
 def send_message(text='', gid=None, uid=None, forward=None, attachments=[],
                  sticker_id=None
-                ):
+                 ):
     if gid:
         gid -= 2000000000
 
@@ -182,13 +184,13 @@ def get_name_by_id(object_id=None, name_case='nom'):
     if object_id is not None:
         object_id = int(object_id)
 
-    if object_id is None or 0 < object_id < 2000000000: # user
+    if object_id is None or 0 < object_id < 2000000000:  # user
         response = api.users.get(user_ids=object_id, name_case=name_case)[0]
         name = ' '.join((response['first_name'], response['last_name']))
-    elif int(object_id) > 2000000000: # chat
+    elif int(object_id) > 2000000000:  # chat
         response = api.messages.getChat(chat_id=object_id-2000000000)
         name = response['title']
-    elif int(object_id) < 1: # group
+    elif int(object_id) < 1:  # group
         response = api.groups.getById(group_id=abs(object_id))[0]
         name = response['name']
     else:
