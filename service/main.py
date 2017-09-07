@@ -12,12 +12,12 @@ from kivy import platform
 from kivy.config import Config
 from kivy.lib import osc
 
-from bot import utils
-from bot.core import Bot
-
 parent_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 parent_path += '\\' if platform == 'win' else '/'
 os.sys.path.append(parent_path)
+
+from bot import utils
+from bot.core import Bot
 
 if platform != 'android':
     utils.PATH = parent_path + utils.PATH
