@@ -838,7 +838,7 @@ class Bot(object):
                    u'ся больше одного человека', cmd
         else:
             user_name, error = vkr.get_name_by_id(
-                user_id=cmd.random_chat_user_id, name_case='acc')
+                object_id=cmd.random_chat_user_id, name_case='acc')
             if user_name:
                 return u'Я выбираю [id%d|%s]' \
                     % (cmd.random_chat_user_id, user_name), cmd
