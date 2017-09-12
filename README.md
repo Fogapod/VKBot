@@ -75,8 +75,8 @@ align="center"/>
 Удаление всей команды производится командой `/forgot команда`. Удаление ответа производится через `/forgot команда::Ответ`
 
 ### OpenWeatherMap
-Для работы команды `погода` необходимо зарегистрироваться на сайте https://openweathermap.org ([скриншот](https://github.com/Fogapod/ChatBot_UI/blob/master/data/images/screenshots/openweathermap_instruction_1.png))
-После этого нужно перейти в раздел [ключей api](https://home.openweathermap.org/api_keys) и скопировать ваш ключ ([скриншот](https://github.com/Fogapod/ChatBot_UI/blob/master/data/images/screenshots/openweathermap_instruction_2.png))  
+Для работы команды `погода` необходимо зарегистрироваться на сайте https://openweathermap.org ([скриншот](https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/openweathermap_instruction_1.png))
+После этого нужно перейти в раздел [ключей api](https://home.openweathermap.org/api_keys) и скопировать ваш ключ ([скриншот](https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/openweathermap_instruction_2.png))  
 
 Далее используйте команду `/погода ваш_ключ`. Готово.
 > От момента создания аккаунта до начала работы ключа может пройти от 10 до 60 минут. Если бот ругается на неправильность ключа, немного подождите и попробуйте ещё раз.
