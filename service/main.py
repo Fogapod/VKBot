@@ -42,7 +42,6 @@ def update_params():
     Config.read(utils.SETTINGS_FILE_PATH)
 
     appeals = Config.get('General', 'appeals')
-    activated = Config.get('General', 'bot_activated') == 'True'
     bot_name = Config.get('General', 'bot_name')
     mark_type = Config.get('General', 'mark_type')
     use_custom_commands = \
@@ -53,7 +52,6 @@ def update_params():
     send_log_line(u'Обновление параметров бота...', 0)
     bot.load_params(
         appeals,
-        activated=activated,
         bot_name=bot_name, mark_type=mark_type,
         use_custom_commands=use_custom_commands,
         openweathermap_api_key=openweathermap_api_key
@@ -218,14 +216,6 @@ if __name__ == '__main__':
 
     while True:
         osc.readQueue(oscid)
-        if bot.activated != activated:
-            activated = bot.activated
-            Config.read(utils.SETTINGS_FILE_PATH)
-            Config.set('General', 'bot_activated', str(activated))
-            send_log_line(u'Начинаю запись нового статуса активации', 0)
-            Config.write()
-            send_log_line(u'Записан новый статус активации', 1)
-            send_status('settings changed')
 
         if bot.openweathermap_api_key != openweathermap_api_key:
             openweathermap_api_key = bot.openweathermap_api_key

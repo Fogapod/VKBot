@@ -75,15 +75,6 @@ __help__ = (
         u'raise <?сообщение=Default exception text>\n'
         u'-Поставить бота на паузу (игнорирование сообщений)\n'
         u'(пауза|pause) <время (секунды)=5>'
-    ),
-    (
-        u'--Страница 4--\n\n'
-        u'Закрытые команды:\n'
-        u'Необходимый уровень доступа: нет, только для автора\n\n'
-        u'-Активировать бота\n'
-        u'activate\n'
-        u'-Деактивировать бота\n'
-        u'deactivate'
     )
 )
 
@@ -234,7 +225,6 @@ class Bot(object):
         self.appeals = ('/')
         self.bot_name = u'(Бот)'
         self.mark_type = u'кавычка'
-        self.activated = False
         self.use_custom_commands = False
         self.openweathermap_api_key = '0'
 
@@ -255,8 +245,6 @@ class Bot(object):
         self.whitelist_access_level = 3
         self.raise_access_level = 3
         self.pause_access_level = 3
-        self.activate_access_level = 0
-        self.deactivate_access_level = 0
 
     def authorization(self, **kwargs):
         self.authorized, error = vkr.log_in(**kwargs)
@@ -368,11 +356,6 @@ class Bot(object):
                         response_text = ''
                         continue
 
-                    if not self.activated:
-                        response_text += \
-                            u'\n\nБот не активирован. По вопросам активации ' \
-                            u'просьба обратиться к автору: {author}'
-
                     response_text, attachments, sticker_id = \
                         self._format_response(
                             response_text, command, attachments
@@ -474,7 +457,7 @@ class Bot(object):
         self.send_log_line(u'Отдельный поток бота отключён', 1, time.time())
         return True
 
-    def load_params(self, appeals, activated,
+    def load_params(self, appeals,
                     bot_name, mark_type,
                     use_custom_commands,
                     openweathermap_api_key):
@@ -488,7 +471,6 @@ class Bot(object):
         if _appeals:
             self.appeals = tuple(_appeals)
 
-        self.activated = activated
         self.bot_name = bot_name
         self.mark_type = mark_type
         self.use_custom_commands = use_custom_commands
@@ -699,10 +681,6 @@ class Bot(object):
             return self.raise_exception, self.raise_access_level
         elif s in ('pause', u'пауза'):
             return self.pause, self.pause_access_level
-        elif s in ('activate'):
-            return self.activate_bot, self.activate_access_level
-        elif s in ('deactivate'):
-            return self.deactivate_bot, self.deactivate_access_level
         else:
             return None, None
 
@@ -1217,26 +1195,6 @@ class Bot(object):
         self.mlpd = None
 
         return u'Пауза окончена', cmd
-
-    def activate_bot(self, cmd):
-        if cmd.real_user_id == AUTHOR_VK_ID:
-            self.activated = True
-            self.send_log_line(
-                u'[b]Произошла [color=#33ff33]активация[/color] бота[/b]', 2
-            )
-            return u'Активация прошла успешно', cmd
-        else:
-            return u'Отказано в доступе', cmd
-
-    def deactivate_bot(self, cmd):
-        if cmd.real_user_id == AUTHOR_VK_ID:
-            self.activated = False
-            self.send_log_line(
-                u'[b]Произошла [color=#ff3300]деактивация[/color] бота[/b]', 2
-            )
-            return u'Деактивация прошла успешно', cmd
-        else:
-            return u'Отказано в доступе', cmd
 
     def _is_argument_missing(self, words):
         if len(words) == 1:

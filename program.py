@@ -139,14 +139,6 @@ class VKBotApp(App):
                 {
                     "type": "title",
                     "title": "Активация бота"
-                },
-                {
-                    "type": "bool",
-                    "title": "Бот активирован",
-                    "section": "General",
-                    "key": "bot_activated",
-                    "values": ["False","True"],
-                    "disabled": 1
                 }
             ]''' % utils.CUSTOM_COMMANDS_FILE_PATH)
 
