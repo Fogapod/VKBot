@@ -1,6 +1,7 @@
 # coding:utf8
 
 
+from kivy.app import App
 from kivy.clock import mainthread, Clock
 
 from uix.popups.editcommandpopup import EditCommandPopup
@@ -19,7 +20,7 @@ class CustomCommandsScreen(ColoredScreen):
 
 
     def on_enter(self):
-        # App.get_running_app().open_loading_popup()
+        App.get_running_app().open_loading_popup()
         Clock.schedule_once(self.sort_blocks)
 
     def sort_blocks(self, *args):
@@ -51,7 +52,7 @@ class CustomCommandsScreen(ColoredScreen):
                 if key not in self.included_keys:
                     self.add_command(key, self.custom_commands[key])
 
-        # App.get_running_app().close_loading_popup()
+        App.get_running_app().close_loading_popup()
 
 
     def leave(self, delay=None):

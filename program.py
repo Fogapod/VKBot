@@ -12,7 +12,7 @@ from kivy.uix.screenmanager import ScreenManager, FadeTransition
 from uix.popups.authpopup import AuthPopup
 from uix.popups.twofapopup import TwoFAPopup
 from uix.popups.captchapopup import CaptchaPopup
-# from uix.popups.loadingpopup import LoadingPopup
+from uix.popups.loadingpopup import LoadingPopup
 from uix.screens.mainscreen import MainScreen
 from uix.screens.customcommandsscreen import CustomCommandsScreen
 
