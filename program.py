@@ -63,7 +63,6 @@ class VKBotApp(App):
                                         'use_custom_commands': 'True',
                                         'logging_level': '1',
                                         'max_log_lines': '50',
-                                        'bot_activated': 'False',
                                         'openweathermap_api_key': '0'
                                       }
                            )
@@ -135,10 +134,6 @@ class VKBotApp(App):
                     "section": "General",
                     "key": "max_log_lines",
                     "options": ["10", "30", "50", "100", "200"]
-                },
-                {
-                    "type": "title",
-                    "title": "Активация бота"
                 }
             ]''' % utils.CUSTOM_COMMANDS_FILE_PATH)
 
