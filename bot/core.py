@@ -128,7 +128,7 @@ class Command(object):
         self.event_user_id = 0
         self.msg_id = 0
 
-    def load(self, message):
+    def read(self, message):
         self.__init__(self.self_id, self.appeals)  # refresh params
 
         if 'attachments' in message.keys() \
@@ -324,7 +324,7 @@ class Bot(object):
                     response_text = ''
                     attachments = []
 
-                    command.load(message)
+                    command.read(message)
 
                     if not command.text or command.msg_id in last_msg_ids:
                         continue
@@ -336,7 +336,9 @@ class Bot(object):
                             ):
                         continue
 
-                    if self.use_custom_commands \
+                    if command.words[0] not in \
+                        ('+', 'learn', u'выучи', '-', 'forgot', u'забудь') \
+                            and self.use_custom_commands \
                             and self.custom_commands is not None:
                         response_text, command = \
                             self.custom_command(command, self.custom_commands)
