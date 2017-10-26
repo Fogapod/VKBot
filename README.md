@@ -39,28 +39,13 @@ align="center"/>
 
 > Каждая из опций может находиться в двух (0, 2) или трёх (0, 1, 2) состояниях. 0 - красный цевт, 1 - синий, 2 - зелёный.
 
-
-Использовать для определения команды синтаксис регулярных выражений (нет, да)
-<img height="25" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/button_use_regex_option.png" align="left"/>
-
-Убрать отметку бота в сообщении (обычное поведение, никогда не убирать, убирать всегда)
-<img height="25" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/button_force_unmark_option.png" align="left"/>
-
-Пересылать сообщения (обычное поведение, никогда не пересылать, пересылать всегда)
-<img height="25" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/button_force_forward_option.png" align="left"/>
-
-<img height="25" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/button_appeal_only_option.png" align="left"/>
-
-Отвечать на команду только при (в любом случае, только без обращения, только при обращении (`бот, команда`))
-
-Отключить команду (нет, да)
-<img height="25" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/button_disable_option.png" align="left"/>
-
-> Язык регулярных выражений - поиск совпадений в тексте по определённым правилам.  
-Документация по регулярным выражениям: <https://docs.python.org/2/library/re.html>  
-Проверка своих регулярных выражений: <http://pythex.org>  
-
-Бот поддерживает группы регулярного выражения. Для использования части полученного сообщения, в ответе необходимо указать `{имя_группы}`, если используется группа с названием. Так же поддерживаются простые группы, которые доступны через `{}` (не забудьте исключить лишние группы через `(?:)` в регулярном выражении. Количество возвращаемых групп не ограничено.
+| Иконка | Описание | Красный (0) | Синий (1) | Зелёный (2) |
+|--------|----------|-------------|-----------|-------------|
+| <img height="25" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/button_use_regex_option.png"/> | Использовать regex | Нет | - | Да |
+| <img height="25" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/button_force_unmark_option.png"/> | Помечать сообщение | Стандартно | Всегда | Никогда |
+| <img height="25" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/button_force_forward_option.png"/> | Пересылать сообщение | Стандартно | Никогда | Всегда |
+| <img height="25" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/button_appeal_only_option.png"/> | Отвечать только | Всегда | Без обращения | При обращении (`Бот, команда`) |
+| <img height="25" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/button_disable_option.png"/> | Отключить команду | Нет | - | Да |
 
 ##### Сообщения
 <img height="300" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/learn-forgot_commands.png"/>
@@ -130,3 +115,10 @@ align="center"/>
 В данном случае бот будет отвечать на любой стикер из данного набора.
 > Полезная команда: `^sticker=(?P<gid>\d+):(?P<id>\d+)$` ответ: `Стикер {id} из набора {gid}`  
 > С помощью этой команды можно получить id всех нужных вам наборов и стикеров.
+
+### Регулярные выражения (regex)
+Язык регулярных выражений - поиск совпадений в тексте по определённым правилам.  
+Документация по регулярным выражениям: <https://docs.python.org/2/library/re.html>  
+Проверка своих регулярных выражений: <http://pythex.org>  
+
+Бот поддерживает группы регулярного выражения. Для использования части полученного сообщения, в ответе необходимо указать `{имя_группы}`, если используется группа с названием. Так же поддерживаются простые группы, которые доступны через `{}` (не забудьте исключить лишние группы через `(?:)` в регулярном выражении. Количество возвращаемых групп не ограничено.
