@@ -42,7 +42,7 @@ align="center"/>
 | Иконка | Описание | Красный (0) | Синий (1) | Зелёный (2) |
 |--------|----------|-------------|-----------|-------------|
 | <img height="25" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/button_use_regex_option.png"/> | Использовать regex | Нет | - | Да |
-| <img height="25" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/button_force_unmark_option.png"/> | Помечать сообщение | Стандартно | Всегда | Никогда |
+| <img height="25" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/button_force_unmark_option.png"/> | Помечать сообщение | Да | - | Нет |
 | <img height="25" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/button_force_forward_option.png"/> | Пересылать сообщение | Стандартно | Никогда | Всегда |
 | <img height="25" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/button_appeal_only_option.png"/> | Условие ответа | Всегда | Без обращения | При обращении (`Бот, команда`) |
 | <img height="25" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/button_disable_option.png"/> | Отключить команду | Нет | - | Да |

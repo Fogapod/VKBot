@@ -630,9 +630,7 @@ class Bot(object):
         elif choice[3] == 1:  # never forward
             cmd.forward_msg = None
 
-        if choice[2] == 1:  # always mark message
-            cmd.mark_msg = True
-        elif choice[2] == 2:  # never mark message
+        if choice[2] == 2:  # do not mark message
             cmd.mark_msg = False
 
         if response.startswith('self='):
