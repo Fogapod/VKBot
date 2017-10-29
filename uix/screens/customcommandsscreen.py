@@ -208,6 +208,7 @@ class CustomCommandsScreen(ColoredScreen):
             self.custom_commands.pop(command, None)
             self.included_keys.remove(command)
             self.ids.cc_list.remove_widget(block)
+
         elif len(block.responses) == 2:
             block.ids.dropdown_btn.unbind(
                 on_release=block.ids.dropdown_btn.callback)
@@ -226,13 +227,25 @@ class CustomCommandsScreen(ColoredScreen):
             command_button.bind(on_release=command_button.callback)
             block.responses.remove(response)
 
-            self.custom_commands[command].remove(
-                [response] + options)
+            try:
+                self.custom_commands[command].remove(
+                    [response] + options)
+            except ValueError:
+                utils.toast_notification(
+                    u'Что-то пошло не так. Вы изменили опции?')
+                return
 
             block.dropdown.dismiss()
+
         else:
-            self.custom_commands[command].remove(
-                [response] + options)
+            try:
+                self.custom_commands[command].remove(
+                    [response] + options)
+            except ValueError:
+                utils.toast_notification(
+                    u'Что-то пошло не так. Вы изменили опции?')
+                return
+
             block.dropdown.remove_widget(command_button)
             block.responses.remove(response)
             block.dropdown.dismiss()
