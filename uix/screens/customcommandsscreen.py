@@ -259,7 +259,10 @@ class CustomCommandsScreen(ColoredScreen):
 
             if len(self.custom_commands[command]) == 1:
                 old_command_button = CommandButton(
-                    text=block.ids.dropdown_btn.response)
+                    text =
+                        block.ids.dropdown_btn.response if
+                            block.ids.dropdown_btn.response else ' '
+                )
                 old_command_button.command = block.ids.dropdown_btn.command
                 old_command_button.response = block.ids.dropdown_btn.response
                 del block.ids.dropdown_btn.command
@@ -362,5 +365,6 @@ class CustomCommandsScreen(ColoredScreen):
             block.ids.dropdown_btn.callback = dropdown_callback
             block.ids.dropdown_btn.bind(
                 on_release=block.ids.dropdown_btn.callback)
+
         self.ids.cc_list.add_widget(block)
         self.included_keys.append(command)
