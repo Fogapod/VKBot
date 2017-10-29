@@ -31,9 +31,9 @@ __help__ = (
         u'(скажи|say) <фраза>\n'
         u'-Посчитать математическое выражение (=)\n'
         u'(посчитай|calculate) <выражение>\n'
-        u'-Проверить, простое ли число (%)\n'
-        u'(простое|prime) <число>\n'
-        u'-Определить достоверность информации\n'
+        u'-Поиск информации\n'
+        u'(найди|find) <запрос>\n'
+        u'-Определить достоверность утверждения (%)\n'
         u'(инфа|chance) <вопрос>\n'
         u'-Выбрать участника беседы\n'
         u'(кто|who) <вопрос>\n'
@@ -79,21 +79,6 @@ __help__ = (
 )
 
 
-def safe_format(s, *args, **kwargs):
-    '''
-    https://stackoverflow.com/questions/9955715/python-missing-arguments-in-string-formatting-lazy-eval
-    '''
-
-    while True:
-        try:
-            return s.format(*args, **kwargs)
-        except KeyError as e:
-            e = e.args[0]
-            kwargs[e] = '{%s}' % e
-        except:
-            return s
-
-
 class Command(object):
     def __init__(self, self_id, appeals):
         self.self_id = self_id
@@ -117,6 +102,7 @@ class Command(object):
         self.out = False
         self.event = None
         self.event_user_id = 0
+        self.event_text = ''
         self.msg_id = 0
 
     def read(self, message):
@@ -172,28 +158,39 @@ class Command(object):
             self.chat_name = message['title']
 
             if not self.raw_text:
-                self.event = message.get('action')
-                if self.event:
-                    if self.event == 'chat_photo_update':
+                event = message.get('action')
+
+                if event:
+                    if event == 'chat_photo_update':
                         self.event = 'photo updated'
-                    elif self.event == 'chat_photo_remove':
+
+                    elif event == 'chat_photo_remove':
                         self.event = 'photo removed'
-                    elif self.event == 'chat_create':
+
+                    elif event == 'chat_create':
                         self.event = 'chat created'
-                    elif self.event == 'chat_title_update':
+
+                    elif event == 'chat_title_update':
                         self.event = 'title updated'
-                    elif self.event == 'chat_invite_user' \
-                            and not message['action_mid'] == self.self_id:
+
+                    elif event == 'chat_invite_user' \
+                            and not message.get('action_mid') == self.self_id:
                         self.event = 'user joined'
-                        self.event_user_id = message['action_mid']
-                    elif self.event == 'chat_kick_user' and not \
+
+                    elif event == 'chat_kick_user' and not \
                             message['action_mid'] == self.self_id:
                         self.event = 'user kicked'
-                        self.event_user_id = message['action_mid']
-                    else:
-                        self.event = None
+
+                    elif event == 'chat_pin_message':
+                        self.event = 'message pinned'
+
+                    elif event == 'chat_unpin_message':
+                        self.event = 'message unpinned'
 
                 if self.event:
+                    self.event_user_id = message.get('action_mid',  '')
+                    self.event_text    = message.get('action_text', '')
+
                     self.raw_text = 'event=' + self.event
                     self.text = self.raw_text
                     self.lower_text = self.raw_text
@@ -231,7 +228,7 @@ class Bot(object):
         self.help_access_level = 0
         self.say_access_level = 0
         self.calculate_access_level = 0
-        self.prime_access_level = 0
+        self.find_access_level = 0
         self.chance_access_level = 0
         self.who_access_level = 0
         self.weather_access_level = 0
@@ -268,13 +265,13 @@ class Bot(object):
             self.runtime_error = None
 
             self.send_log_line(
-                u'Загрузка файла whitelist\'а из %(whitelist_file)s...',
+                u'Загрузка файла whitelist\'а из {whitelist_file}...',
                 0
             )
             self.whitelist = utils.load_whitelist()
 
             self.send_log_line(
-                u'Загрузка файла blacklist\'а из %(blacklist_file)s...',
+                u'Загрузка файла blacklist\'а из {blacklist_file}...',
                 0
             )
             self.blacklist = utils.load_blacklist()
@@ -282,7 +279,7 @@ class Bot(object):
             if self.use_custom_commands:
                 self.send_log_line(
                     u'Загрузка пользовательских команд из '
-                    u'%(custom_commands_file)s...',
+                    u'{custom_commands_file}...',
                     0
                 )
                 self.custom_commands = utils.load_custom_commands()
@@ -537,6 +534,9 @@ class Bot(object):
             name, error = vkr.get_name_by_id(object_id=command.event_user_id)
             format_dict['event_user_name'] = name if name else 'No name'
 
+        if '{event_text}' in response_text:
+            format_dict['event_text'] = command.event_text
+
         for r in re.findall('{random(\d{1,500})}', response_text):
             format_dict['random%s' % r] = random.randrange(int(r) + 1)
 
@@ -573,7 +573,7 @@ class Bot(object):
 
         response_text = media_id_search_pattern.sub('', response_text)
 
-        return safe_format(response_text, **format_dict), attachments, None
+        return utils.safe_format(response_text, **format_dict), attachments, None
 
     def custom_command(self, cmd, custom_commands):
         response_text = ''
@@ -600,7 +600,7 @@ class Bot(object):
                     if response:
                         groups = pattern.findall(cmd.text)
                         groupdict = pattern.search(cmd.text).groupdict()
-                        response = safe_format(response, *groups, **groupdict)
+                        response = utils.safe_format(response, *groups, **groupdict)
                         break
 
             elif cmd.text.lower() == key:
@@ -651,9 +651,9 @@ class Bot(object):
             return self.say, self.say_access_level
         elif s in ('calculate', u'посчитай', '='):
             return self.calculate, self.calculate_access_level
-        elif s in ('prime', u'простое', '%'):
-            return self.prime, self.prime_access_level
-        elif s in ('chance', u'инфа'):
+        elif s in ('find', u'найди'):
+            return self.find, self.find_access_level
+        elif s in ('chance', u'инфа', '%'):
             return self.chance, self.chance_access_level
         elif s in ('who', u'кто'):
             return self.who, self.who_access_level
@@ -707,8 +707,7 @@ class Bot(object):
         if argument_required:
             return argument_required, cmd
 
-        del words[0]
-        text = ' '.join(words)
+        text = ' '.join(words[1:])
         return text, cmd
 
     def calculate(self, cmd):
@@ -717,19 +716,18 @@ class Bot(object):
         if argument_required:
             return argument_required, cmd
 
-        if words[0].startswith('='):
-            words[0] = words[0][1:]
-        else:
-            del words[0]
-        words = ''.join(words).lower()
+
+        words = ''.join(words[1:]).lower()
+
         if re.match(u'^([\d+\-*/%:().,^√πe]|(sqrt)|(pi))+$', words):
             words = ' ' + words + ' '
             words = re.sub(u'(sqrt)|√', 'math.sqrt', words)
-            words = re.sub(u'(pi)|π', 'math.pi', words)
-            words = re.sub('e', 'math.e', words)
-            words = re.sub('\^', '**', words)
-            words = re.sub(',', '.', words)
-            words = re.sub(u':|÷', '/', words)
+            words = re.sub(u'(pi)|π',   'math.pi',   words)
+            words = re.sub(u':|÷',      '/',         words)
+            words = re.sub('e',         'math.e',    words)
+            words = re.sub('\^',        '**',        words)
+            words = re.sub(',',         '.',         words)
+
             while True:
                 if '/' in words:
                     index = re.search('[^.\d]\d+[^.\de]', words)
@@ -764,38 +762,40 @@ class Bot(object):
 
         return result, cmd
 
-    def prime(self, cmd):
+    def find(self, cmd):
         words = cmd.words
         argument_required = self._is_argument_missing(words)
         if argument_required:
             return argument_required, cmd
 
-        del words[0]
-        input_number = ''.join(words)
-        if re.match('^\d+$', input_number) and len(input_number) <= 5:
-            input_number = int(input_number)
-            luc_number = 0
-            last_luc_number = 0
-            for i in range(input_number):
-                if luc_number == 0:
-                    luc_number = 1
-                elif luc_number == 1:
-                    last_luc_number = luc_number
-                    luc_number = 3
-                else:
-                    luc_number, last_luc_number = last_luc_number\
-                                                  + luc_number, luc_number
+        response, error = vkr.http_r_g(
+            'http://api.duckduckgo.com/?',
+            params = {
+                    'q': ' '.join(cmd.words[1:]),
+                    'o': 'json'
+            }
+        )
 
-            if input_number != 0:
-                is_prime = True if (luc_number - 1) \
-                                % input_number == 0 else False
-                result = u'Является простым числом' \
-                    if is_prime else u'Не является простым числом'
-            else:
-                result = u'0 не является простым числом'
-        else:
-            result = u'Дано неверное или слишком большое значение'
-        return result, cmd
+        if error:
+            self.send_log_line(u'Ошибка при получении ответа: ' + error, 0)
+            return u'Возникла ошибка', cmd
+
+        response = response.json()
+
+        if 'RelatedTopics' in response:
+            topics = response['RelatedTopics']
+
+            if len(topics) > 0 and 'Text' in topics[0]:
+                text = u'ФУНКЦИЯ В РАЗРАБОТКЕ\n\n' + topics[0]['Text']
+
+                if 'Icon' in topics[0]:
+                    image_url = topics[0]['Icon']['URL']
+
+                    text += '\n\n' + 'Image url: ' + image_url + ' '
+
+                return text, cmd
+
+        return u'ФУНКЦИЯ В РАЗРАБОТКЕ\n\nНичего не найдено :/', cmd
 
     def chance(self, cmd):
         argument_required = self._is_argument_missing(cmd.words)

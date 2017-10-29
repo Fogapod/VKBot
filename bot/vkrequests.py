@@ -4,6 +4,8 @@
 import time
 import traceback
 
+import requests as r
+
 from kivy.app import App
 
 import vk_api as vk
@@ -25,7 +27,8 @@ def error_handler(request):
             response = request(*args, **kwargs)
         except Exception as raw_error:
             send_log_line(
-                u'Возникла ошибка (vkrequests): %s' % traceback.format_exc(),
+                u'Возникла ошибка (vkrequests): %s' %
+                    traceback.format_exc().decode('utf8'),
                 0
             )
             error = str(raw_error).lower()
@@ -88,7 +91,8 @@ def log_in(login=None, password=None,
                         'auth_handler': twofactor_handler,
                         'captcha_handler': captcha_handler,
                         'app_id': '6045412',
-                        'scope': '70660'  # messages, status, photos, offline
+                        'scope': '70660',  # messages, status, photos, offline
+                        'api_version': '5.68'
                      }
 
     if login and password:
@@ -207,3 +211,19 @@ def get_user_city(user_id=None):
 @error_handler
 def get_real_user_id(user_short_link):
     return api.users.get(user_ids=user_short_link)[0]['id']
+
+
+@error_handler
+def http_r_g(url, params):
+    response =  r.get(url, params)
+    send_log_line(u'Запрос: %s' % url, 0, time.time())
+
+    return response
+
+
+@error_handler
+def http_r_p(url, data):
+    response =  r.post(url, data)
+    send_log_line(u'Запрос: %s' % url, 0, time.time())
+
+    return response

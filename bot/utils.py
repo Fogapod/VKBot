@@ -51,6 +51,21 @@ def toast_notification(text, length_long=True):
     toast(text, length_long=length_long)
 
 
+def safe_format(s, *args, **kwargs):
+    '''
+    https://stackoverflow.com/questions/9955715/python-missing-arguments-in-string-formatting-lazy-eval
+    '''
+
+    while True:
+        try:
+            return s.format(*args, **kwargs)
+        except KeyError as e:
+            e = e.args[0]
+            kwargs[e] = '{%s}' % e
+        except:
+            return s
+
+
 def load_token():
     if not os.path.exists(TOKEN_FILE_PATH):
         open(TOKEN_FILE_PATH, 'w').close()

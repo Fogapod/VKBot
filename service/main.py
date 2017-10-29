@@ -11,6 +11,7 @@ from ast import literal_eval
 from kivy import platform
 from kivy.config import Config
 from kivy.lib import osc
+from kivy.utils import escape_markup
 
 parent_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 parent_path += '\\' if platform == 'win' else '/'
@@ -77,7 +78,7 @@ def send_error(error):
     )
     utils.save_error(error, from_bot=True)
 
-    send_log_line(u'[b]Ошибка сохранена в файле %(bot_error_file)s[/b]', 2)
+    send_log_line(u'[b]Ошибка сохранена в файле {bot_error_file}[/b]', 2)
 
 
 def send_answers_count(*args):
@@ -233,7 +234,7 @@ if __name__ == '__main__':
 
         if bot.runtime_error:
             if bot.runtime_error != 1:
-                send_error(bot.runtime_error)
+                send_error(escape_markup(bot.runtime_error))
             else:
                 send_log_line(u'[b]Бот остановлен через сообщение[/b]', 2)
             if stable_mode and bot.runtime_error != 1:

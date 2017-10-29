@@ -2,6 +2,7 @@
 
 
 import time
+import traceback
 from threading import Thread
 
 from kivy.app import App
@@ -75,13 +76,13 @@ class MainScreen(ColoredScreen):
                             '\n[%H:%M:%S] ', time.localtime(message[2])
                         ) + message[0]
 
-                new_lines = new_lines % \
-                    {
-                    'whitelist_file': utils.WHITELIST_FILE_PATH,
-                    'blacklist_file': utils.BLACKLIST_FILE_PATH,
-                    'bot_error_file': utils.BOT_ERROR_FILE_PATH,
-                    'custom_commands_file': utils.CUSTOM_COMMANDS_FILE_PATH
-                    }
+                new_lines = utils.safe_format(new_lines,
+                    whitelist_file=utils.WHITELIST_FILE_PATH,
+                    blacklist_file=utils.BLACKLIST_FILE_PATH,
+                    bot_error_file=utils.BOT_ERROR_FILE_PATH,
+                    custom_commands_file=utils.CUSTOM_COMMANDS_FILE_PATH
+                    
+                )
 
                 log_text = self.ids.logging_panel.text
                 new_log_text = log_text + new_lines
@@ -94,7 +95,8 @@ class MainScreen(ColoredScreen):
                 self.ids.logging_panel.text = new_log_text
 
             except:
-                self.ids.logging_panel.text += u'\n[b]Возникла ошибка! Не могу отобразить лог[/b]'
+                self.ids.logging_panel.text += u'\n[b]Возникла ошибка! Не могу отобразить лог[/b]\n'
+                self.ids.logging_panel.text += traceback.format_exc()
 
 
     def stop_log_check_thread(self):
