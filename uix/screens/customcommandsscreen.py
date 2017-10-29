@@ -118,10 +118,8 @@ class CustomCommandsScreen(ColoredScreen):
 
 
     def save_edited_command(self, command, response, command_button, block):
-        if not (self.edit_popup.ids.command_textinput.text
-                and self.edit_popup.ids.response_textinput.text):
-            utils.toast_notification(
-                u'Поля с командой и ответом не могут быть пустыми')
+        if not self.edit_popup.ids.command_textinput.text:
+            utils.toast_notification(u'Поле для команды не может быть пустым')
             return
 
         options = self.edit_popup.get_options()
@@ -176,18 +174,25 @@ class CustomCommandsScreen(ColoredScreen):
 
             response_preview = response
             response_preview = response_preview.replace('\n', '  ')
+
             if len(response_preview) > self.max_command_preview_text_len:
                 response_preview = \
                     response_preview[:self.max_command_preview_text_len] + '...'
+
+            if response_preview == '':
+                response_preview = ' '
+
             command_button.text = response_preview
 
             block.responses.append(response)
 
             command_preview = command
             command_preview = command_preview.replace('\n', '  ')
+
             if len(command_preview) > self.max_command_preview_text_len:
                 command_preview = \
                     command_preview[:self.max_command_preview_text_len] + '...'
+
             block.ids.dropdown_btn.text = command_preview
 
             self.custom_commands[command].append([response] + options)
@@ -220,8 +225,10 @@ class CustomCommandsScreen(ColoredScreen):
             command_button.callback = callback
             command_button.bind(on_release=command_button.callback)
             block.responses.remove(response)
+
             self.custom_commands[command].remove(
                 [response] + options)
+
             block.dropdown.dismiss()
         else:
             self.custom_commands[command].remove(
@@ -235,10 +242,8 @@ class CustomCommandsScreen(ColoredScreen):
 
 
     def create_command(self, command, response):
-        if not (self.edit_popup.ids.command_textinput.text
-                and self.edit_popup.ids.response_textinput.text):
-            utils.toast_notification(
-                u'Поля с командой и ответом не могут быть пустыми')
+        if not self.edit_popup.ids.command_textinput.text:
+            utils.toast_notification(u'Поле для команды не может быть пустым')
             return
 
         options = self.edit_popup.get_options()
@@ -277,9 +282,14 @@ class CustomCommandsScreen(ColoredScreen):
 
             response_preview = response
             response_preview = response_preview.replace('\n', '  ')
+
             if len(response_preview) > self.max_command_preview_text_len:
                 response_preview = \
                     response_preview[:self.max_command_preview_text_len] + '...'
+
+            if response_preview == '':
+                response_preview = ' '
+
             command_button = CommandButton(text=response_preview)
             command_button.command = command
             command_button.response = response
@@ -291,6 +301,7 @@ class CustomCommandsScreen(ColoredScreen):
 
             block.dropdown.add_widget(command_button)
             block.responses.append(response)
+
             self.custom_commands[command].append([response] + options)
 
             for r in self.custom_commands[command]:
@@ -311,9 +322,13 @@ class CustomCommandsScreen(ColoredScreen):
             if len(response) > 1:
                 response_preview = item[0]
                 response_preview = response_preview.replace('\n', '  ')
+
                 if len(response_preview) > self.max_command_preview_text_len:
                     response_preview = \
                         response_preview[:self.max_command_preview_text_len] + '...'
+                if response_preview == '':
+                    response_preview = ' '
+
                 command_button = CommandButton(text=response_preview)
             else:
                 command_button = block.ids.dropdown_btn
@@ -328,14 +343,18 @@ class CustomCommandsScreen(ColoredScreen):
 
             if len(response) > 1:
                 block.dropdown.add_widget(command_button)
+
             block.responses.append(item[0])
+
         block.command = command
 
         command_preview = command
         command_preview = command_preview.replace('\n', '  ')
+
         if len(command_preview) > self.max_command_preview_text_len:
             command_preview = \
                 command_preview[:self.max_command_preview_text_len] + '...'
+
         block.ids.dropdown_btn.text = command_preview
 
         if len(response) > 1:

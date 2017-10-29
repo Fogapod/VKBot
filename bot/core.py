@@ -104,6 +104,7 @@ class Command(object):
         self.event_user_id = 0
         self.event_text = ''
         self.msg_id = 0
+        self._pass = False
 
     def read(self, message):
         self.__init__(self.self_id, self.appeals)  # refresh params
@@ -328,9 +329,13 @@ class Bot(object):
                         response_text, command = \
                             self.custom_command(command, self.custom_commands)
 
-                    if not response_text and command.was_appeal:
+                    if command._pass:
+                        continue
+
+                    if command.was_appeal and not response_text:
                         func, required_access_level = \
                             self.builtin_command(command.words[0].lower())
+
                         if func:
                             if command.out:
                                 user_access_level = 3
@@ -637,8 +642,10 @@ class Bot(object):
             cmd.text = '_' + response[5:]
 
             return self.custom_command(cmd, custom_commands)
+
         elif response == 'pass':
-            pass
+            cmd._pass = True
+
         else:
             response_text = response
 
@@ -957,7 +964,7 @@ class Bot(object):
 
         if argument_required:
             response_text = argument_required
-        elif len(text) < 2 or not (command and response):
+        elif len(text) < 2 or not command:
             response_text = u'Неправильный синтаксис команды'
         elif len(options) != utils.CUSTOM_COMMAND_OPTIONS_COUNT:
             response_text = u'Неправильное количество опций'
@@ -1001,9 +1008,9 @@ class Bot(object):
             command = text
             response = ''
 
-        if command and response:
+        if command:
             if command not in self.custom_commands:
-                response = ''
+                response = None
             elif len([x for x in self.custom_commands[command]
                      if response == x[0]]) == 0:
                 response_text = u'В команде «%s» нет ключа «%s»' \
@@ -1018,7 +1025,7 @@ class Bot(object):
                 else:
                     response_text = u'Ключ для команды забыт'
 
-        if not response and not self.custom_commands.pop(command, None):
+        if response is None and self.custom_commands.pop(command, None) is None:
             response_text = u'Я не знаю такой команды (%s)' % command
 
         self.send_log_line(u'Пользовательские команды сохраняются...', 0)
