@@ -80,7 +80,8 @@ class CustomCommandsScreen(ColoredScreen):
 
         new_delete_callback = lambda x: self.remove_command(
             command_button.command, command_button.response,
-            command_button, self.edit_popup.command_block
+            command_button.options, command_button,
+            self.edit_popup.command_block
             )
         new_save_callback = lambda x: self.save_edited_command(
             self.edit_popup.ids.command_textinput.text,
@@ -201,9 +202,7 @@ class CustomCommandsScreen(ColoredScreen):
         self.edit_popup.dismiss()
 
 
-    def remove_command(self, command, response, command_button, block):
-        options = self.edit_popup.get_options()
-
+    def remove_command(self, command, response, options, command_button, block):
         if len(block.responses) == 1:
             self.custom_commands.pop(command, None)
             self.included_keys.remove(command)
@@ -215,8 +214,8 @@ class CustomCommandsScreen(ColoredScreen):
             block.dropdown.remove_widget(command_button)
 
             command_button = block.ids.dropdown_btn
-            command_button.command = command
-            command_button.response =\
+            command_button.command  = command
+            command_button.response = \
                 block.dropdown.container.children[0].response # last child
             block.dropdown.remove_widget(block.dropdown.container.children[0])
 
@@ -227,24 +226,12 @@ class CustomCommandsScreen(ColoredScreen):
             command_button.bind(on_release=command_button.callback)
             block.responses.remove(response)
 
-            try:
-                self.custom_commands[command].remove(
-                    [response] + options)
-            except ValueError:
-                utils.toast_notification(
-                    u'Что-то пошло не так. Вы изменили опции?')
-                return
+            self.custom_commands[command].remove([response] + options)
 
             block.dropdown.dismiss()
 
         else:
-            try:
-                self.custom_commands[command].remove(
-                    [response] + options)
-            except ValueError:
-                utils.toast_notification(
-                    u'Что-то пошло не так. Вы изменили опции?')
-                return
+            self.custom_commands[command].remove([response] + options)
 
             block.dropdown.remove_widget(command_button)
             block.responses.remove(response)
