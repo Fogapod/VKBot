@@ -9,7 +9,7 @@ import requests as r
 from kivy.app import App
 
 import vk_api as vk
-from utils import load_token, save_token
+from utils import load_token, save_token, TEMP_IMAGE_FILE_PATH
 
 
 # globals
@@ -142,6 +142,44 @@ def send_message(text='', gid=None, uid=None, forward=None, attachments=[],
 
 
 @error_handler
+def attach_image(pid, image_url='', image_path=''):
+    if image_url:
+        image_response, error = http_r_get(image_url)
+        image = open(TEMP_IMAGE_FILE_PATH, 'w+b')
+        image.write(image_response.content)
+        image.seek(0)
+
+        if error:
+            raise Exception(error)
+    else:
+        image = open(image_path, 'rb')
+
+    upload_data = api.photos.getMessagesUploadServer(peer_id=pid)
+
+    response, error = \
+        http_r_post(upload_data['upload_url'], files={'photo': image})
+
+    image.close()
+
+    if error:
+        raise Exception(error)
+
+    json_data = response.json()
+
+    if json_data['photo'] == '[]':
+        return False
+
+    save_response = api.photos.saveMessagesPhoto(photo=json_data['photo'],
+                                                 server=json_data['server'],
+                                                 hash=json_data['hash'])[0]
+
+    image_id = 'photo' + \
+        str(save_response['owner_id']) + '_' + str(save_response['id'])
+
+    return image_id
+
+
+@error_handler
 def get_self_id():
     return api.users.get()[0]['id']
 
@@ -214,16 +252,16 @@ def get_real_user_id(user_short_link):
 
 
 @error_handler
-def http_r_g(url, params):
-    response =  r.get(url, params)
-    send_log_line(u'Запрос: %s' % url, 0, time.time())
+def http_r_get(url, **kwargs):
+    send_log_line(u'Запрос: %s %s [GET]' % (url, kwargs), 0, time.time())
+    response =  r.get(url, **kwargs)
 
     return response
 
 
 @error_handler
-def http_r_p(url, data):
-    response =  r.post(url, data)
-    send_log_line(u'Запрос: %s' % url, 0, time.time())
+def http_r_post(url, **kwargs):
+    send_log_line(u'Запрос: %s %s [POST]' % (url, kwargs), 0, time.time())
+    response =  r.post(url, **kwargs)
 
     return response

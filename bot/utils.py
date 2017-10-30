@@ -21,6 +21,7 @@ SETTINGS_FILE_PATH = ''
 WHITELIST_FILE_PATH = ''
 BLACKLIST_FILE_PATH = ''
 BOT_ERROR_FILE_PATH = ''
+TEMP_IMAGE_FILE_PATH = ''
 CUSTOM_COMMANDS_FILE_PATH = ''
 
 
@@ -31,6 +32,7 @@ def update_paths():
     global WHITELIST_FILE_PATH
     global BLACKLIST_FILE_PATH
     global BOT_ERROR_FILE_PATH
+    global TEMP_IMAGE_FILE_PATH
     global CUSTOM_COMMANDS_FILE_PATH
 
     ERROR_FILE_PATH = PATH + 'error.log'
@@ -39,6 +41,7 @@ def update_paths():
     WHITELIST_FILE_PATH = PATH + 'whitelist.txt'
     BLACKLIST_FILE_PATH = PATH + 'blacklist.txt'
     BOT_ERROR_FILE_PATH = PATH + 'bot_error.log'
+    TEMP_IMAGE_FILE_PATH = PATH + '.temp.jpg'
     CUSTOM_COMMANDS_FILE_PATH = PATH + 'custom_commands.txt'
 
 update_paths()

@@ -9,8 +9,6 @@ import traceback
 
 from threading import Thread
 
-import requests as r
-
 import utils
 import vkrequests as vkr
 
@@ -104,6 +102,7 @@ class Command(object):
         self.event_user_id = 0
         self.event_text = ''
         self.msg_id = 0
+        self.attachments = []
         self._pass = False
 
     def read(self, message):
@@ -308,7 +307,6 @@ class Bot(object):
                 for message in messages['items']:
                     user_access_level = 0
                     response_text = ''
-                    attachments = []
 
                     command.read(message)
 
@@ -358,10 +356,9 @@ class Bot(object):
                         response_text = ''
                         continue
 
-                    response_text, attachments, sticker_id = \
-                        self._format_response(
-                            response_text, command, attachments
-                        )
+                    response_text, sticker_id = self._format_response(
+                        response_text, command
+                    )
 
                     if command.mark_msg:
                         if self.mark_type == u'имя':
@@ -382,14 +379,15 @@ class Bot(object):
                         user_id = command.user_id
 
                     message_to_resend = command.forward_msg
-                    msg_id, error = vkr.send_message(
-                                                     text=response_text,
+                    msg_id, error = vkr.send_message(text=response_text,
                                                      uid=user_id,
                                                      gid=chat_id,
                                                      forward=message_to_resend,
-                                                     attachments=attachments,
+                                                     attachments= \
+                                                         command.attachments,
                                                      sticker_id=sticker_id
-                                                    )
+                    )
+
                     if error:
                         if error == 'response code 413':
                             self.send_log_line(
@@ -480,7 +478,7 @@ class Bot(object):
 
         return True
 
-    def _format_response(self, response_text, command, attachments):
+    def _format_response(self, response_text, command):
         format_dict = {}
 
         sticker_ids = re.findall('{sticker=(\d+)}', response_text)
@@ -557,7 +555,7 @@ class Bot(object):
         )
 
         for match in media_id_search_pattern.findall(response_text):
-            if len(attachments) >= 10:
+            if len(command.attachments) >= 10:
                 break
 
             attachment_id = match[0]
@@ -574,11 +572,11 @@ class Bot(object):
                                         offset=random.randrange(album_len)
                                         )[0]
             if attachment_id:
-                attachments.append(attachment_id)
+                command.attachments.append(attachment_id)
 
         response_text = media_id_search_pattern.sub('', response_text)
 
-        return utils.safe_format(response_text, **format_dict), attachments, None
+        return utils.safe_format(response_text, **format_dict), None
 
     def custom_command(self, cmd, custom_commands):
         response_text = ''
@@ -775,34 +773,40 @@ class Bot(object):
         if argument_required:
             return argument_required, cmd
 
-        response, error = vkr.http_r_g(
-            'http://api.duckduckgo.com/?',
-            params = {
-                    'q': ' '.join(cmd.words[1:]),
-                    'o': 'json'
-            }
-        )
+        params = {
+            'q': ' '.join(cmd.words[1:]),
+            'o': 'json'
+        }
+
+        response, error = \
+            vkr.http_r_get('https://api.duckduckgo.com', params=params)
 
         if error:
-            self.send_log_line(u'Ошибка при получении ответа: ' + error, 0)
             return u'Возникла ошибка', cmd
 
-        response = response.json()
+        results_json = response.json()
 
-        if 'RelatedTopics' in response:
-            topics = response['RelatedTopics']
+        text = results_json['AbstractText']
 
-            if len(topics) > 0 and 'Text' in topics[0]:
-                text = u'ФУНКЦИЯ В РАЗРАБОТКЕ\n\n' + topics[0]['Text']
+        if text:
+            image_url = results_json['Image']
 
-                if 'Icon' in topics[0]:
-                    image_url = topics[0]['Icon']['URL']
+            if image_url:
+                pid = cmd.chat_id if cmd.from_chat else cmd.user_id
+                self.send_log_line(str(pid), 0)
 
-                    text += '\n\n' + 'Image url: ' + image_url + ' '
+                response, error = \
+                    vkr.attach_image(pid, image_url=image_url)
 
-                return text, cmd
+                if error or not response:
+                    return text + u'\n\nВозникла ошибка при загрузке фото (' + \
+                        image_url + ')', cmd
 
-        return u'ФУНКЦИЯ В РАЗРАБОТКЕ\n\nНичего не найдено :/', cmd
+                cmd.attachments.append(response)
+ 
+            return text, cmd
+
+        return u'Ничего не найдено :/', cmd
 
     def chance(self, cmd):
         argument_required = self._is_argument_missing(cmd.words)
@@ -860,15 +864,21 @@ class Bot(object):
             if not city:
                 city = u'Москва'
 
-        url = (
-            u'http://api.openweathermap.org/data/2.5/weather?'
-            u'APPID={api_key}&'
-            u'lang=ru&'
-            u'q={city}&'
-            u'units=metric'
-            ).format(api_key=api_key, city=city)
+        params = {
+            'APPID': api_key,
+            'q': city,
+            'lang': 'ru',
+            'units': 'metric'
+        }
 
-        weather_data = r.get(url)
+        weather_data, error = \
+            vkr.http_r_get('https://api.openweathermap.org/data/2.5/weather',
+                           params=params
+            )
+
+        if error:
+            return u'Возникла ошибка', cmd
+
         weather_json = weather_data.json()
 
         if 'cod' in weather_json and weather_json['cod'] == '404':
@@ -903,7 +913,12 @@ class Bot(object):
 
         test_url = 'https://api.openweathermap.org/data/2.5/weather?APPID=%s' \
             % api_key
-        test_weather_json = r.get(test_url).json()
+        response, error = vkr.http_r_get(test_url)
+
+        if error:
+            return False
+
+        test_weather_json = response.json()
 
         if 'cod' in test_weather_json:
             if test_weather_json['cod'] == '401':
