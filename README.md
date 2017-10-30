@@ -80,7 +80,7 @@ align="center"/>
 * `event=photo updated` обновлена обложка беседы
 * `event=photo removed` удалена обложка беседы
 * `event=chat created` создана новая беседа
-* `event=title updated` обновлено название беседы
+* `event=title updated` обновлено название беседы (доступен ключ `{event_text}`)
 * `event=user joined` пользователь приглашён/вернулся (доступны ключи `{event_user_id}`и `{event_user_name}`)
 * `event=user kicked` пользователь удалён/вышел (доступны ключи `{event_user_id}`и `{event_user_name}`)
 
@@ -101,6 +101,7 @@ align="center"/>
 * `{random_user_id}` id случайного пользователя из беседы (и диалога)
 * `{random_user_name}` имя случайного пользователя из беседы (и диалога)
 * `{chat_name}` название беседы
+* `{event_text}` текст события
 * `{event_user_id}` id пользователя, который вышел/приглашён в беседу
 * `{event_user_name}` имя пользователя, который вышел/приглашён в беседу
 * `{randomXXX}` случайное число от 0 до XXX
