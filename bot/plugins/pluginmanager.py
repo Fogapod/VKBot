@@ -124,7 +124,6 @@ class Pluginmanager(object):
             p._accept_request = \
                 types.MethodType(default_plugin__accept_request, p)
 
-
         self.plugins[name] = p
 
     def set_logging_function(self, logging_function):
@@ -155,8 +154,8 @@ class PluginUtils(object):
         return self.__bot.custom_commands
 
     def save_setting(self, key, val, section='Default'):
-        self.log(u'Сохраняю настройку: %s %s' % (key, val), 0)
-        utils.save_bot_setting('General', key, val)
+        self.log(u'Обновляю настройки: %s=%s' % (key, val), 0)
+        utils.save_bot_setting(section, key, val)
         self.__bot.is_settings_changed = True
 
     def save_blacklist(self, blacklist):
