@@ -10,8 +10,6 @@ from kivy.clock import Clock
 
 from kivy import platform
 
-from bot.utils import SETTINGS_FILE_PATH, save_error, BOT_ERROR_FILE_PATH
-
 if platform == 'android':
     from android import AndroidService
     from jnius import autoclass

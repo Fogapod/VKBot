@@ -44,14 +44,14 @@ class VKBotApp(App):
         directories = ['uix/kv/']
 
         for directory in directories:
-            for file in os.listdir(directory):
-                if file.endswith('.kv'):
-                    Builder.load_file(directory + file)
+            for f in os.listdir(directory):
+                if f.endswith('.kv'):
+                    Builder.load_file(directory + f)
                 else:
                     continue
 
     def get_application_config(self):
-        return utils.SETTINGS_FILE_PATH
+        return utils.SETTINGS_FILE
 
     def build_config(self, config):
         config.setdefaults('General', {
@@ -135,7 +135,7 @@ class VKBotApp(App):
                     "key": "max_log_lines",
                     "options": ["10", "30", "50", "100", "200"]
                 }
-            ]''' % utils.CUSTOM_COMMANDS_FILE_PATH)
+            ]''' % utils.CUSTOM_COMMANDS_FILE)
 
     def on_config_change(self, config, section, key, value):
         if config is self.config:
@@ -165,21 +165,21 @@ class VKBotApp(App):
             self.loading_popup.dismiss()
 
     def _export_logs(self):
-        if not os.path.exists(utils.PATH + '.logs/'):
-            os.makedirs(utils.PATH + '.logs/')
-        if not os.path.exists(utils.PATH + '.service_logs/'):
-            os.makedirs(utils.PATH + '.service_logs/')
+        if not os.path.exists(utils.MAIN_DIR + '.logs/'):
+            os.makedirs(utils.MAIN_DIR + '.logs/')
+        if not os.path.exists(utils.MAIN_DIR + '.service_logs/'):
+            os.makedirs(utils.MAIN_DIR + '.service_logs/')
 
         from shutil import copyfile
 
         if os.path.exists('.kivy/logs/'):
             for file in os.listdir('.kivy/logs/'):
-                copyfile('.kivy/logs/' + file, utils.PATH + '.logs/' + file)
+                copyfile('.kivy/logs/' + file, utils.MAIN_DIR + '.logs/' + file)
         if os.path.exists('service/.kivy/logs/'):
             for file in os.listdir('service/.kivy/logs/'):
                 copyfile(
                     'service/.kivy/logs/' + file,
-                    utils.PATH + '.service_logs/' + file)
+                    utils.MAIN_DIR + '.service_logs/' + file)
 
     def _open_url(*args):
         import webbrowser

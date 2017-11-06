@@ -9,7 +9,7 @@ import requests as r
 from kivy.app import App
 
 import vk_api as vk
-from utils import load_token, save_token, TEMP_IMAGE_FILE_PATH
+from utils import load_token, save_token, TEMP_IMAGE_FILE
 
 
 # globals
@@ -66,6 +66,7 @@ def _save_token(token=None):
 def set_new_logger_function(func):
     global send_log_line
     send_log_line = func
+    send_log_line(u'Подключена функция логгирования для vkrequests', 0)
 
 
 def send_log_line(line, log_importance, t=None):
@@ -92,7 +93,7 @@ def log_in(login=None, password=None,
                         'captcha_handler': captcha_handler,
                         'app_id': '6045412',
                         'scope': '70660',  # messages, status, photos, offline
-                        'api_version': '5.68'
+                        'api_version': '5.69'
                      }
 
     if login and password:
@@ -122,20 +123,16 @@ def log_in(login=None, password=None,
 
 
 @error_handler
-def send_message(text='', gid=None, uid=None, forward=None, attachments=[],
-                 sticker_id=None
+def send_message(text, pid, forward=None, attachments=[], sticker=None
                  ):
-    if gid:
-        gid -= 2000000000
 
-    if type(attachments) is list:
-        attachments = ','.join(attachments)
+    attachments = ','.join(attachments)
 
     response = api.messages.send(
-        peer_id=uid, message=text,
+        peer_id=pid, message=text,
         forward_messages=forward,
-        chat_id=gid, attachment=attachments,
-        sticker_id=sticker_id
+        attachment=attachments,
+        sticker_id=sticker
     )
 
     return response
@@ -145,7 +142,7 @@ def send_message(text='', gid=None, uid=None, forward=None, attachments=[],
 def attach_image(pid, image_url='', image_path=''):
     if image_url:
         image_response, error = http_r_get(image_url)
-        image = open(TEMP_IMAGE_FILE_PATH, 'w+b')
+        image = open(TEMP_IMAGE_FILE, 'w+b')
         image.write(image_response.content)
         image.seek(0)
 
@@ -167,7 +164,7 @@ def attach_image(pid, image_url='', image_path=''):
     json_data = response.json()
 
     if json_data['photo'] == '[]':
-        return False
+        raise Exception('Could not upload image !')
 
     save_response = api.photos.saveMessagesPhoto(photo=json_data['photo'],
                                                  server=json_data['server'],
@@ -229,12 +226,15 @@ def get_name_by_id(object_id=None, name_case='nom'):
     if object_id is None or 0 < object_id < 2000000000:  # user
         response = api.users.get(user_ids=object_id, name_case=name_case)[0]
         name = ' '.join((response['first_name'], response['last_name']))
+
     elif int(object_id) > 2000000000:  # chat
-        response = api.messages.getChat(chat_id=object_id-2000000000)
+        response = api.messages.getChat(chat_id=object_id - 2000000000)
         name = response['title']
+
     elif int(object_id) < 1:  # group
         response = api.groups.getById(group_id=abs(object_id))[0]
         name = response['name']
+
     else:
         name = 'Unknown object'
 
@@ -253,7 +253,10 @@ def get_real_user_id(user_short_link):
 
 @error_handler
 def http_r_get(url, **kwargs):
-    send_log_line(u'Запрос: %s %s [GET]' % (url, kwargs), 0, time.time())
+    send_log_line(
+        u'Запрос: %s %s [GET]' % (url, str(kwargs).decode('unicode-escape')),
+        0, time.time()
+    )
     response =  r.get(url, **kwargs)
 
     return response
@@ -261,7 +264,10 @@ def http_r_get(url, **kwargs):
 
 @error_handler
 def http_r_post(url, **kwargs):
-    send_log_line(u'Запрос: %s %s [POST]' % (url, kwargs), 0, time.time())
+    send_log_line(
+        u'Запрос: %s %s [POST]' % (url, str(kwargs).decode('unicode-escape')),
+        0, time.time()
+    )
     response =  r.post(url, **kwargs)
 
     return response

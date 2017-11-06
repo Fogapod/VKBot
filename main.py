@@ -12,10 +12,8 @@ def main():
     app = None
 
     try:
-        if not os.path.exists(utils.PATH) and utils.PATH:
-            os.makedirs(utils.PATH)
-        if not os.path.exists(utils.DATA_PATH):
-            os.makedirs(utils.DATA_PATH)
+        if not os.path.exists(utils.MAIN_DIR) and utils.MAIN_DIR:
+            os.makedirs(utils.MAIN_DIR)
 
         app = VKBotApp()
         app.run()
@@ -32,7 +30,7 @@ def main():
         from kivy.base import runTouchApp
         from uix.screens.exceptionscreen import ExceptionScreen
 
-        error_text += u'\nОшибка записана в файл %s' % utils.ERROR_FILE_PATH
+        error_text += u'\nОшибка записана в файл %s' % utils.ERROR_FILE
         runTouchApp(ExceptionScreen(exception_text=error_text))
 
 if __name__ == '__main__':
