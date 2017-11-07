@@ -6,6 +6,8 @@ class Plugin(object):
     Использование: 
     Пример: '''
 
+    disabled = True
+
     name = 'plugin'
     keywords = (u'плагин', name)
     protection = 0

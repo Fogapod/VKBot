@@ -6,21 +6,19 @@ import re
 
 
 class Plugin(object):
-    __doc__ = '''Плагин предназначен для использования пользовательских команд
+    __doc__ = '''Плагин предназначен для использования пользовательских команд.
     Использование: -
     Пример: -'''
 
     name = 'custom_command'
     keywords = (name)
+    priority = 500
     protection = 0
     argument_required = False
 
-    response = ''
+    rsp = None
 
     def _accept_request(self, msg, rsp, utils, *args, **kwargs):
-        #if any(rsp.text, rsp.attachments, rsp.sticker):
-        #    return False
-
         custom_commands = utils.get_custom_commands()
 
         if not custom_commands:

@@ -2,13 +2,13 @@
 
 
 class Plugin(object):
-    __doc__ = '''Плагин предназначен для удаления команд
+    __doc__ = '''Плагин предназначен для удаления команд.
     Использование: забудь команда::Ответ
     Пример: забудь привет::Пока'''
 
     name = 'forgot'
     keywords = (u'забудь', name, '-')
-    priority = 500
+    priority = 750
     protection = 1
     argument_required = True
 

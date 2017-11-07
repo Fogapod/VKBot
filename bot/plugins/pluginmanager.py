@@ -20,13 +20,13 @@ def default_plugin__accept_request(self, msg, rsp, utils, *args, **kwargs):
 class Pluginmanager(object):
     def __init__(self, bot, vkr):
         self.plugins = {}
+        self.plugin_list = []
         self.log = lambda *x, **y: None
         self.bot = bot
-        self.utils = PluginUtils(self.bot, vkr, self.log)
+        self.utils = PluginUtils(self, self.bot, vkr, self.log)
 
     def plugin_respond(self, msg, rsp):
-        for name in sorted(self.plugins, key=lambda x: self.plugins[x].priority,
-                           reverse=True):
+        for name in self.plugins:
             if not self.plugins[name]._accept_request(msg, rsp, self.utils):
                 continue
 
@@ -53,6 +53,7 @@ class Pluginmanager(object):
 
     def load_plugins(self):
         self.plugins = {}
+        self.plugin_list = []
 
         if not os.path.exists(utils.CUSTOM_PLUGIN_DIR):
             self.log(
@@ -67,7 +68,12 @@ class Pluginmanager(object):
         self.log(u'Чтение пользовательских плагинов ...', 1)
         self._load_plugins_from(utils.CUSTOM_PLUGIN_DIR)
 
-        self.log(u'Загружены плагины: %s' % sorted(self.plugins.keys()), 0)
+        for name in sorted(self.plugins, key=lambda x: self.plugins[x].priority,
+                           reverse=True):
+            self.plugin_list.append(name)
+
+        self.log(
+            u'Загружены плагины: [b]%s[/b]' % ', '.join(self.plugin_list), 0)
 
     def _load_plugins_from(self, path):
         for f in os.listdir(path):
@@ -82,8 +88,11 @@ class Pluginmanager(object):
 
     def _add_plugin(self, plugin, f):
         p = plugin.Plugin()
-        name = getattr(p, 'name', None)
 
+        if getattr(p, 'disabled', False):
+            return
+
+        name = getattr(p, 'name', None)
 
         if name is None:
             name = f[7:-3]
@@ -136,7 +145,8 @@ class PluginUtils(object):
     '''This class contains all nesessary utils for plugins
     '''
 
-    def __init__(self, bot, vkr, log):
+    def __init__(self, pm, bot, vkr, log):
+        self.__pm = pm
         self.__bot = bot
         self.vkr = vkr
         self.log = log
@@ -187,6 +197,9 @@ class PluginUtils(object):
 
     def safe_format(self, *args, **kwargs):
         return utils.safe_format(*args, **kwargs)
+
+    def get_plugin(self, name):
+        return self.__pm.plugins[name] if name in self.__pm.plugins else None
 
     def stop_bot(self):
         self.log(u'Вызов функции остановки', 0)

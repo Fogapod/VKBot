@@ -14,11 +14,10 @@ import utils
 import vkrequests as vkr
 
 
-CLEAR_EXIT_CODE = 0
-RESTART_CODE = 1
-
 AUTHOR_VK_ID = 180850898
 AUTHOR = u'[id%d|Евгений Ершов]' % AUTHOR_VK_ID
+
+MAX_LAST_MESSAGES = 50
 
 
 class Response(object):
@@ -48,8 +47,13 @@ class Response(object):
         self.__sticker   = sticker
         self.text        = ''
         self.attachments = []
-        self.do_mark     = False
+        self.do_mark     = False 
         self.forward_id  = 0
+
+    @property
+    def is_valid(self):
+        return any(((self.text and self.text != 'pass'), self.attachments,
+                     self.sticker)) and self.target != 0
 
 
 class Message(object):
@@ -79,7 +83,7 @@ class Message(object):
         self.out = False         # True if message was sent by bot owner
         self.event_user_id = 0   # action_mid field
         self.event_text = ''     # action_text field
-        self.msg_id = 0          # id of recieved message
+        self.msg_id = 0          # id of current message
 
         if 'attachments' in message.keys() \
                 and message['attachments'][0]['type'] == 'sticker':
@@ -185,6 +189,7 @@ class Bot(object):
         self.running = False
         self.runtime_error = None
         self.reply_count = 0
+        self.last_message_ids = []
 
         self.custom_commands = {}
         self.whitelist = {}
@@ -211,7 +216,6 @@ class Bot(object):
         self.runtime_error = None
 
         max_last_msg_ids = 30
-        last_msg_ids = []
 
         try:
             if not self.authorized:
@@ -270,42 +274,22 @@ class Bot(object):
 
                 for item in messages['items']:
                     message = Message(item, self_id, self.settings['appeals'])
-                    response = Response(message)
 
-                    if not message.text or message.msg_id in last_msg_ids:
+                    if message.msg_id in self.last_message_ids or \
+                            not message.text:
                         continue
+
+                    response = Response(message)
 
                     response = \
                         self.pluginmanager.plugin_respond(message, response)
 
-                    if re.match('((\s*)|(pass))$', response.text):
-                        response.text = ''
+                    response.text = response.text.strip()
+
+                    if not response.is_valid:
                         continue
 
-                    response = self.format_response(message, response)
-
-                    if response.do_mark and not response.sticker:
-                        if self.settings['mark_type'] == u'имя':
-                            response.text = \
-                                self.settings['bot_name'] + ' ' + response.text
-
-                        elif self.settings['mark_type'] == u'кавычка':
-                            response.text += "'"
-
-                        else:
-                            raise Exception(
-                                'Неизвестный способ отметки сообщения'
-                            )
-                    msg_id = self.send_message(response)
-
-                    if not msg_id:
-                        continue
-
-                    self.reply_count += 1
-
-                    if len(last_msg_ids) >= max_last_msg_ids:
-                        last_msg_ids = last_msg_ids[1:]
-                    last_msg_ids.append(msg_id)
+                    self.send_message(self.format_response(message, response))
 
                     time.sleep(1)
                 time.sleep(3)
@@ -345,6 +329,16 @@ class Bot(object):
         return True
 
     def send_message(self, rsp):
+        if rsp.do_mark and not rsp.sticker:
+            if self.settings['mark_type'] == u'имя':
+                response.text = self.settings['bot_name'] + ' ' + rsp.text
+
+            elif self.settings['mark_type'] == u'кавычка':
+                rsp.text += "'"
+
+            else:
+                raise Exception('Неизвестный способ отметки сообщения')
+
         msg_id, error = vkr.send_message(rsp.text, rsp.target,
                                          forward=rsp.forward_msg,
                                          attachments=rsp.attachments,
@@ -368,7 +362,11 @@ class Bot(object):
 
         self.send_log_line(u'[b]Сообщение доставлено (%d)[/b]' % msg_id, 1)
 
-        return msg_id
+        self.count_last_message_id(msg_id)
+
+    def count_last_message_id(self, mid):
+        self.last_message_ids = [mid] + self.last_message_ids[:MAX_LAST_MESSAGES]
+        self.reply_count += 1
 
     # TODO: use execute method to get several {...user_name} in a single request
     def format_response(self, msg, rsp):
@@ -397,6 +395,9 @@ class Bot(object):
 
         if '{appeals}' in rsp.text:
             format_dict['appeals'] = '  '.join(self.settings['appeals'])
+
+        if '{plugins}' in rsp.text:
+            format_dict['plugins'] = ' '.join(self.pluginmanager.plugin_list)
 
         if '{bot_name}' in rsp.text:
             format_dict['bot_name'] = self.bot_name

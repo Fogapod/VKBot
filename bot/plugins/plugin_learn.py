@@ -14,13 +14,13 @@ RESPONSE_FORM = (
 
 
 class Plugin(object):
-    __doc__ = '''Плагин предназначен для добавления команд 
+    __doc__ = '''Плагин предназначен для добавления команд.
     Использование: выучи команда::Ответ::опции
     Пример: выучи привет::Здравствуй::02120'''
 
     name = 'learn'
     keywords = (u'выучи', name, '+')
-    priority = 500
+    priority = 750
     protection = 1
     argument_required = True
 
