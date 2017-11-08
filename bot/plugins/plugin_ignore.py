@@ -1,10 +1,11 @@
-#coding:utf8
+# coding:utf8
 
 
 class Plugin(object):
     __doc__ = '''Плагин предназначен для добавления себя в чёрный список.
-    Использование: игнор
-    Пример: игнор'''
+    Ключевые слова: [{keywords}]
+    Использование: {keyword}
+    Пример: {keyword}'''
 
     name = 'ignore'
     keywords = (u'игнор', name)

@@ -1,4 +1,4 @@
-#coding:utf8
+# coding:utf8
 
 
 import re
@@ -6,10 +6,11 @@ import re
 
 class Plugin(object):
     __doc__ = '''Плагин предназначен для блокировки страниц.
-    Использование: чс <+|-> <id>
-      *просмотр всего списка: чс
+    Ключевые слова: [{keywords}]
+    Использование: {keyword} <+|-> <id>
+      *просмотр всего списка: {keyword}
       *если не указать id, будет заблокирован/разблокирован текущий диалог
-    Пример: чс + fogapod'''
+    Пример: {keyword} + fogapod'''
 
     name = 'blacklist'
     keywords = (u'чс', name)

@@ -1,4 +1,4 @@
-#coding:utf8
+# coding:utf8
 
 
 import copy
@@ -6,8 +6,9 @@ import copy
 
 class Plugin(object):
     __doc__ = '''Плагин предназначен для перезагрузки бота (применение настроек).
-    Использование: restart
-    Пример: restart'''
+    Ключевые слова: [{keywords}]
+    Использование: {keyword}
+    Пример: {keyword}'''
 
     name = 'restart'
     keywords = (u'перезапуск', name)

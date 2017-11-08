@@ -1,4 +1,4 @@
-#coding:utf8
+# coding:utf8
 
 
 import time
@@ -6,8 +6,9 @@ import time
 
 class Plugin(object):
     __doc__ = '''Плагин предназначен для получения информации о погоде.
-    Использование: weather <?город>
-    Пример: погода Уфа'''
+    Ключевые слова: [{keywords}]
+    Использование: {keyword} <?город>
+    Пример: {keyword} Уфа'''
 
     name = 'weather'
     keywords = (u'погода', name)

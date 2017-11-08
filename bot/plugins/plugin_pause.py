@@ -1,10 +1,11 @@
-#coding:utf8
+# coding:utf8
 
 
 class Plugin(object):
     __doc__ = '''Плагин предназначен для приостановки работы бота (игнорирование сообщений).
-    Использование: pause <секунды>
-    Пример: pause 60'''
+    Ключевые слова: [{keywords}]
+    Использование: {keyword} <секунды>
+    Пример: {keyword} 60'''
 
     name = 'pause'
     keywords = (u'пауза', name)

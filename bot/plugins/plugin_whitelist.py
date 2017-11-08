@@ -1,4 +1,4 @@
-#coding:utf8
+# coding:utf8
 
 
 import re
@@ -9,9 +9,10 @@ DEFAULT_ACCESS_LEVEL = 1
 
 class Plugin(object):
     __doc__ = '''Плагин предназначен для выдачи повышенных прав доступа.
-    Использование: вайтлист <id>
-      *Просмотр всего списка: вайтлист
-    Пример: вайтлист fogapod'''
+    Ключевые слова: [{keywords}]
+    Использование: {keyword} <id>
+      *Просмотр всего списка: {keyword}
+    Пример: {keyword} fogapod'''
 
     name = 'whitelist'
     keywords = (u'вайтлист', name)

@@ -5,6 +5,7 @@ import os
 import imp
 import time
 import types
+import random
 import traceback
 
 from .. import utils
@@ -106,7 +107,7 @@ class Pluginmanager(object):
             self.log(u'[b]Ошибка: Нет ключевых слов для модуля %s[/b]' % f, 1)
             return
         
-        if getattr(p, '__doc__', '') is None:
+        if getattr(p, '__doc__', None) is None:
             self.log(
                 u'[b]Предупреждение: модуль %s не имеет документации[/b]' % f, 1
             )

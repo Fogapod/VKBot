@@ -1,4 +1,4 @@
-#coding:utf8
+# coding:utf8
 
 
 import math
@@ -6,8 +6,9 @@ import math
 
 class Plugin(object):
     __doc__ = '''Предназначен для вычисления результатов выражения.
-    Использование: посчитай <выражение>
-    Пример: посчитай (3/4) * PI * 7^3'''
+    Ключевые слова: [{keywords}]
+    Использование: {keyword} <выражение>
+    Пример: {keyword} (3/4) * PI * 7^3'''
 
     name = 'calculate'
     keywords = (u'посчитай', name, '=')

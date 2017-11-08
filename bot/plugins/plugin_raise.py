@@ -1,10 +1,11 @@
-#coding:utf8
+# coding:utf8
 
 
 class Plugin(object):
     __doc__ = '''Плагин предназначен для вызова ошибки бота.
-    Использование: raise <ошибка>
-    Пример: raise Exception'''
+    Ключевые слова: [{keywords}]
+    Использование: {keyword} <ошибка>
+    Пример: {keyword} Exception'''
 
     name = 'raise'
     keywords = (name, )

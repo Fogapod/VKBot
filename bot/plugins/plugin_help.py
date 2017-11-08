@@ -1,5 +1,7 @@
-#coding:utf8
+# coding:utf8
 
+
+import random
 
 HELP_TEXT = (
     (
@@ -16,6 +18,7 @@ HELP_TEXT = (
         u'-weather\n'
         u'-ping\n'
         u'-ignore\n\n'
+        u'Для получения детальной информации о команде, напишите {appeal} help\n'
         u'Разработчик бота: {author}'
     ),
     (
@@ -45,8 +48,9 @@ HELP_TEXT = (
 
 class Plugin(object):
     __doc__ = '''Плагин предназначен для получения информации о других плагинах.
-    Использование: помощь <страница> или помощь <команда>
-    Пример: помощь blacklist'''
+    Ключевые слова: [{keywords}]
+    Использование: {keyword} <страница> или {keyword} <команда>
+    Пример: {keyword} blacklist'''
 
     name = 'help'
     keywords = (u'помощь', name, '?')
@@ -61,9 +65,9 @@ class Plugin(object):
                 plugin = utils.get_plugin(msg.args[1])
 
                 if plugin is None:
-                    rsp.text =  u'Неверно указана страница'
+                    rsp.text =  u'Команда не существует или неверно указана страница'
                 else:
-                    rsp.text = plugin.__doc__
+                    rsp.text = self.format_plugin_docstring(plugin)
 
                 return rsp
         else:
@@ -78,3 +82,10 @@ class Plugin(object):
                 rsp.text = HELP_TEXT[page - 1]
 
         return rsp
+
+    def format_plugin_docstring(self, p):
+        if not p.__doc__:
+            return u'Плагин не документирован'
+
+        return p.__doc__.decode('utf8').format(keyword=random.choice(p.keywords),
+                                               keywords=' '.join(p.keywords))

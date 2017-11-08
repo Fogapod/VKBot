@@ -1,10 +1,11 @@
-#coding:utf8
+# coding:utf8
 
 
 class Plugin(object):
     __doc__ = '''Плагин предназначен для остановки бота.
-    Использование: stop
-    Пример: stop'''
+    Ключевые слова: [{keywords}]
+    Использование: {keyword}
+    Пример: {keyword}'''
 
     name = 'stop'
     keywords = (u'стоп', name, '!')
