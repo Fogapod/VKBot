@@ -8,18 +8,13 @@ import time
 
 from ast import literal_eval
 
-from kivy import platform
-from kivy.config import Config
 from kivy.lib import osc
 from kivy.utils import escape_markup
 
-parent_folder = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-parent_folder += '\\' if platform == 'win' else '/'
-os.sys.path.append(parent_folder)
+os.sys.path.append(os.path.dirname(os.getcwd()))  # go to parent folder
 
 from bot import utils
 from bot.core import Bot
-
 
 # GLOBALS
 
