@@ -3,16 +3,15 @@
 
 import time
 import re
-import math
 import random
 import traceback
 
 from threading import Thread
 
 from plugins.pluginmanager import Pluginmanager
+
 import utils
 import vkrequests as vkr
-
 
 AUTHOR_VK_ID = 180850898
 AUTHOR = u'[id%d|Евгений Ершов]' % AUTHOR_VK_ID
@@ -78,7 +77,6 @@ class Message(object):
         self.real_user_id = 0    # id of user who has sent message 
         self.chat_id = 0         # id of chat where message came from
         self.chat_users = []     # list of users in chat
-        self.random_chat_user_id = 0  # id of random user from chat
         self.chat_name = ''      # chat title
         self.out = False         # True if message was sent by bot owner
         self.event_user_id = 0   # action_mid field
@@ -129,8 +127,6 @@ class Message(object):
             self.chat_users = message['chat_active']
             self.chat_name = message['title']
 
-            self.random_chat_user_id = random.choice(self.chat_users)
-
             if not self.raw_text:
                 action = message.get('action')
 
@@ -170,13 +166,15 @@ class Message(object):
                     self.text = self.raw_text
                     self.lower_text = self.raw_text
 
-        else:
-            self.random_chat_user_id = \
-                random.choice((self.self_id, self.user_id))
-
         if self.from_user:
             if self.out:
                 self.real_user_id = self.self_id
+
+    def get_random_user_id(self):
+        if self.from_chat:
+            return random.choice(self.chat_users)
+
+        return random.choice((self.self_id, self.user_id))
 
 
 class Bot(object):
@@ -417,10 +415,11 @@ class Bot(object):
             format_dict['user_name'] = name if name else 'No name'
 
         if '{random_user_id}' in rsp.text:
-            format_dict['random_user_id'] = msg.random_chat_user_id
+            format_dict['random_user_id'] = msg.get_random_user_id()
 
         if '{random_user_name}' in rsp.text:
-            name, error = vkr.get_name_by_id(object_id=msg.random_chat_user_id)
+            name, error = \
+                vkr.get_name_by_id(object_id=msg.get_random_user_id())
             format_dict['random_user_name'] = name if name else 'No name'
 
         if '{chat_name}' in rsp.text and msg.from_chat:

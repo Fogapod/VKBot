@@ -19,12 +19,13 @@ class Plugin(object):
             rsp.text = u'Для корректной работы команды, в беседе должно наход' \
                        u'иться больше одного человека'
         else:
+            uid = msg.get_random_user_id()
+
             user_name, error = utils.vkr.get_name_by_id(
-                object_id=msg.random_chat_user_id, name_case='acc')
+                object_id=uid, name_case='acc')
 
             if user_name:
-                rsp.text = u'Я выбираю [id%d|%s]' \
-                    % (msg.random_chat_user_id, user_name)
+                rsp.text = u'Я выбираю [id%d|%s]' % (uid, user_name)
             else:
                 rsp.text = u'Произошла ошбка'
 
