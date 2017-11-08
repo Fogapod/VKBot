@@ -329,7 +329,7 @@ class Bot(object):
     def send_message(self, rsp):
         if rsp.do_mark and not rsp.sticker:
             if self.settings['mark_type'] == u'имя':
-                response.text = self.settings['bot_name'] + ' ' + rsp.text
+                rsp.text = self.settings['bot_name'] + ' ' + rsp.text
 
             elif self.settings['mark_type'] == u'кавычка':
                 rsp.text += "'"

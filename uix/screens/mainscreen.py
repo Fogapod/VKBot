@@ -77,10 +77,10 @@ class MainScreen(ColoredScreen):
                         ) + message[0]
 
                 new_lines = utils.safe_format(new_lines,
-                    whitelist_file=utils.WHITELIST_FILE_PATH,
-                    blacklist_file=utils.BLACKLIST_FILE_PATH,
-                    bot_error_file=utils.BOT_ERROR_FILE_PATH,
-                    custom_commands_file=utils.CUSTOM_COMMANDS_FILE_PATH
+                    whitelist_file=utils.WHITELIST_FILE,
+                    blacklist_file=utils.BLACKLIST_FILE,
+                    bot_error_file=utils.BOT_ERROR_FILE,
+                    custom_commands_file=utils.CUSTOM_COMMANDS_FILE
                     
                 )
 

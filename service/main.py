@@ -8,10 +8,15 @@ import time
 
 from ast import literal_eval
 
+from kivy import platform
 from kivy.lib import osc
 from kivy.utils import escape_markup
 
-os.sys.path.append(os.path.dirname(os.getcwd()))  # go to parent folder
+if platform == 'android':
+    os.sys.path.append(os.path.dirname(os.getcwd()))  # go to parent folder
+else:
+    os.sys.path.append(os.getcwd())
+
 
 from bot import utils
 from bot.core import Bot

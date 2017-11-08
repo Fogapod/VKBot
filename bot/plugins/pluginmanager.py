@@ -27,7 +27,7 @@ class Pluginmanager(object):
         self.utils = PluginUtils(self, self.bot, vkr, self.log)
 
     def plugin_respond(self, msg, rsp):
-        for name in self.plugins:
+        for name in self.plugin_list:
             if not self.plugins[name]._accept_request(msg, rsp, self.utils):
                 continue
 
