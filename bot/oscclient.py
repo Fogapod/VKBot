@@ -12,7 +12,7 @@ from kivy import platform
 
 if platform == 'android':
     from android import AndroidService
-    from jnius import autoclass
+    # from jnius import autoclass
     import android
 else:
     import subprocess

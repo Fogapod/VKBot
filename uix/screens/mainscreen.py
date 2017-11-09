@@ -8,7 +8,6 @@ from threading import Thread
 from kivy.app import App
 
 from uix.widgets import ColoredScreen
-from uix.popups.infopopup import InfoPopup
 
 from bot import utils
 
@@ -35,10 +34,6 @@ class MainScreen(ColoredScreen):
         self.continue_reading_log_queue = True
         self.log_check_thread = Thread(target=self.read_log_queue)
         self.log_check_thread.start()
-
-
-    def show_info(self):
-        InfoPopup().open()
 
 
     def on_main_btn_press(self):

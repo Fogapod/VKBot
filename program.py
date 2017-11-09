@@ -12,6 +12,7 @@ from kivy.uix.screenmanager import ScreenManager, FadeTransition
 from uix.popups.authpopup import AuthPopup
 from uix.popups.twofapopup import TwoFAPopup
 from uix.popups.captchapopup import CaptchaPopup
+from uix.popups.infopopup import InfoPopup
 from uix.popups.loadingpopup import LoadingPopup
 from uix.screens.mainscreen import MainScreen
 from uix.screens.customcommandsscreen import CustomCommandsScreen
@@ -28,7 +29,7 @@ class VKBotApp(App):
     _cached_login = None
     _cached_password = None
 
-    loading_popup = None
+    _loading_popup = None
 
     def build(self):
         self.title = 'VKBot'
@@ -156,13 +157,16 @@ class VKBotApp(App):
     def open_captcha_popup(self, capthca_image_url):
         CaptchaPopup(self, capthca_image_url).open()
 
+    def open_info_popup(self):
+        InfoPopup().open()
+
     def open_loading_popup(self):
-        self.loading_popup = LoadingPopup()
-        self.loading_popup.open()
+        self._loading_popup = LoadingPopup()
+        self._loading_popup.open()
 
     def close_loading_popup(self):
-        if self.loading_popup:
-            self.loading_popup.dismiss()
+        if self._loading_popup:
+            self._loading_popup.dismiss()
 
     def _export_logs(self):
         if not os.path.exists(utils.MAIN_DIR + '.logs/'):

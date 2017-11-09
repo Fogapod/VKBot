@@ -3,14 +3,11 @@
 
 import json
 import os
-import re
 
 from kivy import platform
 from kivy.config import Config
 
 from libs.toast import toast
-
-# GLOBALS
 
 IS_VERSION_DEV = True
 
@@ -201,7 +198,7 @@ def load_bot_settings():
 
     appeals = []
     for appeal in Config.get('General', 'appeals').split(':'):
-        if appeal and not re.match('\s+$', appeal):
+        if appeal:
             appeals.append(appeal.lower())
 
     settings['appeals'] = tuple(appeals)

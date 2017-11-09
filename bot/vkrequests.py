@@ -6,8 +6,6 @@ import traceback
 
 import requests as r
 
-from kivy.app import App
-
 import vk_api as vk
 from utils import load_token, save_token, TEMP_IMAGE_FILE
 
