@@ -98,7 +98,6 @@ class Pluginmanager(object):
             return
 
         if getattr(p, 'name', None) is None:
-            name = f[7:-3]
             self.log(
                 u'[b]Предупреждение: отсутствует имя модуля %s. Использую %s[/b]' 
                     % (f, name), 1
