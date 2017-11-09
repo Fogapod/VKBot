@@ -58,7 +58,7 @@ class Pluginmanager(object):
 
         if not os.path.exists(utils.CUSTOM_PLUGIN_DIR):
             self.log(
-                u'Создание директории для пользовательских плагинов: %s ...' 
+                u'Создание директории для пользовательских плагинов: %s ...'
                     % utils.CUSTOM_PLUGIN_DIR, 1
             )
             os.mkdir(utils.CUSTOM_PLUGIN_DIR)
@@ -77,25 +77,27 @@ class Pluginmanager(object):
             u'Загружены плагины: [b]%s[/b]' % ', '.join(self.plugin_list), 0)
 
     def _load_plugins_from(self, path):
-        for f in os.listdir(path):
-            if f.startswith('plugin_') and f.endswith('.py'):
+        files = os.listdir(path)
+
+        for f in files:
+            if f.startswith('plugin_'):
                 try:
-                    self._add_plugin(imp.load_source('', path + f), f)
+                    if f.endswith('.py'):
+                        self._add_plugin(imp.load_source('', path + f), f, f[7:-3])
+                    elif f.endswith('.pyo') and f[:-1] not in files:  # do not load duplicating pyo
+                        self._add_plugin(imp.load_compiled('', path + f), f, f[7:-4])
+
                 except:
                     self.log(u'[b]Ошибка при загрузке плагина %s[/b]' % f, 2)
                     self.log(traceback.format_exc().decode('utf8'), 2)
-            else:
-                continue
 
-    def _add_plugin(self, plugin, f):
+    def _add_plugin(self, plugin, f, name):
         p = plugin.Plugin()
 
         if getattr(p, 'disabled', False):
             return
 
-        name = getattr(p, 'name', None)
-
-        if name is None:
+        if getattr(p, 'name', None) is None:
             name = f[7:-3]
             self.log(
                 u'[b]Предупреждение: отсутствует имя модуля %s. Использую %s[/b]' 
