@@ -165,7 +165,7 @@ class PluginUtils(object):
     def get_custom_commands(self):
         return self.__bot.custom_commands
 
-    def save_setting(self, key, val, section='Default'):
+    def save_setting(self, key, val, section='General'):
         self.log(u'Обновляю настройки: %s=%s' % (key, val), 0)
         utils.save_bot_setting(section, key, val)
         self.__bot.settings[key] = val

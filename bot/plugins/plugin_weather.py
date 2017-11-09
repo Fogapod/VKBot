@@ -20,7 +20,6 @@ class Plugin(object):
 
         if len(msg.args) > 1:
             if ' '.join(msg.args[1:]) == '-':
-                utils.settings['openweathermap_api_key'] = '0'
                 utils.save_setting('openweathermap_api_key', '0')
                 rsp.text =  u'Ключ сброшен'
 
@@ -74,7 +73,7 @@ u'[id{my_id}|НИКОМУ НЕ ПОКАЗЫВАЙТЕ ДАННЫЙ КЛЮЧ, И�
         weather_json = weather_data.json()
 
         if 'cod' in weather_json and weather_json['cod'] == '404':
-            rsp.text =  u'Город не найден (%s)' % city, msg
+            rsp.text =  u'Город не найден (%s)' % city
 
             return rsp
 
