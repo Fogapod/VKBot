@@ -76,7 +76,6 @@ class MainScreen(ColoredScreen):
                     blacklist_file=utils.BLACKLIST_FILE,
                     bot_error_file=utils.BOT_ERROR_FILE,
                     custom_commands_file=utils.CUSTOM_COMMANDS_FILE
-                    
                 )
 
                 log_text = self.ids.logging_panel.text

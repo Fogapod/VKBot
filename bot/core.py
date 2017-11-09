@@ -283,8 +283,6 @@ class Bot(object):
                     response = \
                         self.pluginmanager.plugin_respond(message, response)
 
-                    response.text = response.text.strip()
-
                     if not response.is_valid:
                         continue
 
@@ -357,7 +355,7 @@ class Bot(object):
                     u'Неизвестная ошибка при отправке сообщения', 1)
                 raise Exception(error)
 
-            return 0
+            return
 
         self.send_log_line(u'[b]Сообщение доставлено (%d)[/b]' % msg_id, 1)
 

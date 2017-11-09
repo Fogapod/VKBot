@@ -16,7 +16,7 @@ class Plugin(object):
     argument_required = False
 
     def respond(self, msg, rsp, utils, *args, **kwargs):
-        api_key = utils.settings['openweathermap_api_key']
+        api_key = utils.get_settings()['openweathermap_api_key']
 
         if len(msg.args) > 1:
             if ' '.join(msg.args[1:]) == '-':
@@ -28,7 +28,6 @@ class Plugin(object):
 
             if api_key == '0':
                 if self.verify_openweathermap_api_key(msg, utils):
-                    utils.settings['openweathermap_api_key'] = msg.args[1]
                     utils.save_setting('openweathermap_api_key', msg.args[1])
                     rsp.text = u'Ключ подтверждён'
                 else:

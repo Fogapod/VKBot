@@ -168,6 +168,7 @@ class PluginUtils(object):
     def save_setting(self, key, val, section='Default'):
         self.log(u'Обновляю настройки: %s=%s' % (key, val), 0)
         utils.save_bot_setting(section, key, val)
+        self.__bot.settings[key] = val
         self.__bot.is_settings_changed = True
 
     def save_blacklist(self, blacklist):
