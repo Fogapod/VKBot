@@ -196,7 +196,8 @@ class Bot(object):
         self.settings = {
             'appeals': ('/'),
             'bot_name': u'(Бот)',
-            'mark_type': u'кавычка', 
+            'mark_type': u'кавычка',
+            'stable_mode': True,
             'use_custom_commands': False,
             'openweathermap_api_key': '0'
         }
