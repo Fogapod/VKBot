@@ -21,8 +21,15 @@
             size: self.texture_size
             allow_stretch: True
             source: 'data/images/icon.png'
-        Label:
-            text: 'Загрузка...'
-            font_size: sp(20)
-            size_hint: None, None
-            size: self.texture_size
+        GridLayout:
+            cols: 3
+
+            Widget
+
+            Label:
+                text: 'Загрузка...'
+                font_size: sp(20)
+                size_hint: None, None
+                size: self.texture_size
+
+            Widget
