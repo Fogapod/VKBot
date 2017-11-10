@@ -443,8 +443,9 @@ class Bot(object):
             format_dict['id%s_name' % user_id] = name if name else 'No name'
 
         media_id_search_pattern = re.compile(
-            '{attach=.*?'
-            '(((photo)|(album)|(video)|(audio)|(doc)|(wall)|(market))'
+            '{attach='
+            '(((photo)|(album)|(video)|(audio)|(doc)|(wall)|(market)'
+            '|(market_album)|(wall_reply)|(audio_playlist))'
             '-?\d+_\d+(_\d+)?)}'
         )
 
