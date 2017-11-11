@@ -30,7 +30,11 @@ def main():
         from kivy.base import runTouchApp
         from uix.screens.exceptionscreen import ExceptionScreen
 
-        error_text += u'\nОшибка записана в файл %s' % utils.ERROR_FILE
+        try:
+            error_text += u'\nОшибка записана в файл %s' % utils.ERROR_FILE
+        except:
+            error_text += '\nОшибка записана в файл %s' % utils.ERROR_FILE
+
         runTouchApp(ExceptionScreen(exception_text=error_text))
 
 if __name__ == '__main__':

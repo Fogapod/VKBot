@@ -89,7 +89,8 @@ class MainScreen(ColoredScreen):
                 self.ids.logging_panel.text = new_log_text
 
             except:
-                self.ids.logging_panel.text += u'\n[b]Возникла ошибка! Не могу отобразить лог[/b]\n'
+                self.ids.logging_panel.text += \
+                    u'\n[b]Возникла ошибка! Не могу отобразить лог[/b]\n'
                 self.ids.logging_panel.text += traceback.format_exc()
 
 

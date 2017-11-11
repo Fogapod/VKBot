@@ -4,8 +4,10 @@
 import os
 
 from kivy.app import App
+from kivy.clock import Clock
 from kivy.lang import Builder
 from kivy.config import Config
+from kivy.core.window import Window
 from kivy.uix.settings import SettingsWithNoMenu
 from kivy.uix.screenmanager import ScreenManager, FadeTransition
 
@@ -39,6 +41,8 @@ class VKBotApp(App):
         self.manager = Manager()
         self.manager.show_main_screen()
 
+        Window.bind(on_keyboard=self.key_handler)
+
         return self.manager
 
     def load_kv_files(self):
@@ -50,6 +54,13 @@ class VKBotApp(App):
                     Builder.load_file(directory + f)
                 else:
                     continue
+
+    def key_handler(self, window, keycode1, keycode2, text, modifiers):
+        if keycode1 == 27: #or keycode1 == 1001:
+            self.manager.go_back()
+            return True
+
+        return False
 
     def get_application_config(self):
         return utils.SETTINGS_FILE
@@ -211,10 +222,13 @@ class VKBotApp(App):
 
 
 class Manager(ScreenManager):
-    def __init__(self, **kwargs):
-        super(Manager, self).__init__(**kwargs)
-        self.transition = FadeTransition()
-        self.last_screen = None
+    transition = FadeTransition()
+    last_screen = None
+
+    close_on_back_key = False
+
+    def cancel_app_close(self, _):
+        self.close_on_back_key = False
 
     def show_main_screen(self):
         if 'main_screen' not in self.screen_names:
@@ -224,7 +238,23 @@ class Manager(ScreenManager):
     def show_custom_commands_screen(self):
         if 'cc_screen' not in self.screen_names:
             self.add_widget(CustomCommandsScreen())
+        self.last_screen = self.current_screen.name
         self.current = 'cc_screen'
+
+    def go_back(self):
+        if self.close_on_back_key:
+            App.get_running_app().stop()
+
+        if self.current_screen.name == 'main_screen':
+            utils.toast_notification(
+                u'Нажмите ещё раз для выхода', length_long=False)
+            Clock.schedule_once(self.cancel_app_close, 2.5)
+            self.close_on_back_key = True
+
+            return
+
+        if self.last_screen:
+            self.current = self.last_screen
 
 
 if __name__ == '__main__':
