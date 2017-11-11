@@ -10,18 +10,48 @@ from uix.widgets import ColoredScreen, CustomCommandBlock, ListDropDown, \
 
 from bot import utils
 
+MAX_COMMAND_PREVIEW_TEXT_LEN = 47
+
 
 class CustomCommandsScreen(ColoredScreen):
     def __init__(self, **kwargs):
         super(CustomCommandsScreen, self).__init__(**kwargs)
-        self.edit_popup = EditCommandPopup()
+        self.edit_popup    = EditCommandPopup()
         self.included_keys = []
-        self.max_command_preview_text_len = 47
+
+        self.current_page_num = 0
+        self.num_pages        = 10
+
+        self.update_page_label()
+        self.update_l_r_buttons_state()
 
 
     def on_enter(self):
         App.get_running_app().open_loading_popup()
         Clock.schedule_once(self.sort_blocks)
+
+    def next_page(self):
+        self.current_page_num += 1
+        self.update_page_label()
+        self.update_l_r_buttons_state()
+
+    def prev_page(self):
+        self.current_page_num -= 1
+        self.update_page_label()
+        self.update_l_r_buttons_state() 
+
+    def update_page_label(self):
+        self.ids.page_label.text = \
+            '%d [%d]' % (self.current_page_num + 1, self.num_pages)
+
+    def update_l_r_buttons_state(self):
+        if self.current_page_num == self.num_pages - 1:
+            self.ids.button_right.disabled = True
+        elif self.current_page_num == 0:
+            self.ids.button_left.disabled = True
+        else:
+            self.ids.button_right.disabled = False
+            self.ids.button_left.disabled  = False
 
     def sort_blocks(self, *args):
         for widget in sorted(self.ids.cc_list.children):
@@ -60,16 +90,18 @@ class CustomCommandsScreen(ColoredScreen):
 
 
     def open_edit_popup(self, command_button, command_block):
-        max_title_len = 27
-        title = command_button.command.replace('\n', '  ')
-        if len(title) > max_title_len:
-            title = title[:max_title_len] + '...'
+        title = u'Настройка команды «{}»'
+        max_title_len = MAX_COMMAND_PREVIEW_TEXT_LEN - len(title) + 2
+
+        preview = command_button.command.replace('\n', '  ')
+
+        if len(preview) > max_title_len:
+            preview = preview[:max_title_len] + '...'
 
         self.edit_popup.command_block = command_block
         self.edit_popup.switch_command(
-            command_button,
-            title=u'Настройка команды «{}»'.format(title)
-            )
+            command_button, title=title.format(preview)
+        )
 
         self.edit_popup.ids.delete_command_btn.unbind(
             on_release=self.edit_popup.ids.delete_command_btn._callback
@@ -156,9 +188,9 @@ class CustomCommandsScreen(ColoredScreen):
 
             command_preview = command
             command_preview = command_preview.replace('\n', '  ')
-            if len(command_preview) > self.max_command_preview_text_len:
+            if len(command_preview) > MAX_COMMAND_PREVIEW_TEXT_LEN:
                 command_preview = \
-                    command_preview[:self.max_command_preview_text_len] + '...'
+                    command_preview[:MAX_COMMAND_PREVIEW_TEXT_LEN] + '...'
             block.ids.dropdown_btn.text = command_preview
 
             self.custom_commands[command] = []
@@ -176,9 +208,9 @@ class CustomCommandsScreen(ColoredScreen):
             response_preview = response
             response_preview = response_preview.replace('\n', '  ')
 
-            if len(response_preview) > self.max_command_preview_text_len:
+            if len(response_preview) > MAX_COMMAND_PREVIEW_TEXT_LEN:
                 response_preview = \
-                    response_preview[:self.max_command_preview_text_len] + '...'
+                    response_preview[:MAX_COMMAND_PREVIEW_TEXT_LEN] + '...'
 
             if response_preview == '':
                 response_preview = ' '
@@ -190,9 +222,9 @@ class CustomCommandsScreen(ColoredScreen):
             command_preview = command
             command_preview = command_preview.replace('\n', '  ')
 
-            if len(command_preview) > self.max_command_preview_text_len:
+            if len(command_preview) > MAX_COMMAND_PREVIEW_TEXT_LEN:
                 command_preview = \
-                    command_preview[:self.max_command_preview_text_len] + '...'
+                    command_preview[:MAX_COMMAND_PREVIEW_TEXT_LEN] + '...'
 
             block.ids.dropdown_btn.text = command_preview
 
@@ -286,9 +318,9 @@ class CustomCommandsScreen(ColoredScreen):
             response_preview = response
             response_preview = response_preview.replace('\n', '  ')
 
-            if len(response_preview) > self.max_command_preview_text_len:
+            if len(response_preview) > MAX_COMMAND_PREVIEW_TEXT_LEN:
                 response_preview = \
-                    response_preview[:self.max_command_preview_text_len] + '...'
+                    response_preview[:MAX_COMMAND_PREVIEW_TEXT_LEN] + '...'
 
             if response_preview == '':
                 response_preview = ' '
@@ -326,9 +358,9 @@ class CustomCommandsScreen(ColoredScreen):
                 response_preview = item[0]
                 response_preview = response_preview.replace('\n', '  ')
 
-                if len(response_preview) > self.max_command_preview_text_len:
+                if len(response_preview) > MAX_COMMAND_PREVIEW_TEXT_LEN:
                     response_preview = \
-                        response_preview[:self.max_command_preview_text_len] + '...'
+                        response_preview[:MAX_COMMAND_PREVIEW_TEXT_LEN] + '...'
                 if response_preview == '':
                     response_preview = ' '
 
@@ -354,9 +386,9 @@ class CustomCommandsScreen(ColoredScreen):
         command_preview = command
         command_preview = command_preview.replace('\n', '  ')
 
-        if len(command_preview) > self.max_command_preview_text_len:
+        if len(command_preview) > MAX_COMMAND_PREVIEW_TEXT_LEN:
             command_preview = \
-                command_preview[:self.max_command_preview_text_len] + '...'
+                command_preview[:MAX_COMMAND_PREVIEW_TEXT_LEN] + '...'
 
         block.ids.dropdown_btn.text = command_preview
 
