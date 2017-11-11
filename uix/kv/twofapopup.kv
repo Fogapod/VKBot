@@ -6,9 +6,9 @@
     height: content.height + dp(30)
     pos_hint: {'center_y': 0.7}
 
-    GridLayout: # BoxLayout in future
+    BoxLayout:
         id: content
-        cols: 1
+        orientation: 'vertical'
         size_hint: None, None
         width: app.root_window.width - dp(20)
         height: self.minimum_height
@@ -20,8 +20,7 @@
             size_hint_y: None
             height: self.texture_size[1]
 
-        GridLayout: # BoxLayout in future
-            cols: 3
+        BoxLayout:
             size_hint_y: None
             height: self.minimum_height
 

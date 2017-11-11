@@ -1,10 +1,11 @@
 #: import Widgwt uix.widgets
 
+
 <LoadingPopup>:
     size_hint: 0, 0
     size: 0, 0
 
-    GridLayout:
+    BoxLayout:
         canvas.before:
             Color:
                 rgba: .1, .1, .1, .5
@@ -21,8 +22,9 @@
             size: self.texture_size
             allow_stretch: True
             source: 'data/images/icon.png'
-        GridLayout:
-            cols: 3
+
+        BoxLayout:
+            orientation: 'vertical'
 
             Widget
 

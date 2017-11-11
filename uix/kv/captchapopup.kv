@@ -5,9 +5,9 @@
     size_hint: None, None
     size: content.width + dp(40), content.height + dp(50)
 
-    GridLayout: # BoxLayout in future
+    BoxLayout:
         id: content
-        rows: 3
+        orientation: 'vertical'
         size_hint: None, None
         size: self.minimum_size
         spacing: dp(8)
@@ -25,8 +25,7 @@
             size_hint_y: None
             height: self.minimum_height
 
-        GridLayout:
-            cols: 3
+        BoxLayout:
             size_hint: None, None
             size: image.width, self.minimum_height
 

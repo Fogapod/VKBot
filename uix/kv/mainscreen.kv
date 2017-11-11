@@ -47,8 +47,7 @@
                         on_release:
                             root.ids.logging_panel.text = root.ids.logging_panel.default_text
 
-        GridLayout: # BoxLayout in future
-            cols: 1
+        BoxLayout:
             padding: dp(20), dp(15)
             size_hint_y: None
             height: self.minimum_height

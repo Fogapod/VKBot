@@ -6,9 +6,9 @@
     size: content.size
     pos_hint: {'center_y': .8}
 
-    GridLayout:
+    BoxLayout:
         id: content
-        rows: 5
+        orientation: 'vertical'
         spacing: dp(3)
         size_hint: None, None
         size: self.minimum_size
@@ -55,10 +55,9 @@
             height: self.texture_size[1]
             on_release: root.update_pass_input_status(self)
 
-        GridLayout:
-            cols: 3
+        BoxLayout:
             size_hint_y: None
-            size: self.minimum_size
+            height: self.minimum_height
 
             Widget
 

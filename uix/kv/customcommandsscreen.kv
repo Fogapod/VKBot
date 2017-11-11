@@ -35,15 +35,14 @@
             ScrollView:
                 effect_cls: ScrollEffect
 
-                GridLayout: # BoxLayout in future
+                BoxLayout:
                     id: cc_list
-                    cols: 1
+                    orientation: 'vertical'
                     spacing: dp(2)
                     size_hint_y: None
                     height: self.minimum_size[1]
 
-        GridLayout:
-            cols: 9
+        BoxLayout:
             spacing: dp(7)
             size_hint_y: None
             height: self.minimum_height
@@ -52,6 +51,7 @@
                 text: 'P'
                 size_hint: 1.5, None
                 background_color: 0, 0, 0, 0
+                height: self.texture_size[1] * 2
 
                 on_release: root.open_new_command_popup()
 
@@ -83,5 +83,6 @@
                 text: 'U'
                 size_hint: 1.5, None
                 background_color: 0, 0, 0, 0
+                height: self.texture_size[1] * 2
 
                 on_release: root.on_enter()

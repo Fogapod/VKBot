@@ -18,15 +18,15 @@
     height: content.height + dp(70)
     pos_hint: {'center_y':.6}
 
-    GridLayout: # BoxLayout in future
+    BoxLayout:
+        orientation: 'vertical'
         id: content
-        cols: 1
         size_hint_y: None
         height: self.minimum_height
         spacing: dp(6)
 
-        GridLayout:
-            rows: 3
+        BoxLayout:
+            orientation: 'vertical'
             size_hint_y: None
             height: self.minimum_height
             spacing: dp(5)
@@ -47,8 +47,7 @@
                     min((self.line_height+dp(1))*6, max((self.line_height+dp(1))*3, self.minimum_height))
                 hint_text: 'Ответ'.decode('utf8')
 
-            GridLayout:
-                cols: 9
+            BoxLayout:
                 size_hint_y: None
                 height: self.minimum_height
                 spacing: dp(1)
@@ -91,8 +90,7 @@
                     text: 'D'
                     on_release: root.switch_option_state(self, self.states)
 
-        GridLayout:
-            cols: 3
+        BoxLayout:
             spacing: dp(5)
             size_hint_y: None
             height: self.minimum_height
