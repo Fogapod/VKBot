@@ -14,6 +14,6 @@ class Plugin(object):
 
     def respond(self, msg, rsp, utils, *args, **kwargs):
         utils.stop_bot()
-        rsp.text = u'Завершаю работу'
+        rsp.text = u'Завершаю работу. Удачного времени суток!'
 
         return rsp
