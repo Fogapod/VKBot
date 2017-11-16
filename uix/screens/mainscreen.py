@@ -60,7 +60,7 @@ class MainScreen(ColoredScreen):
                 continue
 
             try:
-                _log_queue = sorted(self.log_queue, cmp=lambda x,y: cmp(x[2], y[2]))
+                _log_queue = sorted(self.log_queue, key=lambda x: x[2])
                 new_lines = ''
 
                 for message in _log_queue:
