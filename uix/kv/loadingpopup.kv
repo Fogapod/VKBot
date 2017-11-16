@@ -6,6 +6,8 @@
     size: 0, 0
 
     BoxLayout:
+        orientation: 'vertical'
+
         canvas.before:
             Color:
                 rgba: .1, .1, .1, .5
@@ -15,7 +17,6 @@
 
         size_hint: None, None
         size: self.minimum_size
-        rows: 2
 
         Image:
             size_hint: None, None
@@ -24,7 +25,8 @@
             source: 'data/images/icon.png'
 
         BoxLayout:
-            orientation: 'vertical'
+            size_hint: None, None
+            size: self.minimum_size
 
             Widget
 
