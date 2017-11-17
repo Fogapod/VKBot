@@ -22,6 +22,8 @@ class Pluginmanager(object):
     def __init__(self, bot, vkr):
         self.plugins = {}
         self.plugin_list = []
+        self.builtin_plugin_list = []
+        self.custom_plugin_list = []
         self.log = lambda *x, **y: None
         self.bot = bot
         self.utils = PluginUtils(self, self.bot, vkr, self.log)
@@ -55,6 +57,8 @@ class Pluginmanager(object):
     def load_plugins(self):
         self.plugins = {}
         self.plugin_list = []
+        self.builtin_plugin_list = []
+        self.custom_plugin_list = []
 
         if not os.path.exists(utils.CUSTOM_PLUGIN_DIR):
             self.log(
@@ -66,12 +70,20 @@ class Pluginmanager(object):
         self.log(u'Чтение встроенных плагинов ...', 0)
         self._load_plugins_from(utils.PLUGIN_DIR)
 
+        for p in self.plugins:
+            self.builtin_plugin_list.append(p)
+
         self.log(u'Чтение пользовательских плагинов ...', 1)
         self._load_plugins_from(utils.CUSTOM_PLUGIN_DIR)
 
-        for name in sorted(self.plugins, key=lambda x: self.plugins[x].priority,
-                           reverse=True):
-            self.plugin_list.append(name)
+        for p in sorted(self.plugins, key=lambda x: self.plugins[x].priority,
+                        reverse=True):
+            self.plugin_list.append(p)
+
+        self.builtin_plugin_list = set(self.builtin_plugin_list)
+        self.plugin_list = set(self.plugin_list)
+        self.custom_plugin_list = \
+            set(self.plugin_list - self.builtin_plugin_list)
 
         self.log(
             u'Загружены плагины: [b]%s[/b]' % ', '.join(self.plugin_list), 0)
@@ -83,10 +95,11 @@ class Pluginmanager(object):
             if f.startswith('plugin_'):
                 try:
                     if f.endswith('.py'):
-                        self._add_plugin(imp.load_source('', path + f), f, f[7:-3])
+                        self._add_plugin(
+                            imp.load_source('', path + f), f, f[7:-3])
                     elif f.endswith('.pyo') and f[:-1] not in files:  # do not load duplicating pyo
-                        self._add_plugin(imp.load_compiled('', path + f), f, f[7:-4])
-
+                        self._add_plugin(
+                            imp.load_compiled('', path + f), f, f[7:-4])
                 except:
                     self.log(u'[b]Ошибка при загрузке плагина %s[/b]' % f, 2)
                     self.log(traceback.format_exc().decode('utf8'), 2)
@@ -104,7 +117,7 @@ class Pluginmanager(object):
             )
             p.name = name
 
-        if len(getattr(p, 'keywords', ())) < 1:
+        if len(getattr(p, 'keywords', ())) == 0:
             self.log(u'[b]Ошибка: Нет ключевых слов для модуля %s[/b]' % f, 1)
             return
         
@@ -135,12 +148,23 @@ class Pluginmanager(object):
             p._accept_request = \
                 types.MethodType(default_plugin__accept_request, p)
 
+        if p.name in self.plugins:
+            self.log(
+                u'Предупреждение: модуль [b]%s[/b] будет переназначен ...' %
+                p.name, 1)
+
+            if p.name in self.builtin_plugin_list:
+                self.builtin_plugin_list.remove(p.name)
+
+            if p.name in self.custom_plugin_list:
+                self.custom_plugin_list.remove(p.name)
+
         self.plugins[name] = p
 
     def set_logging_function(self, logging_function):
         self.log = logging_function
         self.utils.log = logging_function
-        self.log(u'Поделючена функция логгирования для менеджера плагинов', 0)
+        self.log(u'Подключена функция логгирования для менеджера плагинов', 0)
 
 
 class PluginUtils(object):
@@ -201,8 +225,17 @@ class PluginUtils(object):
     def safe_format(self, *args, **kwargs):
         return utils.safe_format(*args, **kwargs)
 
+    def get_plugin_list(self):
+        return self.__pm.plugin_list
+
+    def get_builtin_plugin_list(self):
+        return self.__pm.builtin_plugin_list
+
+    def get_custom_plugin_list(self):
+        return self.__pm.custom_plugin_list
+
     def get_plugin(self, name):
-        return self.__pm.plugins[name] if name in self.__pm.plugins else None
+        return self.__pm.plugins[name] if name in self.__pm.plugin_list else None
 
     def stop_bot(self):
         self.log(u'Вызов функции остановки', 0)

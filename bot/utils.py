@@ -28,7 +28,7 @@ else:
 DATA_DIR = ROOT + 'data/'
 
 TOKEN_FILE                     = DATA_DIR + 'token.txt'
-PLUGIN_DIR                     = ROOT + 'bot/plugins/'
+PLUGIN_DIR                     = ROOT     + 'bot/plugins/'
 CUSTOM_PLUGIN_DIR              = MAIN_DIR + 'plugins/'
 SETTINGS_FILE                  = MAIN_DIR + '.vkbot.ini'
 ERROR_FILE                     = MAIN_DIR + 'error.log'

@@ -396,6 +396,14 @@ class Bot(object):
         if '{plugins}' in rsp.text:
             format_dict['plugins'] = ' '.join(self.pluginmanager.plugin_list)
 
+        if '{builtin_plugins}' in rsp.text:
+            format_dict['builtin_plugins'] = \
+                ' '.join(self.pluginmanager.builtin_plugin_list)
+
+        if '{custom_plugins}' in rsp.text:
+            format_dict['custom_plugins'] = \
+                ' '.join(self.pluginmanager.custom_plugin_list)
+
         if '{bot_name}' in rsp.text:
             format_dict['bot_name'] = self.bot_name
 
