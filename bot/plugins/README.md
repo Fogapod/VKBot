@@ -5,7 +5,7 @@ VKBot поддерживает плагины, написанные на python.
 При необходимости, можно заменить встроенный плагин на свой, указав такое же имя плагина (не путать с именем файла!)
 
 ### Базовый палгин
-```
+```python
 # coding:utf8
 
 
@@ -71,7 +71,7 @@ class Plugin(object):
 
 #### _accept_request(self, msg, rsp, utils, *args, **kwargs): bool
 Вызывается до функции respond, возвращаемое значение определяет, будет ли вызван данный плагин. Определена по умолчанию:
-```
+```python
 def _accept_request(self, msg, rsp, utils, *args, **kwargs):
     if msg.was_appeal and msg.args[0].lower() in self.keywords:
         return True
