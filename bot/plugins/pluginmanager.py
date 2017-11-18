@@ -81,9 +81,9 @@ class Pluginmanager(object):
             self.plugin_list.append(p)
 
         self.builtin_plugin_list = set(self.builtin_plugin_list)
-        self.plugin_list = set(self.plugin_list)
+
         self.custom_plugin_list = \
-            set(self.plugin_list - self.builtin_plugin_list)
+            set(set(self.plugin_list) - self.builtin_plugin_list)
 
         self.log(
             u'Загружены плагины: [b]%s[/b]' % ', '.join(self.plugin_list), 0)

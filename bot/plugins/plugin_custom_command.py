@@ -7,6 +7,7 @@ import re
 
 class Plugin(object):
     __doc__ = '''Плагин предназначен для использования пользовательских команд.
+    Ключевые слова: -
     Использование: -
     Пример: -'''
 
@@ -61,6 +62,9 @@ class Plugin(object):
                     break
 
         if not response:
+            return False
+
+        if response == 'pass':
             return False
 
         if choice[4] == 1:  # works only WITHOUT appeal
