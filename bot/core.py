@@ -74,7 +74,7 @@ class Message(object):
         self.from_chat = False   # True if from chat
         self.from_group = False  # True if from group
         self.user_id = 0         # id of user
-        self.real_user_id = 0    # id of user who has sent message 
+        self.real_user_id = 0    # id of user who has sent message
         self.chat_id = 0         # id of chat where message came from
         self.chat_users = []     # list of users in chat
         self.chat_name = ''      # chat title
