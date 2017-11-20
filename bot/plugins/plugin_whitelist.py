@@ -40,8 +40,13 @@ class Plugin(object):
         user_id = msg.args[1]
 
         if not re.match('\d+$', user_id):
-            user_id, error = utils.vkr.get_real_user_id(user_id)
-            if not user_id and '113' in error:
+            user_id, error = utils.vkr.get_id_by_short_link(user_id)
+
+            if error:
+                rsp.text = u'Возникла ошибка'
+                return rsp
+
+            if user_id is None:
                 rsp.text = u'Указан неверный id пользователя'
                 return rsp
 
@@ -51,7 +56,7 @@ class Plugin(object):
             access_level = DEFAULT_ACCESS_LEVEL
         else:
             access_level = msg.args[2]
-            if not re.match('\d+$', access_level) \
+            if not re.match('-?\d+$', access_level) \
                     or int(access_level) not in range(4):
                 rsp.text = u'Указан неверный уровень доступа'
                 return rsp

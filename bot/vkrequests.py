@@ -7,12 +7,11 @@ import traceback
 import requests as r
 
 import vk_api as vk
+
 from utils import load_token, save_token, TEMP_IMAGE_FILE
 
-
-# globals
-
 api = None
+IS_GROUP = False
 
 
 def error_handler(request):
@@ -242,6 +241,17 @@ def get_name_by_id(object_id=None, name_case='nom'):
 @error_handler
 def get_user_city(user_id=None):
     return api.users.get(user_ids=user_id, fields='city')[0]['city']['title']
+
+
+@error_handler
+def get_id_by_short_link(short_link):
+    response = api.utils.resolveScreenName(screen_name=short_link)
+
+    if not response:
+        return None, Nome
+
+    return -response['object_id'] if response['type'] == 'group' \
+                                  else response['object_id']
 
 
 @error_handler

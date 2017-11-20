@@ -59,10 +59,14 @@ class Plugin(object):
                     else:
                         chat_id = msg.args[2]
 
-                    if not (type(chat_id) is int or re.match('\d+$', chat_id)):
-                        chat_id, error = utils.vkr.get_real_user_id(chat_id)
+                    if not (type(chat_id) is int or re.match('-?\d+$', chat_id)):
+                        chat_id, error = utils.vkr.get_id_by_short_link(chat_id)
 
-                        if not chat_id and '113' in error:
+                        if error:
+                            rsp.text = u'Возникла ошибка'
+                            return rsp
+
+                        if chat_id is None:
                             rsp.text = u'Неправильно указан id'
                             return rsp
                     else:
@@ -86,8 +90,13 @@ class Plugin(object):
                 else:
                     chat_id = msg.args[2]
                     if not re.match('-?\d+$', chat_id):
-                        chat_id, error = utils.vkr.get_real_user_id(chat_id)
-                        if not chat_id and '113' in error:
+                        chat_id, error = utils.vkr.get_id_by_short_link(chat_id)
+
+                        if error:
+                            rsp.text = u'Возникла ошибка'
+                            return rsp
+
+                        if chat_id is None:
                             rsp.text = u'Неправильно указан id'
                             return rsp
                     else:

@@ -54,6 +54,9 @@ class Response(object):
         return any(((self.text and self.text != 'pass'), self.attachments,
                      self.sticker)) and self.target != 0
 
+    def send(self):
+        pass
+
 
 class Message(object):
     '''
@@ -166,7 +169,7 @@ class Message(object):
                     self.text = self.raw_text
                     self.lower_text = self.raw_text
 
-        if self.from_user:
+        if self.from_user or self.from_group:
             if self.out:
                 self.real_user_id = self.self_id
 
