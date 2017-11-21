@@ -16,6 +16,7 @@ import vkrequests as vkr
 AUTHOR_VK_ID = 180850898
 AUTHOR = u'[id%d|Евгений Ершов]' % AUTHOR_VK_ID
 
+VK_MESSAGE_LEN_LIMIT = 4096
 MAX_LAST_MESSAGES = 50
 
 
@@ -23,7 +24,7 @@ class Response(object):
     '''This class contains variables that will be used in response
     '''
 
-    def __init__(self, message):
+    def __init__(self, message, send_func):
         self.target      = 0      # message will be sent to this id
         self.sticker     = 0      # id of sticker to send (no text, attachments)
         self.text        = ''     # text to send
@@ -36,6 +37,8 @@ class Response(object):
             self.forward_msg = message.msg_id
         else:
             self.target = message.user_id
+
+        self.send = lambda: send_func(self)
 
     @property
     def sticker(self):
@@ -53,9 +56,6 @@ class Response(object):
     def is_valid(self):
         return any(((self.text and self.text != 'pass'), self.attachments,
                      self.sticker)) and self.target != 0
-
-    def send(self):
-        pass
 
 
 class Message(object):
@@ -281,7 +281,7 @@ class Bot(object):
                             not message.text:
                         continue
 
-                    response = Response(message)
+                    response = Response(message, self.send_message)
 
                     response = \
                         self.pluginmanager.plugin_respond(message, response)
@@ -328,7 +328,7 @@ class Bot(object):
         self.send_log_line(u'Отдельный поток бота отключён', 1, time.time())
         return True
 
-    def send_message(self, rsp):
+    def add_mark_to_message(self, rsp):
         if rsp.do_mark and not rsp.sticker:
             if self.settings['mark_type'] == u'имя':
                 rsp.text = self.settings['bot_name'] + ' ' + rsp.text
@@ -339,6 +339,15 @@ class Bot(object):
             else:
                 raise Exception('Неизвестный способ отметки сообщения')
 
+        return rsp
+
+    def send_message(self, rsp):
+        rsp = self.add_mark_to_message(rsp)
+
+        if len(rsp.text) > VK_MESSAGE_LEN_LIMIT:
+            rsp.text = u'Слишком длинный ответ. Не могу отправить'
+            rsp = self.add_mark_to_message(rsp)
+
         msg_id, error = vkr.send_message(rsp.text, rsp.target,
                                          forward=rsp.forward_msg,
                                          attachments=rsp.attachments,
@@ -347,7 +356,7 @@ class Bot(object):
         if error:
             if error == 'response code 413':
                 self.send_log_line(u'Сообщение слишком длинное для отправки', 2)
-                # u'Разделяю сообщение', # TODO
+                # in case VK will decide to change max message len
 
             elif 'this sticker is not available' in error:
                 self.send_log_line(

@@ -248,10 +248,11 @@ def get_id_by_short_link(short_link):
     response = api.utils.resolveScreenName(screen_name=short_link)
 
     if not response:
-        return None, Nome
+        return None
 
     return -response['object_id'] if response['type'] == 'group' \
                                   else response['object_id']
+
 
 
 @error_handler
@@ -260,10 +261,15 @@ def get_real_user_id(user_short_link):
 
 
 @error_handler
+def method(name, **kwargs):
+    send_log_line('method kwargs: ' + unicode(kwargs), 0)
+    return getattr(api, name)(**kwargs)
+
+
+@error_handler
 def http_r_get(url, **kwargs):
     send_log_line(
-        u'Запрос: %s %s [GET]' % (url, str(kwargs).decode('unicode-escape')),
-        0, time.time()
+        u'Запрос: %s %s [GET]' % (url, unicode(kwargs)), 0, time.time()
     )
     response =  r.get(url, **kwargs)
 
@@ -273,8 +279,7 @@ def http_r_get(url, **kwargs):
 @error_handler
 def http_r_post(url, **kwargs):
     send_log_line(
-        u'Запрос: %s %s [POST]' % (url, str(kwargs).decode('unicode-escape')),
-        0, time.time()
+        u'Запрос: %s %s [POST]' % (url, unicode(kwargs)), 0, time.time()
     )
     response =  r.post(url, **kwargs)
 

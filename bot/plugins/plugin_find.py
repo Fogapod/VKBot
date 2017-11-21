@@ -9,7 +9,7 @@ class Plugin(object):
     Пример: {keyword} телефон'''
 
     name = 'find'
-    keywords = (u'найди', name)
+    keywords = (name, u'найди', u'🤔')
     protection = 0
     argument_required = True
 

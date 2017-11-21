@@ -37,8 +37,8 @@ class Pluginmanager(object):
 
             if user_access_level < self.plugins[name].protection:
                 rsp.text = (
-                    u'Для использования команды необходим уровень доступа: '
-                    u'%d. Ваш уровень доступа: %d'
+                    u'Для использования команды необходим уровень доступа %d.\n'
+                    u'Ваш уровень доступа: %d'
                         % (self.plugins[name].protection, user_access_level)
                 )
                 break
