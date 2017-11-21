@@ -1,19 +1,16 @@
-__pycache__/
-*.so
 *.pyc
 *.pyo
-*.pyx
-
-.kivy
-.last_tmp.py
-.launch
 *.log
 *.txt
 *.ini
 *.json
 
-.buildozer
-requests
-data/*
+data/
+.buildozer/
+.kivy/
+
+.last_tmp.py
+.launch
+
 !data/images
 !fonts/LICENSE.txt
