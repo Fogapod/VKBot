@@ -5,7 +5,7 @@
 Приложение написано на языке python версии 2.7 с использованием фреймворка [Kivy](https://kivy.org).
 Предполагается использование на OC android, но работа возможна и на других платформах.
 
-<img height="600" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/main_screen.png" 
+<img height="600" src="https://github.com/Fogapod/VKBot/blob/master/.github/screenshots/main_screen.png" 
 align="center"/>
 
 ## Использованы библиотеки:
@@ -16,7 +16,7 @@ align="center"/>
 
 ## Руководство к использованию
 
-> Руководство написано для версии [0.1.0](https://github.com/Fogapod/VKBot/releases/tag/v0.1.0) и может не соответствовать функционалу других версий
+> Руководство написано для версии [0.1.1](https://github.com/Fogapod/VKBot/releases/tag/v0.1.0) и может не соответствовать функционалу других версий
 
 ### Начало работы
 После запуска приложения нажимаем на кнопку включения бота. Если всё работает нормально, появится окно, предлагающее авторизироваться. Без авторизации бот не может начать работать. 
@@ -32,7 +32,7 @@ align="center"/>
 Регистр команды не учитывается.
 
 ##### Интерфейс
-<img height="300" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/command_edit_popup.png"/>
+<img height="300" src="https://github.com/Fogapod/VKBot/blob/master/.github/screenshots/command_edit_popup.png"/>
 
 Для работы с пользовательскими командами в интерефейсе необходимо перейти на экран их настройки из главного экрана приложения. Изначально никаких команд нет. Это можно исправить, добавив несколько.
 Каждая команда содержит 5 опций, переключаемых кнопками ниже поля `ответ`
@@ -41,14 +41,14 @@ align="center"/>
 
 | Иконка | Описание | Красный (0) | Синий (1) | Зелёный (2) |
 |--------|----------|-------------|-----------|-------------|
-| <img height="25" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/button_use_regex_option.png"/> | Использовать regex | Нет | - | Да |
-| <img height="25" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/button_force_unmark_option.png"/> | Помечать сообщение | Да | - | Нет |
-| <img height="25" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/button_force_forward_option.png"/> | Пересылать сообщение | Стандартно | Никогда | Всегда |
-| <img height="25" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/button_appeal_only_option.png"/> | Условие ответа | Всегда | Без обращения | При обращении (`Бот, команда`) |
-| <img height="25" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/button_disable_option.png"/> | Отключить команду | Нет | - | Да |
+| <img height="25" src="https://github.com/Fogapod/VKBot/blob/master/.github/screenshots/button_use_regex_option.png"/> | Использовать regex | Нет | - | Да |
+| <img height="25" src="https://github.com/Fogapod/VKBot/blob/master/.github/screenshots/button_force_unmark_option.png"/> | Помечать сообщение | Да | - | Нет |
+| <img height="25" src="https://github.com/Fogapod/VKBot/blob/master/.github/screenshots/button_force_forward_option.png"/> | Пересылать сообщение | Стандартно | Никогда | Всегда |
+| <img height="25" src="https://github.com/Fogapod/VKBot/blob/master/.github/screenshots/button_appeal_only_option.png"/> | Условие ответа | Всегда | Без обращения | При обращении (`Бот, команда`) |
+| <img height="25" src="https://github.com/Fogapod/VKBot/blob/master/.github/screenshots/button_disable_option.png"/> | Отключить команду | Нет | - | Да |
 
 ##### Сообщения
-<img height="300" src="https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/learn-forgot_commands.png"/>
+<img height="300" src="https://github.com/Fogapod/VKBot/blob/master/.github/screenshots/learn-forgot_commands.png"/>
 
 Пользовательские команды можно настраивать через сообщения. 
 Для добавления команды или ответа для существующей команды используется команда `/learn команда::Ответ::опции`
@@ -58,8 +58,8 @@ align="center"/>
 Удаление всей команды производится командой `/forgot команда`. Удаление ответа производится через `/forgot команда::Ответ`
 
 ### OpenWeatherMap
-Для работы команды `погода` необходимо зарегистрироваться на сайте https://openweathermap.org ([скриншот](https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/openweathermap_instruction_1.png))
-После этого нужно перейти в раздел [ключей api](https://home.openweathermap.org/api_keys) и скопировать ваш ключ ([скриншот](https://github.com/Fogapod/VKBot/blob/master/data/images/screenshots/openweathermap_instruction_2.png))  
+Для работы команды `погода` необходимо зарегистрироваться на сайте https://openweathermap.org ([скриншот](https://github.com/Fogapod/VKBot/blob/master/.github/screenshots/openweathermap_instruction_1.png))
+После этого нужно перейти в раздел [ключей api](https://home.openweathermap.org/api_keys) и скопировать ваш ключ ([скриншот](https://github.com/Fogapod/VKBot/blob/master/.github/screenshots/openweathermap_instruction_2.png))  
 
 Далее используйте команду `/погода ваш_ключ`. Готово.
 > От момента создания аккаунта до начала работы ключа может пройти от 10 до 60 минут. Если бот ругается на неправильность ключа, немного подождите и попробуйте ещё раз.

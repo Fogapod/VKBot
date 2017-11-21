@@ -22,7 +22,7 @@ source.include_exts = py,png,jpg,kv,ttf
 source.exclude_exts = spec,ini,log,pyc,pyx,pyo,txt,md
 
 # (list) List of directory to exclude (let empty to not exclude anything)
-source.exclude_dirs = bin,build,data/images/screenshots
+source.exclude_dirs = bin,build,.github/screenshots
 
 # (list) List of exclusions using pattern matching
 source.exclude_patterns = license
@@ -103,10 +103,10 @@ android.ndk = 10.3.2
 # android.private_storage = False
 
 # (str) Android NDK directory (if empty, it will be automatically downloaded.)
-android.ndk_path = /home/foga/android/crystax-ndk-10.3.2
+#android.ndk_path = /home/foga/android/crystax-ndk-10.3.2 # insert yours
 
 # (str) Android SDK directory (if empty, it will be automatically downloaded.)
-android.sdk_path = /home/foga/android/android-sdk-20
+#android.sdk_path = /home/foga/android/android-sdk-20 # insert yours
 
 # (str) ANT directory (if empty, it will be automatically downloaded.)
 #android.ant_path =
@@ -147,7 +147,7 @@ android.sdk_path = /home/foga/android/android-sdk-20
 #android.gradle_dependencies =
 
 # (str) python-for-android branch to use, defaults to master
-p4a.branch = master
+# p4a.branch = master
 
 # (str) OUYA Console category. Should be one of GAME or APP
 # If you leave this blank, OUYA support will not be enabled
