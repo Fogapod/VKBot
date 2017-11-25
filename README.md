@@ -40,7 +40,7 @@
 
 | Иконка | Описание | Красный (0) | Синий (1) | Зелёный (2) |
 |--------|----------|-------------|-----------|-------------|
-| ![Regex option](.github/images/button_regex_option.png) | Нет | - | Да |
+| ![Regex option](.github/images/button_regex_option.png) | Использовать регулярные выражения | Нет | - | Да |
 | ![Unmark option](.github/images/button_unmark_option.png) | Помечать сообщение | Да | - | Нет |
 | ![Forward option](.github/images/button_forward_option.png) | Пересылать сообщение | Стандартно | Никогда | Всегда |
 | ![Appel option](.github/images/button_appeal_option.png) | Условие ответа | Всегда | Без обращения | При обращении (`Бот, команда`) |
