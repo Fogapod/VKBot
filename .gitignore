@@ -1,7 +1,6 @@
 *.pyc
 *.pyo
 *.log
-*.txt
 *.ini
 *.json
 
@@ -11,6 +10,6 @@ data/
 
 .last_tmp.py
 .launch
+android.txt
 
 !data/images
-!fonts/LICENSE.txt
