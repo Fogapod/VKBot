@@ -27,15 +27,23 @@ else:
 
 DATA_DIR = ROOT + 'data/'
 
-TOKEN_FILE                     = DATA_DIR + 'token.txt'
+TOKEN_FILE                     = DATA_DIR + 'token'
+
+OLD_TOKEN_FILE                 = DATA_DIR + 'token.txt'
+
 PLUGIN_DIR                     = ROOT     + 'bot/plugins/'
 CUSTOM_PLUGIN_DIR              = MAIN_DIR + 'plugins/'
 SETTINGS_FILE                  = MAIN_DIR + '.vkbot.ini'
 ERROR_FILE                     = MAIN_DIR + 'error.log'
 BOT_ERROR_FILE                 = MAIN_DIR + 'bot_error.log'
-WHITELIST_FILE                 = MAIN_DIR + 'whitelist.txt'
-BLACKLIST_FILE                 = MAIN_DIR + 'blacklist.txt'
-CUSTOM_COMMANDS_FILE           = MAIN_DIR + 'custom_commands.txt'
+WHITELIST_FILE                 = MAIN_DIR + 'whitelist.json'
+BLACKLIST_FILE                 = MAIN_DIR + 'blacklist.json'
+CUSTOM_COMMANDS_FILE           = MAIN_DIR + 'custom_commands.json'
+
+OLD_WHITELIST_FILE             = MAIN_DIR + 'whitelist.txt'
+OLD_BLACKLIST_FILE             = MAIN_DIR + 'blacklist.txt'
+OLD_CUSTOM_COMMANDS_FILE       = MAIN_DIR + 'custom_commands.txt'
+
 TEMP_IMAGE_FILE                = MAIN_DIR + '.temp.jpg'
 
 

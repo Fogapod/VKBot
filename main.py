@@ -16,6 +16,9 @@ def main():
             os.makedirs(utils.MAIN_DIR)
 
         app = VKBotApp()
+
+        app.rename_old_files()  # TODO: remove after 0.1.1 release
+
         app.run()
     except:
         error_text = traceback.format_exc()
