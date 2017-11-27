@@ -15,6 +15,7 @@ HELP_TEXT = (
         u'-find\n'
         u'-chance\n'
         u'-who\n'
+        u'-couple\n'
         u'-weather\n'
         u'-ping\n'
         u'-ignore\n\n'

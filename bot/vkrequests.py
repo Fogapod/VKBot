@@ -254,7 +254,6 @@ def get_id_by_short_link(short_link):
                                   else response['object_id']
 
 
-
 @error_handler
 def get_real_user_id(user_short_link):
     return api.users.get(user_ids=user_short_link)[0]['id']
@@ -264,6 +263,12 @@ def get_real_user_id(user_short_link):
 def method(name, **kwargs):
     send_log_line('method kwargs: ' + unicode(kwargs), 0)
     return getattr(api, name)(**kwargs)
+
+
+
+@error_handler
+def execute(code):
+    return api.execute(code=code)
 
 
 @error_handler
