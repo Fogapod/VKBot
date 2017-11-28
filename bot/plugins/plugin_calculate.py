@@ -12,7 +12,7 @@ class Plugin(object):
     Пример: {keyword} (3/4) * PI * 7^3'''
 
     name = 'calculate'
-    keywords = (u'посчитай', name, '=')
+    keywords = (name, u'посчитай', '=')
     protection = 0
     argument_required = True
 
@@ -29,13 +29,10 @@ class Plugin(object):
             expression = re.sub(',',         '.',         expression)
 
             while True:
-                if '/' in expression:
-                    index = re.search('[^.\d]\d+[^.\de]', expression)
-                    if index:
-                        index = index.end() - 1
-                        expression = expression[:index] + '.' + expression[index:]
-                    else:
-                        break
+                index = re.search('[^.\d]\d+[^.\de]', expression)
+                if index:
+                    index = index.end() - 1
+                    expression = expression[:index] + '.' + expression[index:]
                 else:
                     break
             try:
