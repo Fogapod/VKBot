@@ -1,0 +1,13 @@
+bin/*
+.buildozer/*
+.github/*
+.git/*
+build/*
+data/token
+*.log
+*.json
+*.ini
+*.md
+*.spec
+.gitignore
+LICENSE

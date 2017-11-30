@@ -19,10 +19,10 @@ source.include_exts = py,png,jpg,kv,ttf
 #source.include_patterns = assets/*,images/*.png
 
 # (list) Source files to exclude (let empty to not exclude anything)
-source.exclude_exts = spec,ini,log,pyc,pyx,pyo,txt,md
+source.exclude_exts = spec,ini,log,pyc,pyx,pyo,txt,md,json
 
 # (list) List of directory to exclude (let empty to not exclude anything)
-source.exclude_dirs = bin,build,.github/screenshots
+source.exclude_dirs = bin,build,.github
 
 # (list) List of exclusions using pattern matching
 source.exclude_patterns = license
@@ -102,11 +102,12 @@ android.ndk = 10.3.2
 # (bool) Use --private data storage (True) or --dir public storage (False)
 # android.private_storage = False
 
+
 # (str) Android NDK directory (if empty, it will be automatically downloaded.)
-#android.ndk_path = /home/foga/android/crystax-ndk-10.3.2 # insert yours
+#android.ndk_path = /home/foga/android/crystax-ndk-10.3.2
 
 # (str) Android SDK directory (if empty, it will be automatically downloaded.)
-#android.sdk_path = /home/foga/android/android-sdk-20 # insert yours
+#android.sdk_path = /home/foga/android/android-sdk-20
 
 # (str) ANT directory (if empty, it will be automatically downloaded.)
 #android.ant_path =
