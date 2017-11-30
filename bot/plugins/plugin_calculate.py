@@ -20,7 +20,6 @@ class Plugin(object):
         expression = ''.join(msg.args[1:]).lower()
 
         if re.match(u'^([\d+\-*/%:().,^√πe]|(sqrt)|(pi))+$', expression):
-            expression = ' ' + expression + ' '
             expression = re.sub(u'(sqrt)|√', 'math.sqrt', expression)
             expression = re.sub(u'(pi)|π',   'math.pi',   expression)
             expression = re.sub(u':|÷',      '/',         expression)
@@ -28,13 +27,9 @@ class Plugin(object):
             expression = re.sub('\^',        '**',        expression)
             expression = re.sub(',',         '.',         expression)
 
-            while True:
-                index = re.search('[^.\d]\d+[^.\de]', expression)
-                if index:
-                    index = index.end() - 1
-                    expression = expression[:index] + '.' + expression[index:]
-                else:
-                    break
+            expression = re.sub('(?P<int>(?<![\d.])\d+(?![\d.]))',
+                                '\g<int>.', expression)
+
             try:
                 result = eval(expression)
             except SyntaxError:
