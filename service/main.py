@@ -169,10 +169,7 @@ if __name__ == '__main__':
         send_log_line(u'Включение бота ...', 0)
         bot.launch_bot()
 
-    except SystemExit:
-        raise
-
-    except:
+    except Exception:
         send_log_line(u'Обработка и отправка ошибки ...', 0)
         error = traceback.format_exc()
         send_error(error)
@@ -190,6 +187,7 @@ if __name__ == '__main__':
         if bot.runtime_error is not None:
             if bot.runtime_error == 0:
                 send_log_line(u'[b]Бот остановлен через сообщение[/b]', 2)
+                break
 
             elif bot.runtime_error == 1:
                 bot.runtime_error = None

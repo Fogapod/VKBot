@@ -293,7 +293,7 @@ class Bot(object):
 
                     time.sleep(1)
                 time.sleep(3)
-        except:
+        except Exception:
             self.send_log_line(u'Ошибка бота перехвачена', 0)
             self.runtime_error = traceback.format_exc()
 
