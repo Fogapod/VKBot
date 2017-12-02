@@ -89,18 +89,45 @@ class Pluginmanager(object):
             u'Загружены плагины: [b]%s[/b]' % ', '.join(self.plugin_list), 0)
 
     def _load_plugins_from(self, path):
-        files = os.listdir(path)
+        files = sorted(os.listdir(path))  # sorting to ensure that .py goes first
+        included = []
 
         for f in files:
             if f.startswith('plugin_'):
                 try:
                     if f.endswith('.py'):
+                        if f + 'o' in files:
+                            if os.path.getmtime(os.path.join(path, f + 'c')) > os.path.getmtime(os.path.join(path, f)):
+                                # .pyc newer
+                                continue
+
+                            elif os.path.getmtime(os.path.join(path, f + 'o')) > os.path.getmtime(os.path.join(path, f)):
+                                # .pyo newer
+                                continue
+
                         self._add_plugin(
-                            imp.load_source('', path + f), f, f[7:-3])
-                    elif f.endswith('.pyo') and f[:-1] not in files:  # do not load duplicating pyo
+                            imp.load_source('', os.path.join(path, f)), f, f[7:-3])
+
+                        included.append(f)
+
+                    elif f.endswith('.pyc') or f.endswith('.pyo'):
+                        if f[:-1] in included:
+                            continue
+
+                        if f.endswith('c'):
+                            if os.path.getmtime(os.path.join(path, f[:-1] + 'o')) > os.path.getmtime(os.path.join(path, f)):
+                                # .pyo newer
+                                continue
+                        else:
+                            if os.path.getmtime(os.path.join(path, f[:-1] + 'c')) > os.path.getmtime(os.path.join(path, f)):
+                                # .pyc newer
+                                continue
+
                         self._add_plugin(
-                            imp.load_compiled('', path + f), f, f[7:-4])
-                except:
+                            imp.load_compiled('', os.path.join(path, f)), f, f[7:-4])
+                        included.append(f[:-1])
+
+                except Exception:
                     self.log(u'[b]Ошибка при загрузке плагина %s[/b]' % f, 2)
                     self.log(traceback.format_exc().decode('utf8'), 2)
 
