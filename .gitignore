@@ -6,6 +6,7 @@
 
 data/
 .buildozer/
+bin/
 .kivy/
 
 .last_tmp.py

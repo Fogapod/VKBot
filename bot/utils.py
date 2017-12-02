@@ -11,7 +11,7 @@ from libs.toast import toast
 
 IS_VERSION_DEV = True
 
-__version__ = '0.1.1dev'
+__version__ = '0.1.0.7.0'
 
 
 if platform == 'android':

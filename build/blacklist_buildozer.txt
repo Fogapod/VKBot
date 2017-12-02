@@ -1,9 +1,8 @@
 bin/*
-.buildozer/*
 .github/*
 .git/*
-build/*
 token
+presplash.png
 *.log
 *.json
 *.ini

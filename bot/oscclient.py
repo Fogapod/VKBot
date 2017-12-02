@@ -75,14 +75,12 @@ class OSCClient():
         self.start_reading_osc_queue()
 
         if platform == 'android':
-            # try:
-            #     self.subprocess = autoclass(
-            #         'org.fogaprod.vkbot.dev.ServiceBotservice')
-            #     mActivity = autoclass(
-            #        'org.kivy.android.PythonActivity').mActivity
-            #     argument = ''
-            #     self.subprocess.start(mActivity, argument)
-            # except:
+            # self.subprocess = autoclass(
+            #     'org.fogaprod.vkbot.dev.ServiceBotservice')
+            # mActivity = autoclass(
+            #     'org.kivy.android.PythonActivity').mActivity
+            # argument = ''
+            # self.subprocess.start(mActivity, argument)
             self.subprocess = AndroidService('VKBot', 'Бот работает')
             self.subprocess.start('Сервис запущен')
         else:
@@ -96,9 +94,12 @@ class OSCClient():
 
         if platform == 'android':
             if self.subprocess:
-                # try:
-                #     android.stop_service()
-                # except:
+                # self.subprocess = autoclass(
+                #     'org.fogaprod.vkbot.dev.ServiceBotservice')
+                # mActivity = autoclass(
+                #     'org.kivy.android.PythonActivity').mActivity
+                # argument = ''
+                # self.subprocess.stop(mActivity)
                 self.subprocess.stop()
         else:
             osc.sendMsg('/exit', [], port=3000)

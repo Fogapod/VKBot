@@ -13,19 +13,19 @@ package.domain = org.fogaprod
 source.dir = .
 
 # (list) Source files to include (let empty to include all the files)
-source.include_exts = py,png,jpg,kv,ttf
+#source.include_exts = py,png,jpg,kv,ttf
 
 # (list) List of inclusions using pattern matching
 #source.include_patterns = assets/*,images/*.png
 
 # (list) Source files to exclude (let empty to not exclude anything)
-source.exclude_exts = spec,ini,log,pyc,pyx,pyo,txt,md,json
+#source.exclude_exts = spec,ini,log,pyc,pyx,pyo,txt,md,json
 
 # (list) List of directory to exclude (let empty to not exclude anything)
-source.exclude_dirs = bin,build,.github
+#source.exclude_dirs = bin,build,.github
 
 # (list) List of exclusions using pattern matching
-source.exclude_patterns = license
+#source.exclude_patterns = license,token
 
 # (str) Application versioning (method 1)
 # version = 0.1
@@ -36,7 +36,7 @@ version.filename = %(source.dir)s/bot/utils.py
 
 # (list) Application requirements
 # comma seperated e.g. requirements = sqlite3,kivy
-requirements = kivy==master,android,openssl,requests,vk_api
+requirements = kivy==master,android,openssl,vk_api
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -127,7 +127,7 @@ android.ndk = 10.3.2
 #android.whitelist_src =
 
 # (str) Path to a custom blacklist file
-#android.blacklist_src =
+android.blacklist_src = build/blacklist_buildozer.txt
 
 # (list) List of Java .jar files to add to the libs so that pyjnius can access
 # their classes. Don't add jars that you do not need, since extra jars can slow
@@ -200,7 +200,7 @@ android.arch = armeabi-v7a
 #p4a.hook =
 
 # (str) Bootstrap to use for android builds
-# p4a.bootstrap = sdl2
+p4a.bootstrap = sdl2
 
 
 #
