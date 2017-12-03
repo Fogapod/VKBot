@@ -239,11 +239,6 @@ def get_name_by_id(object_id=None, name_case='nom'):
 
 
 @error_handler
-def get_user_city(user_id=None):
-    return api.users.get(user_ids=user_id, fields='city')[0]['city']['title']
-
-
-@error_handler
 def get_id_by_short_link(short_link):
     response = api.utils.resolveScreenName(screen_name=short_link)
 
@@ -252,11 +247,6 @@ def get_id_by_short_link(short_link):
 
     return -response['object_id'] if response['type'] == 'group' \
                                   else response['object_id']
-
-
-@error_handler
-def get_real_user_id(user_short_link):
-    return api.users.get(user_ids=user_short_link)[0]['id']
 
 
 @error_handler

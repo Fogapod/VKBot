@@ -1,4 +1,4 @@
-#coding:utf8
+# coding:utf8
 
 
 import os
@@ -125,6 +125,7 @@ class Pluginmanager(object):
 
                         self._add_plugin(
                             imp.load_compiled('', os.path.join(path, f)), f, f[7:-4])
+
                         included.append(f[:-1])
 
                 except Exception:
@@ -195,8 +196,8 @@ class Pluginmanager(object):
 
 
 class PluginUtils(object):
-    '''This class contains all nesessary utils for plugins
-    '''
+    """This class contains all nesessary utils for plugins
+    """
 
     def __init__(self, pm, bot, vkr, log):
         self.__pm = pm
@@ -216,10 +217,16 @@ class PluginUtils(object):
     def get_custom_commands(self):
         return self.__bot.custom_commands
 
-    def save_setting(self, key, val, section='General'):
+    def get_settings(self, key, section='Plugins'):
+        return utils.get_settings(key, section=section)
+
+    def save_setting(self, key, val, section='Plugins'):
         self.log(u'Обновляю настройки: %s=%s' % (key, val), 0)
-        utils.save_bot_setting(section, key, val)
-        self.__bot.settings[key] = val
+        utils.save_setting(key, val, section=section)
+
+        if key in self.__bot.settings:
+            self.__bot.settings[key] = val
+
         self.__bot.is_settings_changed = True
 
     def save_blacklist(self, blacklist):

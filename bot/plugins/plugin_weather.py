@@ -5,11 +5,11 @@ import time
 
 
 class Plugin(object):
-    __doc__ = '''Плагин предназначен для получения информации о погоде.
+    __doc__ = """Плагин предназначен для получения информации о погоде.
     Для использования необходимо иметь уровень доступа {protection} или выше
     Ключевые слова: [{keywords}]
     Использование: {keyword} <?город>
-    Пример: {keyword} Уфа'''
+    Пример: {keyword} Ufa"""
 
     name = 'weather'
     keywords = (u'погода', name)
@@ -17,7 +17,11 @@ class Plugin(object):
     argument_required = False
 
     def respond(self, msg, rsp, utils, *args, **kwargs):
-        api_key = utils.get_settings()['openweathermap_api_key']
+        api_key = utils.get_settings('openweathermap_api_key')
+
+        if api_key is None:
+            api_key = '0'
+            utils.save_setting('openweathermap_api_key', api_key)
 
         if len(msg.args) > 1:
             if ' '.join(msg.args[1:]) == '-':
@@ -39,17 +43,22 @@ class Plugin(object):
         else:
             if api_key == '0':
                 rsp.text = (
-u'Команда не может функционировать. '
-u'Для её активации необходим специальный ключ:\n'
-u'https://github.com/Fogapod/VKBot/blob/master/README.md#openweathermap\n'
-u'Скопируйте полученный ключ и повторите команду, добавив его, '
-u'чтобы получилось\n/погода 9ld10763q10b2cc882a4a10fg90fc974\n\n'
-u'[id{my_id}|НИКОМУ НЕ ПОКАЗЫВАЙТЕ ДАННЫЙ КЛЮЧ, ИНАЧЕ РИСКУЕТЕ ЕГО ПОТЕРЯТЬ!]'
+                    u'Команда не может функционировать. Для её активации '
+                    U'необходим специальный ключ:\n'
+                    u'https://github.com/Fogapod/VKBot/blob/master/README.md#openweathermap\n'
+                    u'Скопируйте полученный ключ и повторите команду, добавив'
+                    U' его, чтобы получилось\n'
+                    u'/погода 9ld10763q10b2cc882a4a10fg90fc974\n\n'
+                    u'[id{my_id}|НИКОМУ НЕ ПОКАЗЫВАЙТЕ ДАННЫЙ КЛЮЧ, ИНАЧЕ РИСКУЕТЕ ЕГО ПОТЕРЯТЬ!]'
                 )
 
                 return rsp
 
-            city, error = utils.vkr.get_user_city(user_id=msg.real_user_id)
+            city, error = utils.vkr.execute('''
+                var user;
+                user = API.users.get({"user_ids": "%d", "fields": "city"})[0];
+                return user["city"]["title"];
+            ''' % msg.real_user_id)
 
             if not city:
                 city = 'Moscow'

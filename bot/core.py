@@ -21,8 +21,8 @@ MAX_LAST_MESSAGES = 50
 
 
 class Response(object):
-    '''This class contains variables that will be used in response
-    '''
+    """This class contains variables that will be used in response
+    """
 
     def __init__(self, message, send_func):
         self.target      = 0      # message will be sent to this id
@@ -59,10 +59,10 @@ class Response(object):
 
 
 class Message(object):
-    '''
+    """
     This class contains all nesessary information about recieved message
     Important: do NOT change anything!
-    '''
+    """
 
     def __init__(self, message, self_id, appeals):
         self.self_id = self_id  # id of bot owner
@@ -196,14 +196,7 @@ class Bot(object):
         self.whitelist = {}
         self.blacklist = []
 
-        self.settings = {
-            'appeals': ('/'),
-            'bot_name': u'(Бот)',
-            'mark_type': u'кавычка',
-            'stable_mode': True,
-            'use_custom_commands': False,
-            'openweathermap_api_key': '0'
-        }
+        self.settings = {}
 
         self.startup_response = None
         self.is_settings_changed = False
@@ -213,7 +206,7 @@ class Bot(object):
 
         return self.authorized, error
 
-    def process_updates(self):
+    def update_processor(self):
         self.running = True
         self.runtime_error = None
 
@@ -240,7 +233,7 @@ class Bot(object):
             self.blacklist = utils.load_blacklist()
 
             self.send_log_line(u'Загрузка настроек бота ...', 0)
-            self.settings = utils.load_bot_settings()
+            self.read_settings()
 
             if self.settings['use_custom_commands']:
                 self.send_log_line(
@@ -303,7 +296,7 @@ class Bot(object):
         self.send_log_line(
             u'Создание отдельного потока для бота ...', 0, time.time()
         )
-        self.bot_thread = Thread(target=self.process_updates)
+        self.bot_thread = Thread(target=self.update_processor)
         self.send_log_line(u'Запуск потока ...', 0, time.time())
         self.bot_thread.start()
 
@@ -328,11 +321,33 @@ class Bot(object):
         self.send_log_line(u'Отдельный поток бота отключён', 1, time.time())
         return True
 
-    def add_mark_to_message(self, rsp):
+    def read_settings(self):
+        settings = {}
+
+        settings_names = [
+            'appeals', 'bot_name', 'mark_type', 'use_custom_commands',
+            'stable_mode'
+        ]
+
+        settings = utils.get_settings(settings_names)
+
+        self.settings['appeals'] = []
+
+        for appeal in settings['appeals'].split(':'):
+            if appeal:
+                self.settings['appeals'].append(appeal.lower())
+
+        self.settings['appeals'] = tuple(self.settings['appeals'])
+        self.settings['bot_name'] = settings['bot_name']
+        self.settings['mark_type'] = settings['mark_type']
+        self.settings['use_custom_commands'] = \
+            settings['use_custom_commands'] == 'True'
+        self.settings['stable_mode'] = settings['stable_mode'] == 'True'
+
+    def add_mark_to_response(self, rsp):
         if rsp.do_mark and not rsp.sticker:
             if self.settings['mark_type'] == u'имя':
                 rsp.text = self.settings['bot_name'] + ' ' + rsp.text
-
             elif self.settings['mark_type'] == u'кавычка':
                 rsp.text += "'"
 
@@ -342,11 +357,11 @@ class Bot(object):
         return rsp
 
     def send_message(self, rsp):
-        rsp = self.add_mark_to_message(rsp)
+        rsp = self.add_mark_to_response(rsp)
 
         if len(rsp.text) > VK_MESSAGE_LEN_LIMIT:
             rsp.text = u'Слишком длинный ответ. Не могу отправить'
-            rsp = self.add_mark_to_message(rsp)
+            rsp = self.add_mark_to_response(rsp)
 
         msg_id, error = vkr.send_message(rsp.text, rsp.target,
                                          forward=rsp.forward_msg,

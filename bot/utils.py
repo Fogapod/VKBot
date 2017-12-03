@@ -4,8 +4,11 @@
 import json
 import os
 
+from ConfigParser import NoSectionError, NoOptionError
+
 from kivy import platform
 from kivy.config import Config
+# TODO: write custom Config independent from kivy
 
 from libs.toast import toast
 
@@ -200,29 +203,23 @@ def save_error(error_text, from_bot=False):
                 f.write(error_text.encode('utf8'))
 
 
-def load_bot_settings():
-    settings = {}
+def get_settings(keys, section='General'):
     Config.read(SETTINGS_FILE)
+    results = {}
 
-    appeals = []
-    for appeal in Config.get('General', 'appeals').split(':'):
-        if appeal:
-            appeals.append(appeal.lower())
+    if not type(keys) in (list, tuple):
+        keys = (keys, )
 
-    settings['appeals'] = tuple(appeals)
+    for key in keys:
+        try:
+             results[key] = Config.get(section, key)
+        except (NoSectionError, NoOptionError):
+            results[key] = None
 
-    settings['bot_name'] = Config.get('General', 'bot_name')
-    settings['mark_type'] = Config.get('General', 'mark_type')
-    settings['use_custom_commands'] = \
-        Config.get('General', 'use_custom_commands') == 'True'
-    settings['stable_mode'] = Config.get('General', 'stable_mode') == 'True'
-    settings['openweathermap_api_key'] = \
-        Config.get('General', 'openweathermap_api_key')
-
-    return settings
+    return results if len(results) > 1 else results[keys[0]]
 
 
-def save_bot_setting(section, key, value):
+def save_setting(key, value, section='General'):
     Config.read(SETTINGS_FILE)
     Config.set(section, key, value)
     Config.write()

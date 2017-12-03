@@ -24,7 +24,7 @@ from bot import utils
 class VKBotApp(App):
     use_kivy_settings = False
     settings_cls = SettingsWithNoMenu
-    config_version = 1
+    config_version = 2
 
     _cached_login = None
     _cached_password = None
@@ -56,7 +56,7 @@ class VKBotApp(App):
 
     def build_config(self, config):
         config.setdefaults('General', {
-                                        'config_version': '1',
+                                        'config_version': self.config_version,
                                         'appeals': '/:бот,',
                                         'bot_name': '(Бот)',
                                         'mark_type': 'кавычка',
@@ -64,9 +64,10 @@ class VKBotApp(App):
                                         'use_custom_commands': 'True',
                                         'logging_level': '1',
                                         'max_log_lines': '50',
-                                        'openweathermap_api_key': '0'
                                       }
-                           )
+        )
+        config.set('General', 'config_version', self.config_version)
+        config.adddefaultsection('Plugins')
 
     def build_settings(self, settings):
         settings.add_json_panel(
