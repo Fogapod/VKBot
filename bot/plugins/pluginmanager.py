@@ -96,12 +96,13 @@ class Pluginmanager(object):
             if f.startswith('plugin_'):
                 try:
                     if f.endswith('.py'):
-                        if f + 'o' in files:
+                        if f + 'c' in files:
                             if os.path.getmtime(os.path.join(path, f + 'c')) > os.path.getmtime(os.path.join(path, f)):
                                 # .pyc newer
                                 continue
 
-                            elif os.path.getmtime(os.path.join(path, f + 'o')) > os.path.getmtime(os.path.join(path, f)):
+                        elif f + 'o' in files:
+                            if os.path.getmtime(os.path.join(path, f + 'o')) > os.path.getmtime(os.path.join(path, f)):
                                 # .pyo newer
                                 continue
 
@@ -114,11 +115,11 @@ class Pluginmanager(object):
                         if f[:-1] in included:
                             continue
 
-                        if f.endswith('c'):
+                        if f.endswith('c') and f[:-1] + 'o' in files:
                             if os.path.getmtime(os.path.join(path, f[:-1] + 'o')) > os.path.getmtime(os.path.join(path, f)):
                                 # .pyo newer
                                 continue
-                        else:
+                        elif f[:-1] + 'c' in files:
                             if os.path.getmtime(os.path.join(path, f[:-1] + 'c')) > os.path.getmtime(os.path.join(path, f)):
                                 # .pyc newer
                                 continue
