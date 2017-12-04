@@ -218,8 +218,8 @@ class PluginUtils(object):
     def get_custom_commands(self):
         return self.__bot.custom_commands
 
-    def get_settings(self, key, section='Plugins'):
-        return utils.get_settings(key, section=section)
+    def get_settings(self, keys, section='Plugins'):
+        return utils.get_settings(keys, section=section)
 
     def save_setting(self, key, val, section='Plugins'):
         self.log(u'Обновляю настройки: %s=%s' % (key, val), 0)
