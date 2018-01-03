@@ -370,18 +370,15 @@ class Bot(object):
 
         if error:
             if error == 'response code 413':
-                self.send_log_line(u'Сообщение слишком длинное для отправки', 2)
-                # in case VK will decide to change max message len
-
+                rsp.text = u'Сообщение слишком длинное для отправки'
             elif 'this sticker is not available' in error:
-                self.send_log_line(
-                    u'Стикер (%s) недоступен! Не могу отправить сообщение'
-                        % rsp.sticker, 1)
+                rsp.text = u'Стикер (%s) недоступен' % rsp.sticker
             else:
+                rsp.text = u'Неизвестная ошибка при отправке сообщения'
                 self.send_log_line(
-                    u'Неизвестная ошибка при отправке сообщения', 1)
-                raise Exception(error)
+                    'Ошибка при отправке сообщения: %s' % error, 1)
 
+            self.send_message(rsp)
             return
 
         self.send_log_line(u'[b]Сообщение доставлено (%d)[/b]' % msg_id, 1)
