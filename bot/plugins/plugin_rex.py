@@ -8,18 +8,23 @@ LANG_CODES = {
     'java': 4,
     'python2': 5,
     'py2': 5,
-    'c': 6,  # gcc
-    'c++': 7,  # gcc
+    'c': 6,
+    'c(gcc)': 6,
+    'c++': 7,
+    'cpp': 7,
+    'c++(gcc)': 7,
     'php': 8,
     'pascal': 9,
     'objective-c': 10,
     'haskell': 11,
     'ruby': 12,
+    'rb': 12,
     'perl': 13,
     'lua': 14,
     'nasm': 15,
-    'sql-server': 16,
+    'sqlserver': 16,
     'javascript': 17,
+    'js': 17,
     'lisp': 18,
     'prolog': 19,
     'go': 20,
@@ -31,10 +36,10 @@ LANG_CODES = {
     'python': 24,
     'py': 24,
     'octave': 25,
-    'c (clang)': 26,
-    'c++ (clang)': 27,
-    'c++ (vc++)': 28,
-    'c (vc)': 29,
+    'c(clang)': 26,
+    'c++(clang)': 27,
+    'c++(vc++)': 28,
+    'c(vc)': 29,
     'd': 30,
     'r': 31,
     'tcl': 32,
@@ -74,8 +79,15 @@ class Plugin(object):
         }
 
         if msg.args[1] in ('list', u'список'):
+            last_code = 0
             for k, v in sorted(LANG_CODES.items(), key=lambda x: x[1]):
-                rsp.text += '{0}: {1}\n'.format(v, k)
+                if v == last_code:
+                    rsp.text += ', ' + k
+                else:
+                    rsp.text += '\n{0}: {1}'.format(v, k)
+                    last_code = v
+
+            rsp.text = rsp.text.strip()
             return rsp
 
         if len(msg.args) < 3:
