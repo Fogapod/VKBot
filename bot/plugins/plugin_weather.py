@@ -83,7 +83,7 @@ class Plugin(object):
         weather_json = weather_data.json()
 
         if 'cod' in weather_json and weather_json['cod'] == '404':
-            rsp.text = u'Город не найден (%s) или вы ввели название на отличном от английского языке. Сервис openweathermap больше не принимает названия городов на других языках. Команда будет переработана для работы с другим сервисом или будет удалена' % city
+            rsp.text = u'Город не найден (%s)' % city
 
             return rsp
 
