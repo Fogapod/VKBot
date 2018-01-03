@@ -69,7 +69,8 @@ class Plugin(object):
     def respond(self, msg, rsp, utils, *args, **kwargs):
         params = {
             'LanguageChoice': 24,
-            'Program': ''
+            'Program': '',
+            'CompilerArgs': ''
         }
 
         if msg.args[1] in ('list', u'список'):
@@ -82,13 +83,22 @@ class Plugin(object):
             return rsp
 
         if msg.args[1].isdigit():
-            params['LanguageChoice'] = msg.args[1]
+            params['LanguageChoice'] = int(msg.args[1])
         else:
             params['LanguageChoice'] = LANG_CODES.get(msg.args[1].lower(), '')
 
             if not params['LanguageChoice']:
                 rsp.text = u'Неверно указан язык'
                 return rsp
+
+        if params['LanguageChoice'] in (6, 26):
+            params['CompilerArgs'] = 'source_file.c -o a.out'
+        elif params['LanguageChoice'] == 29:
+            params['CompilerArgs'] = 'source_file.c -o a.exe'
+        elif params['LanguageChoice'] in (7, 27):
+            params['CompilerArgs'] = 'source_file.cpp -o a.out'
+        elif params['LanguageChoice'] == 28:
+            params['CompilerArgs'] = 'source_file.cpp -o a.exe'
 
         params['Program'] = ' '.join(msg.args[2:])
 
