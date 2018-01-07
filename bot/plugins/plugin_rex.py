@@ -3,7 +3,7 @@
 
 LANG_CODES = {
     'c#': 1,
-    'vb.net': 2,
+    'vb': 2,
     'visualbasic': 2,
     'f#': 3,
     'java': 4,
@@ -24,7 +24,8 @@ LANG_CODES = {
     'rb': 12,
     'perl': 13,
     'lua': 14,
-    'nasm': 15,
+    'asm': 15,
+    'assembler': 15,
     'sqlserver': 16,
     'javascript': 17,
     'js': 17,
