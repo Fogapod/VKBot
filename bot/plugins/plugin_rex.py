@@ -4,6 +4,7 @@
 LANG_CODES = {
     'c#': 1,
     'vb.net': 2,
+    'visualbasic': 2,
     'f#': 3,
     'java': 4,
     'python2': 5,
@@ -16,7 +17,9 @@ LANG_CODES = {
     'php': 8,
     'pascal': 9,
     'objective-c': 10,
+    'oc': 10,
     'haskell': 11,
+    'hs': 11,
     'ruby': 12,
     'rb': 12,
     'perl': 13,
@@ -30,7 +33,8 @@ LANG_CODES = {
     'go': 20,
     'scala': 21,
     'scheme': 22,
-    'node.js': 23,
+    'nodejs': 23,
+    'node': 23,
     'python3': 24,
     'py3': 24,
     'python': 24,
@@ -55,7 +59,8 @@ LANG_CODES = {
     'kotlin': 43,
     'brainfuck': 44,
     'bf': 44,
-    'fortran': 45
+    'fortran': 45,
+    'ft': 45
 }
 
 class Plugin(object):
@@ -103,14 +108,24 @@ class Plugin(object):
                 rsp.text = u'Неверно указан язык'
                 return rsp
 
-        if params['LanguageChoice'] in (6, 26):
-            params['CompilerArgs'] = 'source_file.c -o a.out'
-        elif params['LanguageChoice'] == 29:
+        if params['LanguageChoice'] in (6, 26):  # c (gcc, clang)
+            params['CompilerArgs'] = '-Wall -std=gnu99 -O2 -o a.out source_file.c'
+        elif params['LanguageChoice'] == 29:  # c (vc)
             params['CompilerArgs'] = 'source_file.c -o a.exe'
-        elif params['LanguageChoice'] in (7, 27):
-            params['CompilerArgs'] = 'source_file.cpp -o a.out'
-        elif params['LanguageChoice'] == 28:
-            params['CompilerArgs'] = 'source_file.cpp -o a.exe'
+        elif params['LanguageChoice'] == 7:  # c++ (gcc)
+            params['CompilerArgs'] = '-Wall -std=c++14 -O2 -o a.out source_file.cpp'
+        elif params['LanguageChoice'] == 27:  # c++ (clang)
+            params['CompilerArgs'] = '-Wall -std=c++14 -stdlib=libc++ -O2 -o a.out source_file.cpp'
+        elif params['LanguageChoice'] == 28:  # c++ (vc++)
+            params['CompilerArgs'] = 'source_file.cpp -o a.exe /EHsc /MD /I C:\boost_1_60_0 /link /LIBPATH:C:\boost_1_60_0\stage\lib'
+        elif params['LanguageChoice'] == 30:  # d
+            params['CompilerArgs'] = 'source_file.d -ofa.out'
+        elif params['LanguageChoice'] == 20:  # go
+            params['CompilerArgs'] = '-o a.out source_file.go'
+        elif params['LanguageChoice'] == 11:  # haskhell
+            params['CompilerArgs'] = '-o a.out source_file.hs'
+        elif params['LanguageChoice'] == 10:  # objective-c
+            params['CompilerArgs'] = '-MMD -MP -DGNUSTEP -DGNUSTEP_BASE_LIBRARY=1 -DGNU_GUI_LIBRARY=1 -DGNU_RUNTIME=1 -DGNUSTEP_BASE_LIBRARY=1 -fno-strict-aliasing -fexceptions -fobjc-exceptions -D_NATIVE_OBJC_EXCEPTIONS -pthread -fPIC -Wall -DGSWARN -DGSDIAGNOSE -Wno-import -g -O2 -fgnu-runtime -fconstant-string-class=NSConstantString -I. -I /usr/include/GNUstep -I/usr/include/GNUstep -o a.out source_file.m -lobjc -lgnustep-base'
 
         params['Program'] = ' '.join(msg.args[2:])
 
@@ -122,9 +137,11 @@ class Plugin(object):
 
         result_json = result.json()
 
-        rsp.text = \
-            result_json['Errors'] or result_json['Result'] or result_json['Stats']
-        
+        rsp.text = result_json['Errors'] or result_json['Result']
+
         rsp.text = rsp.text.strip()
+
+        if not rsp.text:
+            rsp.text = 'Empty output'
 
         return rsp
