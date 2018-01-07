@@ -142,6 +142,6 @@ class Plugin(object):
         rsp.text = rsp.text.strip()
 
         if not rsp.text:
-            rsp.text = 'Empty output'
+            rsp.text = u'Выполнено'
 
         return rsp
