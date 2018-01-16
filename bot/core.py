@@ -456,6 +456,9 @@ class Bot(object):
         if '{chat_name}' in rsp.text and msg.from_chat:
             format_dict['chat_name'] = msg.chat_name
 
+        if '{chat_id}' in rsp.text and msg.from_chat:
+            format_dict['chat_id'] = msg.chat_id
+
         if '{event_user_id}' in rsp.text and msg.event_user_id:
             format_dict['event_user_id'] = msg.event_user_id
 
