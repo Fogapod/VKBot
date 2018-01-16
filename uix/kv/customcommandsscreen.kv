@@ -1,11 +1,38 @@
 #: import Widget uix.widgets
 #: import BlueButton uix.widgets
 #: import FontelloButton uix.widgets
-#: import ScrollEffect kivy.effects.scroll.ScrollEffect
+
+
+<ListButton>:
+    text_size: self.width, None
+    halign: 'center'
+    size_hint_y: None
+
+
+<Command>:
+    background_color: .25, .7, .7, 1
+    dropdown: None
+    edit_popup: None
+
+    command_text: ''
+    responses: []
+    command_list: []
+    index_in_list: None
+
+    text: root.preview(self.command_text)
+
+
+<Response>:
+    background_color: .3, .3, .3, 1
+
+    response_text: ''
+
+    text: root.preview(self.response_text)
 
 
 <CustomCommandsScreen>:
     name: 'cc_screen'
+    command_list: command_list
 
     BoxLayout:
         orientation: 'vertical'
@@ -28,19 +55,24 @@
 
                 Rectangle:
                     pos:
-                        self.pos[0] + self.padding[0]/2, self.pos[1] + self.padding[1]/2
+                        self.pos[0] + self.padding[0] / 2, self.pos[1] + self.padding[1] / 2
+
                     size:
                         self.size[0] - self.padding[0], self.size[1] - self.padding[1]
 
-            ScrollView:
-                effect_cls: ScrollEffect
+            RecycleView:
+                id: command_list
+                viewclass: 'Command'
 
-                BoxLayout:
-                    id: cc_list
+                RecycleBoxLayout:
                     orientation: 'vertical'
-                    spacing: dp(2)
+                    default_size_hint: 1, None
                     size_hint_y: None
-                    height: self.minimum_size[1]
+                    height: self.minimum_height
+                    spacing: dp(2)
+
+                    # required for accessing screen's properties from commands
+                    root: root
 
         BoxLayout:
             spacing: dp(7)
@@ -53,7 +85,7 @@
                 background_color: 0, 0, 0, 0
                 height: self.texture_size[1] * 2
 
-                on_release: root.open_new_command_popup()
+                on_release: root.edit_popup.open_empty()
 
             Widget
 
@@ -85,4 +117,4 @@
                 background_color: 0, 0, 0, 0
                 height: self.texture_size[1] * 2
 
-                on_release: root.on_enter()
+                on_release: root.sort()
