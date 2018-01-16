@@ -171,15 +171,15 @@ class VKBotApp(App):
 
     def rename_old_files(self):
         # TODO: remove after 0.1.1 release
-        old_files = (utils.OLD_TOKEN_FILE, utils.OLD_WHITELIST_FILE,
-                     utils.OLD_BLACKLIST_FILE, utils.OLD_CUSTOM_COMMANDS_FILE)
+        old_filenames = (utils.OLD_TOKEN_FILE, utils.OLD_WHITELIST_FILE,
+                         utils.OLD_BLACKLIST_FILE, utils.OLD_CUSTOM_COMMANDS_FILE)
 
-        new_files = (utils.TOKEN_FILE, utils.WHITELIST_FILE,
-                     utils.BLACKLIST_FILE, utils.CUSTOM_COMMANDS_FILE)
+        new_filenames = (utils.TOKEN_FILE, utils.WHITELIST_FILE,
+                         utils.BLACKLIST_FILE, utils.CUSTOM_COMMANDS_FILE)
 
-        for i, f in enumerate(old_files):
-            if os.path.exists(f):
-                os.rename(f, new_files[i])
+        for new, old in zip(new_filenames, old_filenames):
+            if os.path.exists(old) and not os.path.exists(new):
+                os.rename(old, new)
 
     def _export_logs(self):
         if not os.path.exists(utils.MAIN_DIR + '.logs/'):
