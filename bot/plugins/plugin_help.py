@@ -18,7 +18,8 @@ HELP_TEXT = (
         u'-couple\n'
         u'-weather\n'
         u'-ping\n'
-        u'-ignore\n\n'
+        u'-ignore\n'
+        u'-rex\n\n'
         u'Для получения детальной информации о команде, напишите {appeal} help <команда>\n'
         u'Разработчик бота: {author}'
     ),
