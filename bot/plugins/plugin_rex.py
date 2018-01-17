@@ -3,6 +3,7 @@
 
 LANG_CODES = {
     'c#': 1,
+    'cs': 1,
     'vb': 2,
     'visualbasic': 2,
     'f#': 3,
