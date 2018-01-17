@@ -17,6 +17,12 @@ class Plugin(object):
     argument_required = False
 
     def respond(self, msg, rsp, utils, *args, **kwargs):
+        blacklist = utils.get_blacklist()
+
+        for bid in blacklist.keys():
+            if bid in msg.chat_users:
+                msg.chat_users.remove(bid)
+
         if not msg.from_chat:
             rsp.text = u'Данная команда работает только в беседе'
         elif len(msg.chat_users) < 2:
