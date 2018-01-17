@@ -85,7 +85,7 @@ class Message(object):
         self.event_user_id = 0   # action_mid field
         self.event_text = ''     # action_text field
         self.msg_id = 0          # id of current message
-        self.date = 0            # time when message recieved
+        self.date = 0            # time when message uploaded
 
         if 'attachments' in message.keys() \
                 and message['attachments'][0]['type'] == 'sticker':
@@ -128,7 +128,7 @@ class Message(object):
 
         if self.from_chat:
             self.chat_id = message['chat_id'] + 2000000000
-            self.chat_users = message['chat_active']
+            self.chat_users = message['chat_users']
             self.chat_name = message['title']
 
             if not self.raw_text:
@@ -260,17 +260,21 @@ class Bot(object):
                 )
 
                 if updates:
-                    history = updates[0]
-                    self.mlpd['pts'] = updates[1]
-                    messages = updates[2]
+                    history = updates['history']
+                    self.mlpd['pts'] = updates['new_pts']
+                    messages = updates['messages']
+
                     self.send_log_line(
-                        u'Получено сообщений: %d' % messages['count'],
-                        0
-                    )
+                        u'Получено сообщений: %d' % messages['count'], 0)
                 else:
                     raise Exception(error)
 
                 for item in messages['items']:
+                    for chat in updates['chats']:
+                        if item['chat_id'] == chat['id']:
+                            item['chat_users'] = chat['users']
+                            break
+
                     message = Message(item, self_id, self.settings['appeals'])
 
                     if message.msg_id in self.last_message_ids or \

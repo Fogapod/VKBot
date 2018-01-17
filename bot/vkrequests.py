@@ -187,7 +187,7 @@ def get_message_long_poll_data():
 def get_message_updates(ts, pts):
     response = api.messages.getLongPollHistory(ts=ts, pts=pts)
 
-    return response['history'], response['new_pts'], response['messages']
+    return response
 
 
 @error_handler
