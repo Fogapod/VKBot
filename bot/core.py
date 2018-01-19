@@ -65,8 +65,8 @@ class Message(object):
     """
 
     def __init__(self, message, self_id, appeals):
-        self.self_id = self_id  # id of bot owner
-        self.appeals = appeals  # list of appeals
+        self.self_id = self_id   # id of bot owner
+        self.appeals = appeals   # list of appeals
 
         self.raw_text = ''       # raw text of recieved message
         self.lower_text = ''     # lower version of raw text
@@ -85,7 +85,7 @@ class Message(object):
         self.event_user_id = 0   # action_mid field
         self.event_text = ''     # action_text field
         self.msg_id = 0          # id of current message
-        self.date = 0            # time when message uploaded
+        self.upload_time = 0     # time when message uploaded
 
         if 'attachments' in message.keys() \
                 and message['attachments'][0]['type'] == 'sticker':
@@ -174,7 +174,7 @@ class Message(object):
             if self.out:
                 self.real_user_id = self.self_id
 
-        self.date = message['date']
+        self.upload_time = message['date']
 
     def get_random_user_id(self):
         if self.from_chat:

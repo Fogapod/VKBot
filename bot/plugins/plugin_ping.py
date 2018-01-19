@@ -16,7 +16,7 @@ class Plugin(object):
     argument_required = False
 
     def respond(self, msg, rsp, *args, **kwargs):
-        delta = int(round((time.time() - msg.date) * 1000))
+        delta = int(round((time.time() - msg.upload_time) * 1000))
         rsp.forward_id = 0
         rsp.text = u'pong, заняло ' + str(delta) + u'мс'
 
