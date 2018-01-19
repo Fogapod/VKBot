@@ -19,6 +19,13 @@ AUTHOR = u'[id%d|Евгений Ершов]' % AUTHOR_VK_ID
 VK_MESSAGE_LEN_LIMIT = 4096
 MAX_LAST_MESSAGES = 50
 
+MEDIA_ID_SEARCH_PATTERN = re.compile(
+    '{attach='
+    '(((photo)|(album)|(video)|(audio)|(doc)|(wall)|(market)'
+    '|(market_album)|(wall_reply)|(audio_playlist))'
+    '-?\d+_\d+(_\d+)?)}'
+)
+
 
 class Response(object):
     """This class contains variables that will be used in response
@@ -484,14 +491,7 @@ class Bot(object):
             name, error = vkr.get_name_by_id(object_id=user_id)
             format_dict['id%s_name' % user_id] = name if name else 'No name'
 
-        media_id_search_pattern = re.compile(
-            '{attach='
-            '(((photo)|(album)|(video)|(audio)|(doc)|(wall)|(market)'
-            '|(market_album)|(wall_reply)|(audio_playlist))'
-            '-?\d+_\d+(_\d+)?)}'
-        )
-
-        for match in media_id_search_pattern.findall(rsp.text):
+        for match in MEDIA_ID_SEARCH_PATTERN.findall(rsp.text):
             if len(rsp.attachments) >= 10:
                 break
 
@@ -511,7 +511,7 @@ class Bot(object):
             if attachment_id:
                 rsp.attachments.append(attachment_id)
 
-        rsp.text = media_id_search_pattern.sub('', rsp.text)
+        rsp.text = MEDIA_ID_SEARCH_PATTERN.sub('', rsp.text)
         rsp.text = utils.safe_format(rsp.text, **format_dict)
 
         return rsp
