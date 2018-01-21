@@ -277,8 +277,8 @@ class Bot(object):
                     raise Exception(error)
 
                 for item in messages['items']:
-                    for chat in updates.get('chats', ()):
-                        if item['chat_id'] == chat['id']:
+                    for chat in updates.get('chats', {}):
+                        if item['chat_id'] == chat.get('id'):
                             item['chat_users'] = chat['users']
                             break
 
